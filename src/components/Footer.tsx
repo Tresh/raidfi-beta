@@ -1,4 +1,5 @@
-import { Zap, Twitter, MessageCircle, FileText } from "lucide-react";
+import { Twitter, MessageCircle, FileText } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Footer = () => {
   return (
@@ -6,9 +7,7 @@ const Footer = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
-              <Zap className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="Swipht" className="w-6 h-6" />
             <span className="text-sm font-medium text-foreground">Swipht</span>
           </div>
 
