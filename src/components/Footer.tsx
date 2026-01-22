@@ -1,4 +1,4 @@
-import { Twitter, MessageCircle, FileText } from "lucide-react";
+import { Twitter, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Footer = () => {
@@ -18,13 +18,10 @@ const Footer = () => {
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <MessageCircle className="w-5 h-5" />
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              <FileText className="w-5 h-5" />
-            </a>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            © 2024 Swipht
+            © 2025 Swipht
           </p>
         </div>
       </div>

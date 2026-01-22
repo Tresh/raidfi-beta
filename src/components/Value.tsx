@@ -1,5 +1,4 @@
 import { CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const Value = () => {
   return (
@@ -19,7 +18,7 @@ const Value = () => {
             <h3 className="text-xl font-medium mb-2 text-foreground">For Projects</h3>
             <p className="text-sm text-muted-foreground mb-6">Scale your social growth</p>
 
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3">
               {[
                 "Higher quality engagement with measurable ROI",
                 "Reduced spam risk through AI filtering",
@@ -32,17 +31,13 @@ const Value = () => {
                 </div>
               ))}
             </div>
-
-            <Button className="w-full">
-              Create Raid Pool
-            </Button>
           </div>
 
           <div className="border border-border rounded-lg p-8">
             <h3 className="text-xl font-medium mb-2 text-foreground">For Raiders</h3>
             <p className="text-sm text-muted-foreground mb-6">Get rewarded for quality</p>
 
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3">
               {[
                 "Fair and transparent reward distribution",
                 "Reputation-based rankings that matter",
@@ -55,10 +50,6 @@ const Value = () => {
                 </div>
               ))}
             </div>
-
-            <Button variant="outline" className="w-full">
-              Start Raiding
-            </Button>
           </div>
         </div>
       </div>
