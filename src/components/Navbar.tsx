@@ -1,7 +1,22 @@
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { useState } from "react";
 
 const Navbar = () => {
+  const [open, setOpen] = useState(false);
+
+  const navLinks = [
+    { href: "#how-it-works", label: "How It Works" },
+    { href: "#features", label: "Features" },
+    { href: "#value", label: "Value" },
+  ];
+
+  const handleLinkClick = () => {
+    setOpen(false);
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-6 py-4">
@@ -13,25 +28,57 @@ const Navbar = () => {
             </span>
           </div>
           
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-              How It Works
-            </a>
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-              Features
-            </a>
-            <a href="#value" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-              Value
-            </a>
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              Connect
+            <Button size="sm" className="hidden sm:inline-flex" asChild>
+              <a href="#waitlist">Join Waitlist</a>
             </Button>
-            <Button size="sm">
-              Launch App
-            </Button>
+
+            {/* Mobile Menu */}
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="sm">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <div className="flex flex-col gap-6 mt-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <img src={logo} alt="Swipht" className="w-8 h-8" />
+                    <span className="text-xl font-semibold text-foreground">
+                      Swipht
+                    </span>
+                  </div>
+                  
+                  {navLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={handleLinkClick}
+                      className="text-foreground hover:text-primary transition-colors text-lg font-medium"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                  
+                  <Button className="mt-4" asChild>
+                    <a href="#waitlist" onClick={handleLinkClick}>Join Waitlist</a>
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>

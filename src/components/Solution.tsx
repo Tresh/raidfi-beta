@@ -1,5 +1,4 @@
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2 } from "lucide-react";
 
 const Solution = () => {
   return (
@@ -28,24 +27,19 @@ const Solution = () => {
                 </div>
               ))}
             </div>
-
-            <Button>
-              Explore RaidFi
-              <ArrowRight className="w-4 h-4" />
-            </Button>
           </div>
 
           <div className="border border-border rounded-lg p-6 bg-background">
             <div className="mb-6">
-              <p className="text-xs text-primary font-medium mb-1">Live Raid Pool</p>
-              <h3 className="text-lg font-medium text-foreground">$SWIPHT Launch Campaign</h3>
+              <p className="text-xs text-primary font-medium mb-1">Example Raid Pool</p>
+              <h3 className="text-lg font-medium text-foreground">Token Launch Campaign</h3>
             </div>
 
             <div className="space-y-3">
               {[
-                { rank: 1, name: "CryptoRaider.eth", score: "9.8", reward: "$2,450" },
-                { rank: 2, name: "ShillMaster.sol", score: "9.4", reward: "$1,890" },
-                { rank: 3, name: "Web3Whale.bnb", score: "9.1", reward: "$1,240" },
+                { rank: 1, name: "CryptoRaider.eth", score: "9.8" },
+                { rank: 2, name: "ShillMaster.sol", score: "9.4" },
+                { rank: 3, name: "Web3Whale.bnb", score: "9.1" },
               ].map((entry) => (
                 <div key={entry.rank} className="flex items-center justify-between p-3 bg-secondary rounded-md">
                   <div className="flex items-center gap-3">
@@ -54,17 +48,17 @@ const Solution = () => {
                     </span>
                     <div>
                       <p className="text-sm font-medium text-foreground">{entry.name}</p>
-                      <p className="text-xs text-muted-foreground">Score: {entry.score}</p>
+                      <p className="text-xs text-muted-foreground">AI Score: {entry.score}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-primary">{entry.reward}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Pool Size</span>
-              <span className="text-lg font-medium text-foreground">$50,000</span>
+            <div className="mt-6 pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground text-center">
+                Rewards distributed based on contribution quality
+              </p>
             </div>
           </div>
         </div>
