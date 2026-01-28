@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 const CTA = () => {
   return (
@@ -15,7 +16,10 @@ const CTA = () => {
           </p>
 
           <Button size="lg" asChild>
-            <a href="#waitlist">Join Waitlist</a>
+            <a href="/waitlist" className="group">
+              Join Waitlist
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </a>
           </Button>
         </div>
       </div>
