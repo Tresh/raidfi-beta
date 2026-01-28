@@ -21,12 +21,12 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Swipht" className="w-8 h-8" />
+          <a href="/" className="flex items-center gap-2">
+            <img src={logo} alt="Swipht" className="w-8 h-8 rounded-full" />
             <span className="text-xl font-semibold text-foreground">
               Swipht
             </span>
-          </div>
+          </a>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -43,7 +43,7 @@ const Navbar = () => {
 
           <div className="flex items-center gap-3">
             <Button size="sm" className="hidden sm:inline-flex" asChild>
-              <a href="#waitlist">Join Waitlist</a>
+              <a href="/waitlist">Join Waitlist</a>
             </Button>
 
             {/* Mobile Menu */}
@@ -56,7 +56,7 @@ const Navbar = () => {
               <SheetContent side="right" className="w-72">
                 <div className="flex flex-col gap-6 mt-8">
                   <div className="flex items-center gap-2 mb-4">
-                    <img src={logo} alt="Swipht" className="w-8 h-8" />
+                    <img src={logo} alt="Swipht" className="w-8 h-8 rounded-full" />
                     <span className="text-xl font-semibold text-foreground">
                       Swipht
                     </span>
@@ -74,7 +74,7 @@ const Navbar = () => {
                   ))}
                   
                   <Button className="mt-4" asChild>
-                    <a href="#waitlist" onClick={handleLinkClick}>Join Waitlist</a>
+                    <a href="/waitlist" onClick={handleLinkClick}>Join Waitlist</a>
                   </Button>
                 </div>
               </SheetContent>
