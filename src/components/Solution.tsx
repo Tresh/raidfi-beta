@@ -25,16 +25,16 @@ const Solution = () => {
               { label: "Rewards", desc: "Distributed fairly" },
             ].map((item, index) => (
               <div key={index} className="relative">
-                <div className="border border-border rounded-lg p-5 bg-card text-center">
+                <div className="glass-card rounded-xl p-5 text-center hover:glow-cyan transition-all duration-500 group">
                   <p className="text-primary text-xs font-medium mb-1 uppercase tracking-wider">
                     {String(index + 1).padStart(2, "0")}
                   </p>
-                  <p className="font-medium text-foreground">{item.label}</p>
+                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">{item.label}</p>
                   <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
                 </div>
                 {index < 3 && (
                   <div className="hidden md:flex absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                    <ArrowRight className="w-4 h-4 text-primary/50" />
                   </div>
                 )}
               </div>
@@ -59,9 +59,9 @@ const Solution = () => {
             ].map((benefit, index) => (
               <div
                 key={index}
-                className="border border-border rounded-lg p-6 bg-card"
+                className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300 group"
               >
-                <h3 className="font-medium text-foreground mb-2">
+                <h3 className="font-medium text-foreground mb-2 group-hover:text-primary transition-colors">
                   {benefit.title}
                 </h3>
                 <p className="text-sm text-muted-foreground">{benefit.desc}</p>

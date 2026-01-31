@@ -35,8 +35,11 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-secondary">
-      <div className="container mx-auto px-6">
+    <section id="features" className="py-24 relative">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
+      
+      <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
             Key Features
@@ -50,9 +53,9 @@ const Features = () => {
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="p-5 border border-border rounded-lg bg-background"
+              className="glass-card rounded-xl p-5 hover:border-primary/20 hover:glow-cyan transition-all duration-500 group"
             >
-              <h3 className="text-base font-medium mb-2 text-foreground">
+              <h3 className="text-base font-medium mb-2 text-foreground group-hover:text-primary transition-colors">
                 {feature.title}
               </h3>
               <p className="text-sm text-muted-foreground">
