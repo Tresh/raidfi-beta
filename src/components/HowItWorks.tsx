@@ -23,7 +23,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section id="how-it-works" className="py-24">
+    <section id="how-it-works" className="py-24 relative">
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
@@ -36,9 +36,9 @@ const HowItWorks = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
           {steps.map((step, index) => (
-            <div key={index}>
-              <p className="text-4xl font-semibold text-primary mb-4">{step.step}</p>
-              <h3 className="text-base font-medium mb-2 text-foreground">
+            <div key={index} className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300 group">
+              <p className="text-4xl font-semibold text-primary mb-4 group-hover:glow-cyan transition-all">{step.step}</p>
+              <h3 className="text-base font-medium mb-2 text-foreground group-hover:text-primary transition-colors">
                 {step.title}
               </h3>
               <p className="text-sm text-muted-foreground">
