@@ -9,7 +9,7 @@ const Value = () => {
             Value Proposition
           </h2>
           <p className="text-muted-foreground">
-            Swipht creates value for both projects and contributors
+            RaidFi creates value for both projects and contributors
           </p>
         </div>
 

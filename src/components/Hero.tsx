@@ -24,7 +24,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-            Swipht transforms chaotic social engagement into transparent,
+            RaidFi transforms chaotic social engagement into transparent,
             AI-ranked contributions. Reward impact, not noise.
           </p>
 

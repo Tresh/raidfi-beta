@@ -7,8 +7,8 @@ const Footer = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Swipht" className="w-6 h-6 rounded-full" />
-            <span className="text-sm font-medium text-foreground">Swipht</span>
+            <img src={logo} alt="RaidFi" className="w-6 h-6 rounded-full" />
+            <span className="text-sm font-medium text-foreground">RaidFi</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -26,7 +26,7 @@ const Footer = () => {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            © 2026 Swipht
+            © 2026 RaidFi
           </p>
         </div>
       </div>

@@ -15,7 +15,7 @@ const CTA = () => {
             Ready to Transform Your Engagement?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Join the waitlist to be first when Swipht launches.
+            Join the waitlist to be first when RaidFi launches.
           </p>
           <Button size="lg" asChild className="glow-cyan">
             <a href="/waitlist" className="group">
