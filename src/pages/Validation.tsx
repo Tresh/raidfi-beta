@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ArrowLeft, ArrowRight, Trophy } from "lucide-react";
+import { CheckCircle2, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 type UserRole = "raider" | "project";
@@ -19,6 +20,7 @@ const Validation = () => {
 
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -62,7 +64,7 @@ const Validation = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!role || !formData.name) {
       toast({
@@ -72,23 +74,59 @@ const Validation = () => {
       });
       return;
     }
-    console.log("Validation submission:", { email, role, ...formData });
-    setSubmitted(true);
-    toast({
-      title: "You earned 200 RaidFi Points!",
-      description: "Thanks for completing the validation.",
-    });
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase.from("validation_submissions").insert({
+        user_id: user.id,
+        email: email || user.email || "",
+        role,
+        name: formData.name,
+        twitter_handle: formData.twitterHandle || null,
+        telegram_handle: formData.telegramHandle || null,
+        why_interested: formData.whyInterested || null,
+        experience: formData.experience || null,
+        project_name: formData.projectName || null,
+        project_description: formData.projectDescription || null,
+        project_website: formData.projectWebsite || null,
+        expected_budget: formData.expectedBudget || null,
+      });
+      if (error) throw error;
+
+      // Update points in waitlist_submissions
+      await supabase
+        .from("waitlist_submissions")
+        .update({ points: 250 })
+        .eq("user_id", user.id);
+
+      setSubmitted(true);
+      toast({
+        title: "You earned 200 RaidFi Points!",
+        description: "Thanks for completing the validation.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 glow-cyan">
-            <Trophy className="w-10 h-10 text-primary" />
+          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-primary" />
           </div>
           <h2 className="text-2xl font-semibold text-foreground mb-2">
-            +200 RaidFi Points earned!
+            +200 RaidFi Points earned
           </h2>
           <p className="text-primary font-semibold mb-1">Total: 250 Points</p>
           <p className="text-muted-foreground mb-8">
@@ -104,7 +142,6 @@ const Validation = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border/50 glass">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -121,10 +158,8 @@ const Validation = () => {
         </div>
       </header>
 
-      {/* Form */}
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-lg mx-auto">
-          {/* Progress */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">
@@ -143,7 +178,6 @@ const Validation = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Step 1: Role Selection */}
             {step === 1 && (
               <div className="space-y-6">
                 <div>
@@ -192,7 +226,6 @@ const Validation = () => {
               </div>
             )}
 
-            {/* Step 2: Basic Info */}
             {step === 2 && (
               <div className="space-y-6">
                 <div>
@@ -219,7 +252,6 @@ const Validation = () => {
               </div>
             )}
 
-            {/* Step 3: Role-specific */}
             {step === 3 && (
               <div className="space-y-6">
                 <div>
@@ -265,7 +297,6 @@ const Validation = () => {
               </div>
             )}
 
-            {/* Navigation */}
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
               {step > 1 ? (
                 <Button type="button" variant="ghost" onClick={handleBack}>
@@ -282,7 +313,8 @@ const Validation = () => {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
+                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Claim 200 Points
                 </Button>
               )}
