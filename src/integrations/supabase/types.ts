@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      validation_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          expected_budget: string | null
+          experience: string | null
+          id: string
+          name: string
+          points_earned: number
+          project_description: string | null
+          project_name: string | null
+          project_website: string | null
+          role: string
+          telegram_handle: string | null
+          twitter_handle: string | null
+          user_id: string
+          why_interested: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expected_budget?: string | null
+          experience?: string | null
+          id?: string
+          name: string
+          points_earned?: number
+          project_description?: string | null
+          project_name?: string | null
+          project_website?: string | null
+          role: string
+          telegram_handle?: string | null
+          twitter_handle?: string | null
+          user_id: string
+          why_interested?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expected_budget?: string | null
+          experience?: string | null
+          id?: string
+          name?: string
+          points_earned?: number
+          project_description?: string | null
+          project_name?: string | null
+          project_website?: string | null
+          role?: string
+          telegram_handle?: string | null
+          twitter_handle?: string | null
+          user_id?: string
+          why_interested?: string | null
+        }
+        Relationships: []
+      }
       waitlist_submissions: {
         Row: {
           created_at: string

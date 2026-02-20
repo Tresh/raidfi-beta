@@ -39,47 +39,44 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button size="sm" className="hidden sm:inline-flex" asChild>
+            <Button size="sm" asChild>
               <a href="/waitlist">Join Waitlist</a>
             </Button>
-
-            {/* Mobile Menu */}
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="sm">
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <div className="flex flex-col gap-6 mt-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <img src={logo} alt="Swipht" className="w-8 h-8 rounded-full" />
-                    <span className="text-xl font-semibold text-foreground">
-                      Swipht
-                    </span>
-                  </div>
-                  
-                  {navLinks.map((link) => (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      onClick={handleLinkClick}
-                      className="text-foreground hover:text-primary transition-colors text-lg font-medium"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                  
-                  <Button className="mt-4" asChild>
-                    <a href="/waitlist" onClick={handleLinkClick}>Join Waitlist</a>
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
+
+          {/* Mobile Menu */}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="sm">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <div className="flex flex-col gap-6 mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <img src={logo} alt="Swipht" className="w-8 h-8 rounded-full" />
+                  <span className="text-xl font-semibold text-foreground">
+                    Swipht
+                  </span>
+                </div>
+                
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={handleLinkClick}
+                    className="text-foreground hover:text-primary transition-colors text-lg font-medium"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+                
+                <Button className="mt-4" asChild>
+                  <a href="/waitlist" onClick={handleLinkClick}>Join Waitlist</a>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>
