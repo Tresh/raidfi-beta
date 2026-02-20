@@ -10,7 +10,7 @@ const Solution = () => {
               The Solution
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Swipht introduces <span className="text-primary font-medium">RaidFi</span>—a
+              RaidFi introduces a
               decentralized engagement economy where social actions are tracked,
               analyzed by AI, and rewarded based on real value.
             </p>

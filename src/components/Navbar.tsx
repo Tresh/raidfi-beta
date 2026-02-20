@@ -22,13 +22,12 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <img src={logo} alt="Swipht" className="w-8 h-8 rounded-full" />
+            <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
             <span className="text-xl font-semibold text-foreground">
-              Swipht
+              RaidFi
             </span>
           </a>
           
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <a
@@ -44,7 +43,6 @@ const Navbar = () => {
             </Button>
           </div>
 
-          {/* Mobile Menu */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="sm">
@@ -54,9 +52,9 @@ const Navbar = () => {
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-6 mt-8">
                 <div className="flex items-center gap-2 mb-4">
-                  <img src={logo} alt="Swipht" className="w-8 h-8 rounded-full" />
+                  <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
                   <span className="text-xl font-semibold text-foreground">
-                    Swipht
+                    RaidFi
                   </span>
                 </div>
                 
