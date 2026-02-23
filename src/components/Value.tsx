@@ -9,21 +9,21 @@ const Value = () => {
             Value Proposition
           </h2>
           <p className="text-muted-foreground">
-            RaidFi creates value for both projects and contributors
+            Reputation and access — not just rewards
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <div className="border border-border rounded-lg p-8">
             <h3 className="text-xl font-medium mb-2 text-foreground">For Projects</h3>
-            <p className="text-sm text-muted-foreground mb-6">Scale your social growth</p>
+            <p className="text-sm text-muted-foreground mb-6">Strategic social intelligence</p>
 
             <div className="space-y-3">
               {[
-                "Higher quality engagement with measurable ROI",
-                "Reduced spam risk through AI filtering",
-                "Transparent contributor performance metrics",
-                "Scalable social growth infrastructure"
+                "Verified contributor intelligence for campaign planning",
+                "Performance-based raid team selection and vetting",
+                "ROI visibility across on-chain and off-chain campaigns",
+                "Reduced dependency on guesswork and vanity metrics"
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
@@ -34,15 +34,15 @@ const Value = () => {
           </div>
 
           <div className="border border-border rounded-lg p-8">
-            <h3 className="text-xl font-medium mb-2 text-foreground">For Raiders</h3>
-            <p className="text-sm text-muted-foreground mb-6">Get rewarded for quality</p>
+            <h3 className="text-xl font-medium mb-2 text-foreground">For Contributors</h3>
+            <p className="text-sm text-muted-foreground mb-6">Own your social reputation</p>
 
             <div className="space-y-3">
               {[
-                "Fair and transparent reward distribution",
-                "Reputation-based rankings that matter",
-                "Recognition for quality contributions",
-                "Long-term incentive alignment"
+                "Portable reputation that persists across campaigns",
+                "Access to higher-tier campaigns and opportunities",
+                "Long-term contributor credibility and proof of impact",
+                "Data-backed profile that speaks for your work"
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />

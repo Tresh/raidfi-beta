@@ -8,9 +8,9 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   const navLinks = [
-    { href: "#how-it-works", label: "How It Works" },
+    { href: "#how-it-works", label: "Infrastructure" },
     { href: "#features", label: "Features" },
-    { href: "#value", label: "Value" },
+    { href: "#value", label: "For Projects" },
   ];
 
   const handleLinkClick = () => {
@@ -27,7 +27,7 @@ const Navbar = () => {
               RaidFi
             </span>
           </a>
-          
+
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <a
@@ -39,7 +39,7 @@ const Navbar = () => {
               </a>
             ))}
             <Button size="sm" asChild>
-              <a href="/waitlist">Join Waitlist</a>
+              <a href="/waitlist">Request Access</a>
             </Button>
           </div>
 
@@ -57,7 +57,7 @@ const Navbar = () => {
                     RaidFi
                   </span>
                 </div>
-                
+
                 {navLinks.map((link) => (
                   <a
                     key={link.href}
@@ -68,9 +68,9 @@ const Navbar = () => {
                     {link.label}
                   </a>
                 ))}
-                
+
                 <Button className="mt-4" asChild>
-                  <a href="/waitlist" onClick={handleLinkClick}>Join Waitlist</a>
+                  <a href="/waitlist" onClick={handleLinkClick}>Request Access</a>
                 </Button>
               </div>
             </SheetContent>

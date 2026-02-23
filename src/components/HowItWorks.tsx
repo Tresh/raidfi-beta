@@ -1,26 +1,3 @@
-const steps = [
-  {
-    step: "01",
-    title: "Create Raid Pool",
-    description: "Projects define target content, accepted actions, rewards, and participation rules"
-  },
-  {
-    step: "02",
-    title: "Raider Participation",
-    description: "Raiders engage through comments, retweets, likes, bookmarks, and shares"
-  },
-  {
-    step: "03",
-    title: "AI Scoring",
-    description: "AI evaluates relevance, quality, sentiment, authenticity, and spam detection"
-  },
-  {
-    step: "04",
-    title: "Rank & Reward",
-    description: "Contributors are ranked on leaderboards and rewards distributed by impact"
-  }
-];
-
 const HowItWorks = () => {
   return (
     <section id="how-it-works" className="py-24 relative">
@@ -30,23 +7,73 @@ const HowItWorks = () => {
             How RaidFi Works
           </h2>
           <p className="text-muted-foreground">
-            A transparent four-step process that turns engagement into measurable value
+            Two operational modes — one unified reputation layer
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
-          {steps.map((step, index) => (
-            <div key={index} className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300 group">
-              <p className="text-4xl font-semibold text-primary mb-4 group-hover:glow-cyan transition-all">{step.step}</p>
-              <h3 className="text-base font-medium mb-2 text-foreground group-hover:text-primary transition-colors">
-                {step.title}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {step.description}
-              </p>
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* On-Chain */}
+          <div className="glass-card rounded-xl p-8">
+            <p className="text-primary text-xs font-medium mb-3 uppercase tracking-wider">
+              Mode 01
+            </p>
+            <h3 className="text-xl font-medium mb-2 text-foreground">
+              On-Chain Raid Infrastructure
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Structured campaigns with optional reward distribution
+            </p>
+            <div className="space-y-4">
+              {[
+                "Projects create structured raid campaigns",
+                "Raid teams or individuals participate",
+                "Contributions are autonomously tracked",
+                "Reputation updated in real-time",
+                "Rewards distributed based on verified impact"
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="text-primary text-xs font-medium mt-0.5 min-w-[20px]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-sm text-foreground">{item}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Off-Chain */}
+          <div className="glass-card rounded-xl p-8">
+            <p className="text-primary text-xs font-medium mb-3 uppercase tracking-wider">
+              Mode 02
+            </p>
+            <h3 className="text-xl font-medium mb-2 text-foreground">
+              Off-Chain Social Analytics
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Pure intelligence — no rewards, just data
+            </p>
+            <div className="space-y-4">
+              {[
+                "Projects connect social accounts",
+                "RaidFi tracks mentions, engagement, and influence spread",
+                "Contributor velocity and reach analyzed",
+                "Performance data feeds into reputation graph",
+                "Actionable intelligence reports generated"
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="text-primary text-xs font-medium mt-0.5 min-w-[20px]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-sm text-foreground">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-8 max-w-2xl mx-auto">
+          Contributor reputation persists across campaigns. No manual proof submissions required.
+        </p>
       </div>
     </section>
   );
