@@ -1,27 +1,27 @@
 const problems = [
   {
-    title: "Unstructured Chaos",
-    description: "Raiding and shilling are mostly unstructured with no way to measure real impact"
+    title: "No Contributor Identity",
+    description: "There is no unified, portable identity for social contributors across Web3 campaigns"
   },
   {
-    title: "Low Quality Spam",
-    description: "Engagement quality is often low and flooded with spam-heavy interactions"
+    title: "No Reliable Analytics",
+    description: "Projects lack structured data on social campaign performance and contributor quality"
   },
   {
-    title: "Unfair Compensation",
-    description: "Raiders are underpaid, unrewarded, or exploited for their efforts"
+    title: "Noise vs. Influence",
+    description: "No system separates genuine influence from low-value engagement at scale"
   },
   {
-    title: "No Differentiation",
-    description: "High-quality shillers are treated the same as low-effort spammers"
+    title: "Reputation Disappears",
+    description: "Raid performance resets after every campaign — no long-term contributor credibility"
   },
   {
-    title: "Wasted Resources",
-    description: "Projects waste resources on ineffective campaigns with no ROI tracking"
+    title: "Fragmented Data",
+    description: "On-chain and off-chain social contributions exist in silos with no unified view"
   },
   {
-    title: "Missing Infrastructure",
-    description: "No standardized system exists for measuring social contribution value"
+    title: "Guesswork Over Intelligence",
+    description: "Projects select contributors and allocate resources without actionable social intelligence"
   }
 ];
 
@@ -31,16 +31,17 @@ const Problem = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            The Problem
+            The Gap in Web3
           </h2>
-          <p className="text-muted-foreground">
-            In today's Web3 ecosystem, social growth is critical—yet deeply flawed.
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Web3 has financial infrastructure. It lacks social infrastructure.
+            Contributor value goes untracked, unverified, and unowned.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {problems.map((problem, index) => (
-            <div 
+            <div
               key={index}
               className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300 group"
             >

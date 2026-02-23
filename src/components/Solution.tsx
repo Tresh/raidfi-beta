@@ -10,19 +10,19 @@ const Solution = () => {
               The Solution
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              RaidFi introduces a
-              decentralized engagement economy where social actions are tracked,
-              analyzed by AI, and rewarded based on real value.
+              RaidFi is a social contribution tracking engine, reputation graph,
+              and performance analytics layer — powering contributor economies
+              across Web3.
             </p>
           </div>
 
           {/* Flow diagram */}
           <div className="grid md:grid-cols-4 gap-4 mb-16">
             {[
-              { label: "Project", desc: "Creates raid pool" },
-              { label: "Raiders", desc: "Engage with content" },
-              { label: "AI", desc: "Scores quality" },
-              { label: "Rewards", desc: "Distributed fairly" },
+              { label: "Track", desc: "Capture contributions across platforms" },
+              { label: "Analyze", desc: "Score quality, reach, and influence" },
+              { label: "Rank", desc: "Build persistent reputation profiles" },
+              { label: "Unlock", desc: "Gate access and surface insights" },
             ].map((item, index) => (
               <div key={index} className="relative">
                 <div className="glass-card rounded-xl p-5 text-center hover:glow-cyan transition-all duration-500 group">
@@ -45,16 +45,16 @@ const Solution = () => {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                title: "Transparent Rankings",
-                desc: "Every contributor is ranked based on AI-evaluated engagement quality, not just volume.",
+                title: "Data Transparency",
+                desc: "Every contribution is tracked, verified, and visible — creating a trustless record of social impact.",
               },
               {
-                title: "Fair Distribution",
-                desc: "Rewards flow to those who create real impact, eliminating spam and low-effort gaming.",
+                title: "Persistent Identity",
+                desc: "Contributor reputation carries across campaigns, building long-term credibility and access.",
               },
               {
-                title: "Measurable ROI",
-                desc: "Projects get clear metrics on their social campaigns with actionable insights.",
+                title: "Actionable Intelligence",
+                desc: "Projects receive structured analytics on contributor performance, not raw vanity metrics.",
               },
             ].map((benefit, index) => (
               <div
