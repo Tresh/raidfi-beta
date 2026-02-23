@@ -20,6 +20,7 @@ export type Database = {
           email: string
           expected_budget: string | null
           experience: string | null
+          form_responses: Json | null
           id: string
           name: string
           points_earned: number
@@ -37,6 +38,7 @@ export type Database = {
           email: string
           expected_budget?: string | null
           experience?: string | null
+          form_responses?: Json | null
           id?: string
           name: string
           points_earned?: number
@@ -54,6 +56,7 @@ export type Database = {
           email?: string
           expected_budget?: string | null
           experience?: string | null
+          form_responses?: Json | null
           id?: string
           name?: string
           points_earned?: number
