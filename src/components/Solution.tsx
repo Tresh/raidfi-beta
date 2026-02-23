@@ -11,8 +11,8 @@ const Solution = () => {
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               RaidFi is a social contribution tracking engine, reputation graph,
-              and performance analytics layer — powering contributor economies
-              across Web3.
+              and performance analytics layer, powering contributor economies
+              across Web3. Projects can access community data first, then launch campaigns when ready.
             </p>
           </div>
 

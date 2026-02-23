@@ -35,7 +35,7 @@ const Problem = () => {
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Web3 has financial infrastructure. It lacks social infrastructure.
-            Contributor value goes untracked, unverified, and unowned.
+            Contributor value goes untracked, unverified, and unowned. Projects have no way to measure community impact.
           </p>
         </div>
 

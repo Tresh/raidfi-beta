@@ -44,7 +44,7 @@ const Features = () => {
             Infrastructure Features
           </h2>
           <p className="text-muted-foreground">
-            Web3-native social data infrastructure — built for contributors and projects
+            Web3-native social data infrastructure, built for community and projects
           </p>
         </div>
 

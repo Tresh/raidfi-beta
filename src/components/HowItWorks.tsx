@@ -7,7 +7,7 @@ const HowItWorks = () => {
             How RaidFi Works
           </h2>
           <p className="text-muted-foreground">
-            Two operational modes — one unified reputation layer
+            Two operational modes, one unified reputation layer
           </p>
         </div>
 
@@ -26,7 +26,7 @@ const HowItWorks = () => {
             <div className="space-y-4">
               {[
                 "Projects create structured raid campaigns",
-                "Raid teams or individuals participate",
+                "Raid teams or community members participate",
                 "Contributions are autonomously tracked",
                 "Reputation updated in real-time",
                 "Rewards distributed based on verified impact"
@@ -50,11 +50,11 @@ const HowItWorks = () => {
               Off-Chain Social Analytics
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Pure intelligence — no rewards, just data
+              Pure intelligence, no rewards, just data
             </p>
             <div className="space-y-4">
               {[
-                "Projects connect social accounts",
+                "Projects connect to track community/social data",
                 "RaidFi tracks mentions, engagement, and influence spread",
                 "Contributor velocity and reach analyzed",
                 "Performance data feeds into reputation graph",
