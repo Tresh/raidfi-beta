@@ -93,14 +93,14 @@ export const TextQuestion = ({ label, value, onChange, placeholder, multiline, r
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="bg-white/[0.05] border-white/[0.1] min-h-[80px]"
+        className="bg-white/[0.05] border-white/[0.1] min-h-[80px] focus-visible:ring-offset-0"
       />
     ) : (
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="bg-white/[0.05] border-white/[0.1]"
+        className="bg-white/[0.05] border-white/[0.1] focus-visible:ring-offset-0"
       />
     )}
   </div>

@@ -10,7 +10,7 @@ export const IndividualStep1 = ({ data, update }: StepProps) => (
     <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Background & Activity</h3>
     <SingleSelect
       label="How long have you been active in Web3?"
-      options={["< 6 months", "6–12 months", "1–2 years", "2+ years"]}
+      options={["< 6 months", "6-12 months", "1-2 years", "2+ years"]}
       value={data.web3_duration || ""}
       onChange={(v) => update("web3_duration", v)}
       required

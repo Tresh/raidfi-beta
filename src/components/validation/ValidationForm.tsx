@@ -129,7 +129,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       </div>
 
       {/* Step content */}
-      <div className="min-h-[400px] overflow-y-auto pr-1">
+      <div className="min-h-[400px] overflow-y-auto">
         {CurrentStep && <CurrentStep data={data} update={update} />}
       </div>
 
