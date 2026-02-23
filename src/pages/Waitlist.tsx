@@ -20,6 +20,22 @@ const Waitlist = () => {
 
     setLoading(true);
     try {
+      // Check if email is already on the waitlist
+      const { data: existing } = await supabase
+        .from("waitlist_submissions")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: "Already registered",
+          description: "This email is already on the waitlist. Check your inbox for the verification link.",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -84,7 +100,7 @@ const Waitlist = () => {
                     disabled={loading}
                   >
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Join Waitlist
+                    Verify Email
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">

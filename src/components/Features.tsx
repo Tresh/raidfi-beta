@@ -52,9 +52,9 @@ const Features = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="glass-card rounded-xl p-5 hover:border-primary/20 hover:glow-cyan transition-all duration-500 group"
+              className="glass-card rounded-xl p-5 hover:border-primary/20 transition-all duration-300"
             >
-              <h3 className="text-base font-medium mb-2 text-foreground group-hover:text-primary transition-colors">
+              <h3 className="text-base font-medium mb-2 text-foreground">
                 {feature.title}
               </h3>
               <p className="text-sm text-muted-foreground">
