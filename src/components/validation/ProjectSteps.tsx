@@ -135,7 +135,7 @@ export const ProjectStep5 = ({ data, update }: StepProps) => (
     />
     <SingleSelect
       label="What budget do you allocate monthly for growth/community tools?"
-      options={["$0", "$50–200", "$200–1k", "$1k+"]}
+      options={["$0", "$50-200", "$200-1k", "$1k+"]}
       value={data.monthly_budget || ""}
       onChange={(v) => update("monthly_budget", v)}
     />
