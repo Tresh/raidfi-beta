@@ -21,37 +21,42 @@ const WaitlistConfirmed = () => {
     const handleAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        setAuthenticated(true);
-        setUserEmail(session.user.email || "");
-        setUserId(session.user.id);
-
-        await supabase.from("waitlist_submissions").upsert(
-          { user_id: session.user.id, email: session.user.email || "", points: 50 },
-          { onConflict: "email" }
-        );
-
-        setLoading(false);
+        await initUser(session.user);
       } else {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (event === "SIGNED_IN" && session?.user) {
-              setAuthenticated(true);
-              setUserEmail(session.user.email || "");
-              setUserId(session.user.id);
-
-              await supabase.from("waitlist_submissions").upsert(
-                { user_id: session.user.id, email: session.user.email || "", points: 50 },
-                { onConflict: "email" }
-              );
-
-              setLoading(false);
+              await initUser(session.user);
             }
           }
         );
-
         setTimeout(() => setLoading(false), 3000);
         return () => subscription.unsubscribe();
       }
+    };
+
+    const initUser = async (user: any) => {
+      setAuthenticated(true);
+      setUserEmail(user.email || "");
+      setUserId(user.id);
+
+      await supabase.from("waitlist_submissions").upsert(
+        { user_id: user.id, email: user.email || "", points: 50 },
+        { onConflict: "email" }
+      );
+
+      // Check if user already completed the validation form
+      const { data: existing } = await supabase
+        .from("validation_submissions")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        setCompleted(true);
+      }
+
+      setLoading(false);
     };
 
     handleAuth();
