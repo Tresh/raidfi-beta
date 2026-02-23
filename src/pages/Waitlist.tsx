@@ -30,9 +30,9 @@ const Waitlist = () => {
       if (existing) {
         toast({
           title: "Already registered",
-          description: "This email is already on the waitlist. Check your inbox for the verification link.",
+          description: "This email is already on the waitlist.",
         });
-        setLoading(false);
+        navigate("/");
         return;
       }
 
