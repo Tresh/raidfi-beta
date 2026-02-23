@@ -14,7 +14,7 @@ const CTA = () => {
             Build Your Social Infrastructure
           </h2>
           <p className="text-muted-foreground mb-8">
-            Early-stage access for projects and contributors shaping the future of Web3 social intelligence.
+            Early-stage access for projects and community members shaping the future of Web3 social intelligence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="glow-cyan">
@@ -25,7 +25,7 @@ const CTA = () => {
             </Button>
             <Button size="lg" variant="outline" asChild>
               <a href="/waitlist" className="group">
-                Apply as Contributor
+                Apply as Community
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
             </Button>

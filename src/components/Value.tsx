@@ -9,7 +9,7 @@ const Value = () => {
             Value Proposition
           </h2>
           <p className="text-muted-foreground">
-            Reputation and access — not just rewards
+            Reputation and access, not just rewards
           </p>
         </div>
 
@@ -20,10 +20,10 @@ const Value = () => {
 
             <div className="space-y-3">
               {[
-                "Verified contributor intelligence for campaign planning",
+                "Access community social data without launching a campaign",
                 "Performance-based raid team selection and vetting",
                 "ROI visibility across on-chain and off-chain campaigns",
-                "Reduced dependency on guesswork and vanity metrics"
+                "Launch raid pools when you're ready, not before"
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
@@ -34,7 +34,7 @@ const Value = () => {
           </div>
 
           <div className="border border-border rounded-lg p-8">
-            <h3 className="text-xl font-medium mb-2 text-foreground">For Contributors</h3>
+            <h3 className="text-xl font-medium mb-2 text-foreground">For Community</h3>
             <p className="text-sm text-muted-foreground mb-6">Own your social reputation</p>
 
             <div className="space-y-3">
