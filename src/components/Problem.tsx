@@ -13,7 +13,7 @@ const problems = [
   },
   {
     title: "Reputation Disappears",
-    description: "Raid performance resets after every campaign — no long-term contributor credibility"
+    description: "Raid performance resets after every campaign, no long-term contributor credibility"
   },
   {
     title: "Fragmented Data",
