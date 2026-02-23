@@ -43,9 +43,9 @@ const Problem = () => {
           {problems.map((problem, index) => (
             <div
               key={index}
-              className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300 group"
+              className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300"
             >
-              <h3 className="text-base font-medium mb-2 text-foreground group-hover:text-primary transition-colors">
+              <h3 className="text-base font-medium mb-2 text-foreground">
                 {problem.title}
               </h3>
               <p className="text-sm text-muted-foreground">
