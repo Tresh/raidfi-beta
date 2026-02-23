@@ -46,7 +46,7 @@ const Solution = () => {
             {[
               {
                 title: "Data Transparency",
-                desc: "Every contribution is tracked, verified, and visible — creating a trustless record of social impact.",
+                desc: "Every contribution is tracked, verified, and visible, creating a trustless record of social impact.",
               },
               {
                 title: "Persistent Identity",

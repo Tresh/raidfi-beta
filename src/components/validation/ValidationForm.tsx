@@ -77,6 +77,8 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
         .eq("user_id", userId);
 
       toast({ title: "You earned 200 bonus points!", description: "Total: 250 RaidFi Points" });
+      // Sign out to invalidate the magic link session so it can't be reused
+      await supabase.auth.signOut();
       onComplete();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
