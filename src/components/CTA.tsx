@@ -11,25 +11,20 @@ const CTA = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-2xl mx-auto text-center glass-card rounded-2xl p-12">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            Build Your Social Infrastructure
+            Early Collaboration
           </h2>
           <p className="text-muted-foreground mb-8">
-            Early-stage access for projects and community members shaping the future of Web3 social intelligence.
+            Want to integrate RaidFi into your project or explore a partnership? We're open to early collaborations with teams building in Web3.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild className="glow-cyan">
-              <a href="/waitlist" className="group">
-                Apply as Project
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href="/waitlist" className="group">
-                Apply as Community
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </a>
-            </Button>
-          </div>
+          <Button size="lg" asChild className="glow-cyan">
+            <a href="mailto:hello@raidfi.com" className="group">
+              Get in Touch
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </Button>
+          <p className="text-sm text-muted-foreground mt-4">
+            hello@raidfi.com
+          </p>
         </div>
       </div>
     </section>
