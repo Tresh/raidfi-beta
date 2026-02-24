@@ -11,29 +11,21 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-
-      const { data: isAdmin } = await supabase.rpc("has_role", {
-        _user_id: data.user.id,
-        _role: "admin",
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+        },
       });
-
-      if (!isAdmin) {
-        await supabase.auth.signOut();
-        toast({ title: "Access denied", description: "You are not an admin.", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-
-      navigate("/admin");
+      if (error) throw error;
+      setSent(true);
     } catch (err: any) {
       toast({ title: "Login failed", description: err.message, variant: "destructive" });
     } finally {
@@ -47,30 +39,38 @@ const AdminLogin = () => {
         <div className="text-center mb-8">
           <img src={logo} alt="RaidFi" className="w-12 h-12 rounded-full mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to the admin panel</p>
+          <p className="text-sm text-muted-foreground mt-1">Sign in with your admin email</p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <Input
-            type="email"
-            placeholder="admin@raidfi.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="bg-card border-border h-11"
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="bg-card border-border h-11"
-            required
-          />
-          <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Sign In
-          </Button>
-        </form>
+
+        {!sent ? (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Input
+              type="email"
+              placeholder="admin@raidfi.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-card border-border h-11"
+              required
+            />
+            <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
+              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Send Magic Link
+            </Button>
+          </form>
+        ) : (
+          <div className="glass-card p-6 rounded-xl text-center">
+            <p className="text-foreground mb-2">Check your email</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              We sent a login link to <span className="text-primary">{email}</span>
+            </p>
+            <button
+              onClick={() => { setSent(false); setEmail(""); }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Try a different email
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
