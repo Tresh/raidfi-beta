@@ -7,6 +7,32 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
+const SIGNUP_STORAGE_KEY = "raidfi_waitlist_signup";
+const SIGNUP_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
+const getSignupCooldown = (): { blocked: boolean; email?: string } => {
+  try {
+    const raw = localStorage.getItem(SIGNUP_STORAGE_KEY);
+    if (!raw) return { blocked: false };
+    const data = JSON.parse(raw);
+    const elapsed = Date.now() - data.timestamp;
+    if (elapsed < SIGNUP_COOLDOWN_MS) {
+      return { blocked: true, email: data.email };
+    }
+    localStorage.removeItem(SIGNUP_STORAGE_KEY);
+    return { blocked: false };
+  } catch {
+    return { blocked: false };
+  }
+};
+
+const recordSignup = (email: string) => {
+  localStorage.setItem(
+    SIGNUP_STORAGE_KEY,
+    JSON.stringify({ email, timestamp: Date.now() })
+  );
+};
+
 const Waitlist = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,9 +44,20 @@ const Waitlist = () => {
     e.preventDefault();
     if (!email) return;
 
+    // Client-side rate limit: block repeated signups for 3 days
+    const cooldown = getSignupCooldown();
+    if (cooldown.blocked) {
+      toast({
+        title: "Already signed up",
+        description: `You've already submitted with ${cooldown.email}. Try again in a few days.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      // Check if email exists in waitlist_submissions or validation_submissions
+      // Server-side duplicate check across both tables
       const { data: emailExists, error: checkError } = await supabase.rpc(
         "check_email_exists",
         { check_email: email }
@@ -30,8 +67,8 @@ const Waitlist = () => {
 
       if (emailExists) {
         toast({
-          title: "Error",
-          description: "Email already exists.",
+          title: "Already on the list",
+          description: "This email is already registered.",
           variant: "destructive",
         });
         setLoading(false);
@@ -46,6 +83,9 @@ const Waitlist = () => {
         },
       });
       if (error) throw error;
+
+      // Record in browser to prevent repeated submissions
+      recordSignup(email);
       setSent(true);
     } catch (err: any) {
       toast({
