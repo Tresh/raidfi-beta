@@ -6,6 +6,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Waitlist from "./pages/Waitlist";
 import WaitlistConfirmed from "./pages/WaitlistConfirmed";
+import Contact from "./pages/Contact";
+import AdminLogin from "./pages/admin/AdminLogin";
+import Dashboard from "./pages/admin/Dashboard";
+import WaitlistManager from "./pages/admin/WaitlistManager";
+import ValidationsManager from "./pages/admin/ValidationsManager";
+import ContactsManager from "./pages/admin/ContactsManager";
+import AdminLayout from "./components/admin/AdminLayout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +27,12 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/waitlist" element={<Waitlist />} />
           <Route path="/waitlist/confirmed" element={<WaitlistConfirmed />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
+          <Route path="/admin/waitlist" element={<AdminLayout><WaitlistManager /></AdminLayout>} />
+          <Route path="/admin/validations" element={<AdminLayout><ValidationsManager /></AdminLayout>} />
+          <Route path="/admin/contacts" element={<AdminLayout><ContactsManager /></AdminLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
