@@ -20,31 +20,15 @@ const Waitlist = () => {
 
     setLoading(true);
     try {
-      // Check if email exists in waitlist_submissions
-      const { data: existingWaitlist } = await supabase
-        .from("waitlist_submissions")
-        .select("id")
-        .eq("email", email)
-        .maybeSingle();
+      // Check if email exists in waitlist_submissions or validation_submissions
+      const { data: emailExists, error: checkError } = await supabase.rpc(
+        "check_email_exists",
+        { check_email: email }
+      );
 
-      if (existingWaitlist) {
-        toast({
-          title: "Error",
-          description: "Email already exists.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
+      if (checkError) throw checkError;
 
-      // Check if email exists in auth users via a sign-in attempt check
-      const { data: existingValidation } = await supabase
-        .from("validation_submissions")
-        .select("id")
-        .eq("email", email)
-        .maybeSingle();
-
-      if (existingValidation) {
+      if (emailExists) {
         toast({
           title: "Error",
           description: "Email already exists.",
