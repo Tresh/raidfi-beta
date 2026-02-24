@@ -20,19 +20,37 @@ const Waitlist = () => {
 
     setLoading(true);
     try {
-      // Check if email is already on the waitlist
-      const { data: existing } = await supabase
+      // Check if email exists in waitlist_submissions
+      const { data: existingWaitlist } = await supabase
         .from("waitlist_submissions")
         .select("id")
         .eq("email", email)
         .maybeSingle();
 
-      if (existing) {
+      if (existingWaitlist) {
         toast({
-          title: "Already registered",
-          description: "This email is already on the waitlist.",
+          title: "Error",
+          description: "Email already exists.",
+          variant: "destructive",
         });
-        navigate("/");
+        setLoading(false);
+        return;
+      }
+
+      // Check if email exists in auth users via a sign-in attempt check
+      const { data: existingValidation } = await supabase
+        .from("validation_submissions")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (existingValidation) {
+        toast({
+          title: "Error",
+          description: "Email already exists.",
+          variant: "destructive",
+        });
+        setLoading(false);
         return;
       }
 
