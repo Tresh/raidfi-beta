@@ -17,14 +17,11 @@ const CTA = () => {
             Want to integrate RaidFi into your project or explore a partnership? We're open to early collaborations with teams building in Web3.
           </p>
           <Button size="lg" asChild className="glow-cyan">
-            <a href="mailto:hello@raidfi.com" className="group">
+            <a href="/contact" className="group">
               Get in Touch
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </a>
           </Button>
-          <p className="text-sm text-muted-foreground mt-4">
-            hello@raidfi.com
-          </p>
         </div>
       </div>
     </section>
