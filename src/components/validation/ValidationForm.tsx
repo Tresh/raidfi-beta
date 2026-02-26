@@ -9,7 +9,7 @@ import { ProjectStep1, ProjectStep2, ProjectStep3, ProjectStep4, ProjectStep5 } 
 type UserRole = "raider" | "project";
 
 interface ValidationFormProps {
-  userId?: string;
+  userId: string;
   userEmail: string;
   onComplete: () => void;
 }
@@ -41,6 +41,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       .from("validation_submissions")
       .select("id")
       .ilike("twitter_handle", normalized)
+      .neq("user_id", userId)
       .maybeSingle();
 
     return !!existing;
@@ -49,6 +50,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
+      // Check duplicate X handle
       const xHandle = data.x_handle || "";
       if (xHandle) {
         const isDuplicate = await checkDuplicateHandle(xHandle);
@@ -60,7 +62,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       }
 
       const { error } = await supabase.from("validation_submissions").insert({
-        user_id: userId || null,
+        user_id: userId,
         email: userEmail,
         role: role!,
         name: xHandle || "Anonymous",
@@ -69,13 +71,14 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       });
       if (error) throw error;
 
-      // Update points on waitlist entry
       await supabase
         .from("waitlist_submissions")
         .update({ points: 250 })
-        .eq("email", userEmail);
+        .eq("user_id", userId);
 
       toast({ title: "You earned 200 bonus points!", description: "Total: 250 RaidFi Points" });
+      // Sign out to invalidate the magic link session so it can't be reused
+      await supabase.auth.signOut();
       onComplete();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -84,6 +87,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
     }
   };
 
+  // Role selection screen
   if (!role) {
     return (
       <div className="space-y-4">
@@ -111,6 +115,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
 
   return (
     <div>
+      {/* Progress */}
       <div className="flex items-center gap-2 mb-6">
         <button onClick={() => { if (step === 0) setRole(null); else setStep(step - 1); }} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -123,10 +128,12 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
         <span className="text-xs text-muted-foreground">{step + 1}/{totalSteps}</span>
       </div>
 
+      {/* Step content */}
       <div className="min-h-[400px] overflow-y-auto">
         {CurrentStep && <CurrentStep data={data} update={update} />}
       </div>
 
+      {/* Navigation */}
       <div className="pt-6 flex gap-3">
         {step < totalSteps - 1 ? (
           <Button onClick={() => setStep(step + 1)} className="flex-1 h-11 font-semibold">

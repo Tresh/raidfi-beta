@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Loader2, CheckCircle2, Gift, ArrowRight } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
-import ValidationForm from "@/components/validation/ValidationForm";
 
 const SIGNUP_STORAGE_KEY = "raidfi_waitlist_signup";
-const SIGNUP_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+const SIGNUP_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 const getSignupCooldown = (): { blocked: boolean; email?: string } => {
   try {
@@ -39,12 +38,13 @@ const Waitlist = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [phase, setPhase] = useState<"form" | "prompt" | "validation" | "done">("form");
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
+    // Client-side rate limit: block repeated signups for 3 days
     const cooldown = getSignupCooldown();
     if (cooldown.blocked) {
       toast({
@@ -57,10 +57,12 @@ const Waitlist = () => {
 
     setLoading(true);
     try {
+      // Server-side duplicate check across both tables
       const { data: emailExists, error: checkError } = await supabase.rpc(
         "check_email_exists",
         { check_email: email }
       );
+
       if (checkError) throw checkError;
 
       if (emailExists) {
@@ -73,13 +75,18 @@ const Waitlist = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from("waitlist_submissions")
-        .insert({ email, points: 50 });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/waitlist/confirmed`,
+        },
+      });
       if (error) throw error;
 
+      // Record in browser to prevent repeated submissions
       recordSignup(email);
-      setPhase("prompt");
+      setSent(true);
     } catch (err: any) {
       toast({
         title: "Error",
@@ -106,9 +113,9 @@ const Waitlist = () => {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
+      <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
-          {phase === "form" && (
+          {!sent ? (
             <>
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-foreground mb-3">
@@ -118,6 +125,7 @@ const Waitlist = () => {
                   Be among the first to experience RaidFi. Enter your email to secure your spot.
                 </p>
               </div>
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="glass-card p-6 rounded-xl">
                   <Input
@@ -134,60 +142,37 @@ const Waitlist = () => {
                     disabled={loading}
                   >
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Join Waitlist
+                    Verify Email
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">No spam. Unsubscribe anytime.</p>
+                <p className="text-xs text-muted-foreground">
+                  No spam. Unsubscribe anytime.
+                </p>
               </form>
             </>
-          )}
-
-          {phase === "prompt" && (
-            <div>
-              <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="w-10 h-10 text-primary" />
+          ) : (
+            <div className="glass-card p-8 rounded-xl">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
               </div>
-              <h1 className="text-3xl font-bold text-foreground mb-3">You're on the list!</h1>
+              <h2 className="text-2xl font-semibold text-foreground mb-3">
+                Check your email
+              </h2>
               <p className="text-muted-foreground mb-2">
-                Signed up as <span className="text-foreground font-medium">{email}</span>
+                We sent a verification link to
               </p>
-              <p className="text-primary font-semibold text-lg mb-8">+50 RaidFi Points earned</p>
-
-              <div className="glass-card rounded-xl p-8 text-left">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Gift className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">Earn 200 bonus points</p>
-                    <p className="text-sm text-muted-foreground">Answer a few quick questions to boost your priority</p>
-                  </div>
-                </div>
-                <Button onClick={() => setPhase("validation")} className="w-full h-12 font-semibold">
-                  Continue <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-                <button onClick={() => navigate("/")} className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors text-center block">
-                  Maybe later
-                </button>
-              </div>
-            </div>
-          )}
-
-          {phase === "validation" && (
-            <div className="text-left">
-              <ValidationForm userEmail={email} onComplete={() => setPhase("done")} />
-            </div>
-          )}
-
-          {phase === "done" && (
-            <div>
-              <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="w-10 h-10 text-primary" />
-              </div>
-              <h2 className="text-2xl font-semibold text-foreground mb-2">You're all set</h2>
-              <p className="text-primary font-semibold text-lg mb-1">250 RaidFi Points</p>
-              <p className="text-muted-foreground mb-8">We'll reach out with early access details. The more points you have, the sooner you get in.</p>
-              <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
+              <p className="text-primary font-medium mb-6">{email}</p>
+              <p className="text-sm text-muted-foreground">
+                Click the link in the email to confirm and join the waitlist.
+              </p>
+              <button
+                onClick={() => { setSent(false); setEmail(""); }}
+                className="mt-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Use a different email
+              </button>
             </div>
           )}
         </div>

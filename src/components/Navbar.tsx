@@ -11,7 +11,6 @@ const Navbar = () => {
     { href: "#how-it-works", label: "Infrastructure" },
     { href: "#features", label: "Features" },
     { href: "#value", label: "For Projects" },
-    { href: "/contact", label: "Contact" },
   ];
 
   const handleLinkClick = () => {
