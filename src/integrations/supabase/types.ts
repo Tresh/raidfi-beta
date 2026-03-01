@@ -81,7 +81,7 @@ export type Database = {
           role: string
           telegram_handle: string | null
           twitter_handle: string | null
-          user_id: string
+          user_id: string | null
           why_interested: string | null
         }
         Insert: {
@@ -99,7 +99,7 @@ export type Database = {
           role: string
           telegram_handle?: string | null
           twitter_handle?: string | null
-          user_id: string
+          user_id?: string | null
           why_interested?: string | null
         }
         Update: {
@@ -117,7 +117,7 @@ export type Database = {
           role?: string
           telegram_handle?: string | null
           twitter_handle?: string | null
-          user_id?: string
+          user_id?: string | null
           why_interested?: string | null
         }
         Relationships: []

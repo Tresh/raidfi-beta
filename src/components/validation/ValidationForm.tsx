@@ -41,7 +41,6 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       .from("validation_submissions")
       .select("id")
       .ilike("twitter_handle", normalized)
-      .neq("user_id", userId)
       .maybeSingle();
 
     return !!existing;
@@ -74,11 +73,9 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       await supabase
         .from("waitlist_submissions")
         .update({ points: 250 })
-        .eq("user_id", userId);
+        .eq("id", userId);
 
       toast({ title: "You earned 200 bonus points!", description: "Total: 250 RaidFi Points" });
-      // Sign out to invalidate the magic link session so it can't be reused
-      await supabase.auth.signOut();
       onComplete();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
