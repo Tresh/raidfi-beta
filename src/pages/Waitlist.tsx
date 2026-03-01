@@ -64,7 +64,7 @@ const Waitlist = () => {
       // Server-side duplicate check across both tables
       const { data: emailExists, error: checkError } = await supabase.rpc(
         "check_email_exists",
-        { check_email: email }
+        { check_email: email.trim().toLowerCase() }
       );
 
       if (checkError) throw checkError;
