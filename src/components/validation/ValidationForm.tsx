@@ -61,7 +61,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       }
 
       const { error } = await supabase.from("validation_submissions").insert({
-        user_id: userId,
+        user_id: null,
         email: userEmail,
         role: role!,
         name: xHandle || "Anonymous",
