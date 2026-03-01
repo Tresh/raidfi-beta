@@ -1,15 +1,6 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Users,
-  Mail,
-  ClipboardList,
-  LogOut,
-  Home,
-  Menu,
-  X,
-} from "lucide-react";
+import { LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -47,7 +38,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar-background border-r border-sidebar-border flex flex-col transition-transform lg:translate-x-0 ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 h-screen bg-sidebar-background border-r border-sidebar-border flex flex-col transition-transform lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -65,9 +56,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">
-            Management
-          </p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">Management</p>
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -121,9 +110,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );
