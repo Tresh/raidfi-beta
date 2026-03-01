@@ -28,10 +28,7 @@ const getSignupCooldown = (): { blocked: boolean; email?: string } => {
 };
 
 const recordSignup = (email: string) => {
-  localStorage.setItem(
-    SIGNUP_STORAGE_KEY,
-    JSON.stringify({ email, timestamp: Date.now() })
-  );
+  localStorage.setItem(SIGNUP_STORAGE_KEY, JSON.stringify({ email, timestamp: Date.now() }));
 };
 
 type WaitlistState = "form" | "validation" | "completed";
@@ -62,10 +59,9 @@ const Waitlist = () => {
     setLoading(true);
     try {
       // Server-side duplicate check across both tables
-      const { data: emailExists, error: checkError } = await supabase.rpc(
-        "check_email_exists",
-        { check_email: email.trim().toLowerCase() }
-      );
+      const { data: emailExists, error: checkError } = await supabase.rpc("check_email_exists", {
+        check_email: email.trim().toLowerCase(),
+      });
 
       if (checkError) throw checkError;
 
@@ -79,10 +75,13 @@ const Waitlist = () => {
         return;
       }
 
-      // Direct insert into waitlist — no email confirmation
+      // Direct insert into waitlist — fully anonymous
       const { data: inserted, error } = await supabase
         .from("waitlist_submissions")
-        .insert({ email, points: 50 })
+        .insert({
+          email: email.trim().toLowerCase(),
+          points: 50,
+        })
         .select("id")
         .single();
 
@@ -141,18 +140,12 @@ const Waitlist = () => {
                     className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base"
                     required
                   />
-                  <Button
-                    type="submit"
-                    className="w-full mt-4 h-12 text-base font-semibold"
-                    disabled={loading}
-                  >
+                  <Button type="submit" className="w-full mt-4 h-12 text-base font-semibold" disabled={loading}>
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Join Waitlist
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  No spam. Unsubscribe anytime.
-                </p>
+                <p className="text-xs text-muted-foreground">No spam. Unsubscribe anytime.</p>
               </form>
             </div>
           )}
@@ -168,7 +161,10 @@ const Waitlist = () => {
                   Signed up as <span className="text-foreground font-medium">{submittedEmail}</span>
                 </p>
                 <p className="text-primary font-semibold mb-4">+50 RaidFi Points earned</p>
-                <p className="text-sm text-muted-foreground">Answer a few quick questions to earn <span className="text-primary font-semibold">200 bonus points</span> and boost your priority.</p>
+                <p className="text-sm text-muted-foreground">
+                  Answer a few quick questions to earn{" "}
+                  <span className="text-primary font-semibold">200 bonus points</span> and boost your priority.
+                </p>
               </div>
               <ValidationForm
                 userId={waitlistUserId}
@@ -185,8 +181,12 @@ const Waitlist = () => {
               </div>
               <h2 className="text-2xl font-semibold text-foreground mb-2">You're all set!</h2>
               <p className="text-primary font-semibold text-lg mb-1">250 RaidFi Points</p>
-              <p className="text-muted-foreground mb-8">We'll reach out with early access details. The more points you have, the sooner you get in.</p>
-              <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
+              <p className="text-muted-foreground mb-8">
+                We'll reach out with early access details. The more points you have, the sooner you get in.
+              </p>
+              <Button variant="outline" onClick={() => navigate("/")}>
+                Back to Home
+              </Button>
             </div>
           )}
         </div>
