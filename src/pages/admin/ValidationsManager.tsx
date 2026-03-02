@@ -14,35 +14,18 @@ const ValidationsManager = () => {
 
   const fetchData = async () => {
     setLoading(true);
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("validation_submissions")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-
-    if (error) {
-      toast({
-        title: "Error loading validations",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setRows(data || []);
-    }
-
+      .order("created_at", { ascending: false });
+    setRows(data || []);
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this validation entry?")) return;
-
     const { error } = await supabase.from("validation_submissions").delete().eq("id", id);
-
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -53,23 +36,11 @@ const ValidationsManager = () => {
 
   const handleExportCSV = () => {
     const headers = ["Name", "Email", "Role", "Points", "Created At"];
-
-    const escape = (value: any) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-
-    const filteredRows = rows.filter(
-      (r) =>
-        (r.email || "").toLowerCase().includes(search.toLowerCase()) ||
-        (r.name || "").toLowerCase().includes(search.toLowerCase()),
-    );
-
     const csv = [
       headers.join(","),
-      ...filteredRows.map((r) =>
-        [escape(r.name), escape(r.email), escape(r.role), escape(r.points_earned), escape(r.created_at)].join(","),
-      ),
+      ...rows.map((r) => [r.name, r.email, r.role, r.points_earned, r.created_at].join(",")),
     ].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -79,12 +50,12 @@ const ValidationsManager = () => {
 
   const filtered = rows.filter(
     (r) =>
-      (r.email || "").toLowerCase().includes(search.toLowerCase()) ||
-      (r.name || "").toLowerCase().includes(search.toLowerCase()),
+      r.email.toLowerCase().includes(search.toLowerCase()) ||
+      r.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col overflow-hidden">
+    <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Validations</h1>
@@ -107,10 +78,10 @@ const ValidationsManager = () => {
         </div>
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden flex-1 flex flex-col min-h-0">
-        <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="glass-card rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-background z-10">
+            <thead>
               <tr className="border-b border-border/50">
                 <th className="text-left p-4 text-muted-foreground font-medium">Name</th>
                 <th className="text-left p-4 text-muted-foreground font-medium">Email</th>
@@ -120,20 +91,11 @@ const ValidationsManager = () => {
                 <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                    Loading...
-                  </td>
-                </tr>
+                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                    No entries found.
-                  </td>
-                </tr>
+                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No entries found.</td></tr>
               ) : (
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
@@ -169,21 +131,14 @@ const ValidationsManager = () => {
 
       {/* Detail modal */}
       {selected && (
-        <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="glass-card rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+          <div className="glass-card rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">{selected.name}</h2>
               <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <div className="space-y-3 text-sm">
               {[
                 ["Email", selected.email],
@@ -203,9 +158,8 @@ const ValidationsManager = () => {
                     <p className="text-muted-foreground text-xs">{label}</p>
                     <p className="text-foreground">{String(value)}</p>
                   </div>
-                ) : null,
+                ) : null
               )}
-
               {selected.form_responses && Object.keys(selected.form_responses).length > 0 && (
                 <div>
                   <p className="text-muted-foreground text-xs mb-1">Form Responses</p>

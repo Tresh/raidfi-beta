@@ -13,35 +13,18 @@ const WaitlistManager = () => {
 
   const fetchData = async () => {
     setLoading(true);
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("waitlist_submissions")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-
-    if (error) {
-      toast({
-        title: "Error loading waitlist",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setRows(data || []);
-    }
-
+      .order("created_at", { ascending: false });
+    setRows(data || []);
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this waitlist entry?")) return;
-
     const { error } = await supabase.from("waitlist_submissions").delete().eq("id", id);
-
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -52,19 +35,11 @@ const WaitlistManager = () => {
 
   const handleExportCSV = () => {
     const headers = ["Email", "Points", "User ID", "Created At"];
-
-    const escape = (value: any) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-
-    const filteredRows = rows.filter((r) => (r.email || "").toLowerCase().includes(search.toLowerCase()));
-
     const csv = [
       headers.join(","),
-      ...filteredRows.map((r) =>
-        [escape(r.email), escape(r.points), escape(r.user_id), escape(r.created_at)].join(","),
-      ),
+      ...rows.map((r) => [r.email, r.points, r.user_id || "", r.created_at].join(",")),
     ].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -72,10 +47,12 @@ const WaitlistManager = () => {
     a.click();
   };
 
-  const filtered = rows.filter((r) => (r.email || "").toLowerCase().includes(search.toLowerCase()));
+  const filtered = rows.filter((r) =>
+    r.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col overflow-hidden">
+    <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Waitlist</h1>
@@ -98,10 +75,10 @@ const WaitlistManager = () => {
         </div>
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden flex-1 flex flex-col min-h-0">
-        <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="glass-card rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-background z-10">
+            <thead>
               <tr className="border-b border-border/50">
                 <th className="text-left p-4 text-muted-foreground font-medium">Email</th>
                 <th className="text-left p-4 text-muted-foreground font-medium">Points</th>
@@ -109,20 +86,11 @@ const WaitlistManager = () => {
                 <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                    Loading...
-                  </td>
-                </tr>
+                <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                    No entries found.
-                  </td>
-                </tr>
+                <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">No entries found.</td></tr>
               ) : (
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">

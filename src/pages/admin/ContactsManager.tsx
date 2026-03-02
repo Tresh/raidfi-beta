@@ -14,35 +14,18 @@ const ContactsManager = () => {
 
   const fetchData = async () => {
     setLoading(true);
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("contact_submissions")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (error) {
-      toast({
-        title: "Error loading messages",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setRows(data || []);
-    }
-
+      .order("created_at", { ascending: false });
+    setRows(data || []);
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this message?")) return;
-
     const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
-
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -53,37 +36,31 @@ const ContactsManager = () => {
   };
 
   const handleMarkRead = async (id: string) => {
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status: "read" } : r)));
-
-    if (selected?.id === id) {
-      setSelected({ ...selected, status: "read" });
-    }
-
     const { error } = await supabase.from("contact_submissions").update({ status: "read" }).eq("id", id);
-
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
-      fetchData();
+    } else {
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status: "read" } : r)));
+      if (selected?.id === id) setSelected({ ...selected, status: "read" });
     }
   };
 
   const filtered = rows.filter(
     (r) =>
-      (r.name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (r.email || "").toLowerCase().includes(search.toLowerCase()) ||
-      (r.subject || "").toLowerCase().includes(search.toLowerCase()),
+      r.name.toLowerCase().includes(search.toLowerCase()) ||
+      r.email.toLowerCase().includes(search.toLowerCase()) ||
+      r.subject.toLowerCase().includes(search.toLowerCase())
   );
 
   const newCount = rows.filter((r) => r.status === "new").length;
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Contact Messages</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {rows.length} total
-            {newCount > 0 && <span className="text-primary ml-1">({newCount} new)</span>}
+            {rows.length} total{newCount > 0 && <span className="text-primary ml-1">({newCount} new)</span>}
           </p>
         </div>
       </div>
@@ -100,96 +77,67 @@ const ContactsManager = () => {
         </div>
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden h-[65vh] flex flex-col">
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-background z-10">
-                <tr className="border-b border-border/50">
-                  <th className="text-left p-4 text-muted-foreground font-medium">Name</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Subject</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Status</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium hidden lg:table-cell">Date</th>
-                  <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                      Loading...
+      <div className="glass-card rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/50">
+                <th className="text-left p-4 text-muted-foreground font-medium">Name</th>
+                <th className="text-left p-4 text-muted-foreground font-medium">Subject</th>
+                <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Status</th>
+                <th className="text-left p-4 text-muted-foreground font-medium hidden lg:table-cell">Date</th>
+                <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No messages found.</td></tr>
+              ) : (
+                filtered.map((r) => (
+                  <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
+                    <td className="p-4 text-foreground">{r.name}</td>
+                    <td className="p-4 text-foreground">{r.subject}</td>
+                    <td className="p-4 hidden md:table-cell">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        r.status === "new" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                      }`}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-muted-foreground hidden lg:table-cell">
+                      {new Date(r.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="p-4 text-right space-x-1">
+                      <Button variant="ghost" size="icon" onClick={() => setSelected(r)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      {r.status === "new" && (
+                        <Button variant="ghost" size="icon" className="text-green-400" onClick={() => handleMarkRead(r.id)}>
+                          <CheckCircle2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDelete(r.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </td>
                   </tr>
-                ) : filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                      No messages found.
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((r) => (
-                    <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
-                      <td className="p-4 text-foreground">{r.name}</td>
-                      <td className="p-4 text-foreground">{r.subject}</td>
-                      <td className="p-4 hidden md:table-cell">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
-                            r.status === "new" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {r.status}
-                        </span>
-                      </td>
-                      <td className="p-4 text-muted-foreground hidden lg:table-cell">
-                        {new Date(r.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="p-4 text-right space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelected(r);
-                            if (r.status === "new") handleMarkRead(r.id);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-
-                        {r.status === "new" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-green-400"
-                            onClick={() => handleMarkRead(r.id)}
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                          </Button>
-                        )}
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(r.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
+      {/* Detail modal */}
       {selected && (
-        <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelected(null)}
-        >
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="glass-card rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">{selected.subject}</h2>
@@ -197,13 +145,10 @@ const ContactsManager = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <div className="space-y-3 text-sm">
               <div>
                 <p className="text-muted-foreground text-xs">From</p>
-                <p className="text-foreground">
-                  {selected.name} ({selected.email})
-                </p>
+                <p className="text-foreground">{selected.name} ({selected.email})</p>
               </div>
               <div>
                 <p className="text-muted-foreground text-xs">Date</p>
@@ -214,7 +159,6 @@ const ContactsManager = () => {
                 <p className="text-foreground whitespace-pre-wrap">{selected.message}</p>
               </div>
             </div>
-
             <div className="mt-6 flex gap-2">
               {selected.status === "new" && (
                 <Button size="sm" variant="outline" onClick={() => handleMarkRead(selected.id)}>
