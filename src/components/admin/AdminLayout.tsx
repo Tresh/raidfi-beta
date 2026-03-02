@@ -47,11 +47,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar-background border-r border-sidebar-border flex flex-col transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar-background border-r border-sidebar-border flex flex-col transition-transform lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-5 flex items-center justify-between border-b border-sidebar-border">
+        <div className="p-5 flex items-center justify-between border-b border-sidebar-border shrink-0">
           <div className="flex items-center gap-2">
             <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
             <div>
@@ -64,7 +64,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           </button>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto min-h-0">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">
             Management
           </p>
@@ -88,7 +88,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-sidebar-border space-y-1">
+        <div className="p-3 border-t border-sidebar-border space-y-1 shrink-0">
           <NavLink
             to="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
@@ -107,7 +107,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background/80 backdrop-blur-sm sticky top-0 z-30">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground">
             <Menu className="w-5 h-5" />
