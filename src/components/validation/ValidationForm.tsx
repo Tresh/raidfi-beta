@@ -33,17 +33,8 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
   const CurrentStep = steps[step];
 
   const checkDuplicateHandle = async (handle: string): Promise<boolean> => {
-    if (!handle) return false;
-    const normalized = handle.replace(/^@/, "").toLowerCase().trim();
-    if (!normalized) return false;
-
-    const { data: existing } = await supabase
-      .from("validation_submissions")
-      .select("id")
-      .ilike("twitter_handle", normalized)
-      .maybeSingle();
-
-    return !!existing;
+    // Skip client-side duplicate check — let DB unique constraint handle it
+    return false;
   };
 
   const handleSubmit = async () => {

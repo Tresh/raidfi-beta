@@ -79,18 +79,17 @@ const Waitlist = () => {
         return;
       }
 
-      // Direct insert into waitlist — no email confirmation
-      const { data: inserted, error } = await supabase
+      // Generate ID client-side to avoid needing SELECT permission
+      const newId = crypto.randomUUID();
+      const { error } = await supabase
         .from("waitlist_submissions")
-        .insert({ email, points: 50 })
-        .select("id")
-        .single();
+        .insert({ id: newId, email, points: 50 });
 
       if (error) throw error;
 
       recordSignup(email);
       setSubmittedEmail(email);
-      setWaitlistUserId(inserted.id);
+      setWaitlistUserId(newId);
       setState("validation");
     } catch (err: any) {
       toast({
