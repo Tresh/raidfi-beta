@@ -2,27 +2,43 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Search, Eye, X, CheckCircle2 } from "lucide-react";
+import { Trash2, Search, Eye, X, CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const BATCH_SIZE = 30;
 
 const ContactsManager = () => {
   const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<any | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    const { data } = await supabase
+  const fetchData = async (offset = 0, append = false) => {
+    if (offset === 0) setLoading(true);
+    else setLoadingMore(true);
+
+    const { data, count } = await supabase
       .from("contact_submissions")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setRows(data || []);
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(offset, offset + BATCH_SIZE - 1);
+
+    const fetched = data || [];
+    if (append) setRows((prev) => [...prev, ...fetched]);
+    else setRows(fetched);
+    setTotalCount(count || 0);
+    setHasMore(fetched.length === BATCH_SIZE);
     setLoading(false);
+    setLoadingMore(false);
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const handleLoadMore = () => fetchData(rows.length, true);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
@@ -30,6 +46,7 @@ const ContactsManager = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setRows((prev) => prev.filter((r) => r.id !== id));
+      setTotalCount((c) => c - 1);
       if (selected?.id === id) setSelected(null);
       toast({ title: "Deleted", description: "Message removed." });
     }
@@ -60,7 +77,7 @@ const ContactsManager = () => {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Contact Messages</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {rows.length} total{newCount > 0 && <span className="text-primary ml-1">({newCount} new)</span>}
+            {totalCount} total{newCount > 0 && <span className="text-primary ml-1">({newCount} new)</span>}
           </p>
         </div>
       </div>
@@ -133,6 +150,15 @@ const ContactsManager = () => {
             </tbody>
           </table>
         </div>
+
+        {hasMore && !search && !loading && (
+          <div className="p-4 text-center border-t border-border/30">
+            <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loadingMore}>
+              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Load more
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Detail modal */}

@@ -22,20 +22,19 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       const [waitlist, validations, contacts] = await Promise.all([
-        supabase.from("waitlist_submissions").select("*"),
-        supabase.from("validation_submissions").select("id"),
-        supabase.from("contact_submissions").select("*").order("created_at", { ascending: false }).limit(5),
+        supabase.from("waitlist_submissions").select("id, email, points, created_at", { count: "exact" }).order("created_at", { ascending: false }).limit(5),
+        supabase.from("validation_submissions").select("id", { count: "exact" }),
+        supabase.from("contact_submissions").select("id, name, subject, status, created_at", { count: "exact" }).order("created_at", { ascending: false }).limit(5),
       ]);
 
-      const wl = waitlist.data || [];
       setStats({
-        waitlistCount: wl.length,
-        validationCount: validations.data?.length || 0,
-        contactCount: contacts.data?.length || 0,
-        totalPoints: wl.reduce((sum, r) => sum + (r.points || 0), 0),
+        waitlistCount: waitlist.count || 0,
+        validationCount: validations.count || 0,
+        contactCount: contacts.count || 0,
+        totalPoints: 0, // Avoid loading all rows just for sum
       });
 
-      setRecentWaitlist(wl.slice(-5).reverse());
+      setRecentWaitlist(waitlist.data || []);
       setRecentContacts(contacts.data || []);
     };
     fetchStats();
@@ -45,7 +44,6 @@ const Dashboard = () => {
     { label: "Waitlist Signups", value: stats.waitlistCount, icon: Users, color: "text-primary" },
     { label: "Form Completions", value: stats.validationCount, icon: ClipboardList, color: "text-green-400" },
     { label: "Contact Messages", value: stats.contactCount, icon: Mail, color: "text-amber-400" },
-    { label: "Total Points Given", value: stats.totalPoints, icon: TrendingUp, color: "text-purple-400" },
   ];
 
   return (
@@ -55,7 +53,7 @@ const Dashboard = () => {
         <p className="text-muted-foreground text-sm mt-1">Overview of your platform activity</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map((card) => (
           <div key={card.label} className="glass-card rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
@@ -68,7 +66,6 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Waitlist */}
         <div className="glass-card rounded-xl p-5">
           <h2 className="font-semibold text-foreground mb-4">Recent Waitlist Signups</h2>
           {recentWaitlist.length === 0 ? (
@@ -88,7 +85,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Recent Contacts */}
         <div className="glass-card rounded-xl p-5">
           <h2 className="font-semibold text-foreground mb-4">Recent Contact Messages</h2>
           {recentContacts.length === 0 ? (
