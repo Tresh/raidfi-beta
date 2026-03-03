@@ -2,26 +2,42 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Search, Download } from "lucide-react";
+import { Trash2, Search, Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const BATCH_SIZE = 30;
 
 const WaitlistManager = () => {
   const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const fetchData = async () => {
-    setLoading(true);
-    const { data } = await supabase
+  const fetchData = async (offset = 0, append = false) => {
+    if (offset === 0) setLoading(true);
+    else setLoadingMore(true);
+
+    const { data, count } = await supabase
       .from("waitlist_submissions")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setRows(data || []);
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(offset, offset + BATCH_SIZE - 1);
+
+    const fetched = data || [];
+    if (append) setRows((prev) => [...prev, ...fetched]);
+    else setRows(fetched);
+    setTotalCount(count || 0);
+    setHasMore(fetched.length === BATCH_SIZE);
     setLoading(false);
+    setLoadingMore(false);
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const handleLoadMore = () => fetchData(rows.length, true);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("waitlist_submissions").delete().eq("id", id);
@@ -29,6 +45,7 @@ const WaitlistManager = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setRows((prev) => prev.filter((r) => r.id !== id));
+      setTotalCount((c) => c - 1);
       toast({ title: "Deleted", description: "Entry removed." });
     }
   };
@@ -56,7 +73,7 @@ const WaitlistManager = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Waitlist</h1>
-          <p className="text-muted-foreground text-sm mt-1">{rows.length} total signups</p>
+          <p className="text-muted-foreground text-sm mt-1">{totalCount} total signups</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleExportCSV}>
           <Download className="w-4 h-4 mr-2" /> Export CSV
@@ -117,6 +134,15 @@ const WaitlistManager = () => {
             </tbody>
           </table>
         </div>
+
+        {hasMore && !search && !loading && (
+          <div className="p-4 text-center border-t border-border/30">
+            <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loadingMore}>
+              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Load more
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
