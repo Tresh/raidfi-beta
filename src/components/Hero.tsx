@@ -4,9 +4,6 @@ import { ArrowRight } from "lucide-react";
 const Hero = () => {
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/8 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-primary/4 rounded-full blur-[120px] pointer-events-none" />
-
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 text-foreground tracking-tight leading-tight">
@@ -23,7 +20,7 @@ const Hero = () => {
             and structured analytics.
           </p>
 
-          <Button size="lg" asChild className="glow-cyan">
+          <Button size="lg" asChild>
             <a href="/waitlist" className="group">
               Request Early Access
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

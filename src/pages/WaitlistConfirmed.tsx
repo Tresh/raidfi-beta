@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Gift, ArrowRight, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import ValidationForm from "@/components/validation/ValidationForm";
 
 const WaitlistConfirmed = () => {
@@ -45,7 +46,6 @@ const WaitlistConfirmed = () => {
         { onConflict: "email" }
       );
 
-      // Check if user already completed the validation form
       const { data: existing } = await supabase
         .from("validation_submissions")
         .select("id")
@@ -72,44 +72,45 @@ const WaitlistConfirmed = () => {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          <h2 className="text-2xl font-semibold text-foreground mb-3">Verification expired</h2>
-          <p className="text-muted-foreground mb-6">This link may have expired or already been used. Please try again.</p>
-          <Button onClick={() => navigate("/waitlist")}>Back to Waitlist</Button>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6 pt-24">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-semibold text-foreground mb-3">Verification expired</h2>
+            <p className="text-muted-foreground mb-6">This link may have expired or already been used. Please try again.</p>
+            <Button onClick={() => navigate("/waitlist")}>Back to Waitlist</Button>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   if (completed) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-primary" />
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6 pt-24">
+          <div className="text-center max-w-md">
+            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">You're all set</h2>
+            <p className="text-primary font-semibold text-lg mb-1">250 RaidFi Points</p>
+            <p className="text-muted-foreground mb-8">We'll reach out with early access details. The more points you have, the sooner you get in.</p>
+            <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
           </div>
-          <h2 className="text-2xl font-semibold text-foreground mb-2">You're all set</h2>
-          <p className="text-primary font-semibold text-lg mb-1">250 RaidFi Points</p>
-          <p className="text-muted-foreground mb-8">We'll reach out with early access details. The more points you have, the sooner you get in.</p>
-          <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border/50 glass">
-        <div className="container mx-auto px-6 py-4">
-          <a href="/" className="flex items-center gap-2">
-            <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
-            <span className="font-medium text-foreground">RaidFi</span>
-          </a>
-        </div>
-      </header>
+      <Navbar />
 
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
+      <main className="flex-1 flex items-center justify-center px-6 py-12 pt-24">
         <div className="max-w-lg w-full">
           {!showValidation ? (
             <div className="text-center">
@@ -145,6 +146,8 @@ const WaitlistConfirmed = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

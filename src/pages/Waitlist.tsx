@@ -2,14 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import ValidationForm from "@/components/validation/ValidationForm";
 
 const SIGNUP_STORAGE_KEY = "raidfi_waitlist_signup";
-const SIGNUP_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const SIGNUP_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
 
 const getSignupCooldown = (): { blocked: boolean; email?: string } => {
   try {
@@ -61,7 +62,6 @@ const Waitlist = () => {
 
     setLoading(true);
     try {
-      // Server-side duplicate check across both tables
       const { data: emailExists, error: checkError } = await supabase.rpc(
         "check_email_exists",
         { check_email: email.trim().toLowerCase() }
@@ -79,7 +79,6 @@ const Waitlist = () => {
         return;
       }
 
-      // Generate ID client-side to avoid needing SELECT permission
       const newId = crypto.randomUUID();
       const { error } = await supabase
         .from("waitlist_submissions")
@@ -104,20 +103,9 @@ const Waitlist = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border/50 glass">
-        <div className="container mx-auto px-6 py-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
-            <span className="font-medium text-foreground">RaidFi</span>
-          </button>
-        </div>
-      </header>
+      <Navbar />
 
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
+      <main className="flex-1 flex items-center justify-center px-6 py-12 pt-24">
         <div className="max-w-md w-full">
           {state === "form" && (
             <div className="text-center">
@@ -190,6 +178,8 @@ const Waitlist = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

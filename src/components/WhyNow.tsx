@@ -15,7 +15,7 @@ const WhyNow = () => {
           {[
             {
               title: "Contributor Economies Are Scaling",
-              desc: "Web3 projects increasingly rely on community-driven social campaigns. The volume of contributors, contributions, and capital flowing into social activation is growing — but the infrastructure to measure and manage it doesn't exist yet.",
+              desc: "Web3 projects increasingly rely on community-driven social campaigns. The volume of contributors, contributions, and capital flowing into social activation is growing, but the infrastructure to measure and manage it doesn't exist yet.",
             },
             {
               title: "Intelligence Is the Missing Layer",

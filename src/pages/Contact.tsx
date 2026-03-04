@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { z } from "zod";
 
 const contactSchema = z.object({
@@ -39,7 +40,6 @@ const Contact = () => {
     try {
       const { name, email, subject, message } = parsed.data;
 
-      // Check for duplicate email submission
       const { data: existing } = await supabase
         .from("contact_submissions")
         .select("id")
@@ -64,20 +64,9 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border/50 glass">
-        <div className="container mx-auto px-6 py-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
-            <span className="font-medium text-foreground">RaidFi</span>
-          </button>
-        </div>
-      </header>
+      <Navbar />
 
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
+      <main className="flex-1 flex items-center justify-center px-6 py-8 pt-24">
         <div className="max-w-sm w-full">
           {!sent ? (
             <>
@@ -150,6 +139,8 @@ const Contact = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

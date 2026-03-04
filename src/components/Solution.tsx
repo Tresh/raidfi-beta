@@ -11,7 +11,7 @@ const Solution = () => {
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               RaidFi is a social data engine, reputation graph, and performance
-              analytics layer — powering contributor intelligence across Web3.
+              analytics layer, powering contributor intelligence across Web3.
               Data and reputation come first. Campaigns are an optional activation layer.
             </p>
           </div>
@@ -41,33 +41,33 @@ const Solution = () => {
             ))}
           </div>
 
-          {/* Key benefits with numbers */}
+          {/* Key benefits */}
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 title: "Verified Contribution Tracking",
                 stat: "100%",
                 statLabel: "of contributions tracked",
-                desc: "Every contribution is captured, verified, and structured — creating a trustless record of social impact across platforms.",
+                desc: "Every contribution is captured, verified, and structured, creating a trustless record of social impact across platforms.",
               },
               {
                 title: "Persistent Reputation",
-                stat: "∞",
-                statLabel: "cross-campaign credibility",
+                stat: "Cross-campaign",
+                statLabel: "credibility that compounds",
                 desc: "Contributor reputation compounds over time and carries across projects, building long-term credibility and access.",
               },
               {
                 title: "Structured Intelligence",
                 stat: "Real-time",
                 statLabel: "performance analytics",
-                desc: "Projects receive structured, actionable analytics on contributor performance — measurable data, not assumptions.",
+                desc: "Projects receive structured, actionable analytics on contributor performance, measurable data, not assumptions.",
               },
             ].map((benefit, index) => (
               <div
                 key={index}
                 className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300"
               >
-                <p className="text-2xl font-semibold text-primary mb-0.5">{benefit.stat}</p>
+                <p className="text-2xl font-semibold text-foreground mb-0.5">{benefit.stat}</p>
                 <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider">{benefit.statLabel}</p>
                 <h3 className="font-medium text-foreground mb-2">
                   {benefit.title}

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useState } from "react";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -9,7 +10,7 @@ const Navbar = () => {
   const navLinks = [
     { href: "#how-it-works", label: "Infrastructure" },
     { href: "#features", label: "Features" },
-    { href: "#value", label: "For Projects" },
+    { href: "#value", label: "Value" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -22,6 +23,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
+            <img src={logo} alt="RaidFi" className="w-7 h-7 rounded-full" />
             <span className="text-xl font-semibold text-foreground">
               RaidFi
             </span>
@@ -51,6 +53,7 @@ const Navbar = () => {
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-6 mt-8">
                 <div className="flex items-center gap-2 mb-4">
+                  <img src={logo} alt="RaidFi" className="w-7 h-7 rounded-full" />
                   <span className="text-xl font-semibold text-foreground">
                     RaidFi
                   </span>

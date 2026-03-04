@@ -9,7 +9,7 @@ const problems = [
   },
   {
     title: "Reputation Resets Every Campaign",
-    description: "Contributor performance disappears after each campaign — no long-term credibility, no compounding value."
+    description: "Contributor performance disappears after each campaign, no long-term credibility, no compounding value."
   },
   {
     title: "Fragmented Social Data",
@@ -31,7 +31,7 @@ const Problem = () => {
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Contributor economies are growing. Community-driven campaigns are scaling.
-            Capital is flowing into social activation. But the intelligence layer is missing —
+            Capital is flowing into social activation. But the intelligence layer is missing,
             contributor value goes untracked, unverified, and unowned.
           </p>
         </div>
