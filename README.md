@@ -192,7 +192,7 @@ RaidFi is currently in early access development. We are validating with a focuse
 
 ## <a name="updates"></a> Stay Updated
 
-- Twitter / X: `[@RaidFi_App](https://x.com/raidfi_app)`
+- Twitter / X: [`@RaidFi_App`](https://x.com/raidfi_app)
 - Discord: Coming soon
 - Documentation: Coming soon
 
