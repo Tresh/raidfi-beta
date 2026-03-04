@@ -9,25 +9,18 @@ const Hero = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center glass rounded-full px-3 py-1.5 mb-5">
-            <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2 animate-pulse" />
-            <span className="text-xs text-primary font-medium tracking-wide uppercase">
-              Social Intelligence Infrastructure
-            </span>
-          </div>
-
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 text-foreground tracking-tight leading-tight">
-            The Reputation &
+            The Data &
             <br />
-            <span className="text-gradient">Social Intelligence Layer</span>
+            <span className="text-gradient">Reputation Layer</span>
             <br />
             for Web3
           </h1>
 
           <p className="text-base text-muted-foreground mb-8 max-w-lg mx-auto">
-            Verified contribution tracking, portable reputation,
-            and social performance analytics for projects, raiders,
-            and communities.
+            A unified intelligence layer that transforms social activity
+            into measurable performance, persistent credibility,
+            and structured analytics.
           </p>
 
           <Button size="lg" asChild className="glow-cyan">
@@ -38,7 +31,7 @@ const Hero = () => {
           </Button>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Infrastructure-level access, limited early slots
+            Protocol-grade infrastructure · Limited early slots
           </p>
         </div>
       </div>

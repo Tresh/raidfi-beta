@@ -1,28 +1,24 @@
 const problems = [
   {
     title: "No Contributor Identity",
-    description: "There is no unified, portable identity for social contributors across Web3 campaigns"
+    description: "There is no unified, portable identity for social contributors across Web3 campaigns and communities."
   },
   {
-    title: "No Reliable Analytics",
-    description: "Projects lack structured data on social campaign performance and contributor quality"
+    title: "No Structured Analytics",
+    description: "Projects lack measurable data on social campaign performance, contributor quality, and engagement efficiency."
   },
   {
-    title: "Noise vs. Influence",
-    description: "No system separates genuine influence from low-value engagement at scale"
+    title: "Reputation Resets Every Campaign",
+    description: "Contributor performance disappears after each campaign — no long-term credibility, no compounding value."
   },
   {
-    title: "Reputation Disappears",
-    description: "Raid performance resets after every campaign, no long-term contributor credibility"
+    title: "Fragmented Social Data",
+    description: "On-chain and off-chain social contributions exist in silos with no unified intelligence layer."
   },
   {
-    title: "Fragmented Data",
-    description: "On-chain and off-chain social contributions exist in silos with no unified view"
+    title: "Assumptions Over Evidence",
+    description: "Projects select contributors and allocate resources without structured data or verified performance history."
   },
-  {
-    title: "Guesswork Over Intelligence",
-    description: "Projects select contributors and allocate resources without actionable social intelligence"
-  }
 ];
 
 const Problem = () => {
@@ -34,8 +30,9 @@ const Problem = () => {
             The Gap in Web3
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Web3 has financial infrastructure. It lacks social infrastructure.
-            Contributor value goes untracked, unverified, and unowned. Projects have no way to measure community impact.
+            Contributor economies are growing. Community-driven campaigns are scaling.
+            Capital is flowing into social activation. But the intelligence layer is missing —
+            contributor value goes untracked, unverified, and unowned.
           </p>
         </div>
 

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import logo from "@/assets/logo.png";
 import { useState } from "react";
 
 const Navbar = () => {
@@ -23,7 +22,6 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
             <span className="text-xl font-semibold text-foreground">
               RaidFi
             </span>
@@ -53,7 +51,6 @@ const Navbar = () => {
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-6 mt-8">
                 <div className="flex items-center gap-2 mb-4">
-                  <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
                   <span className="text-xl font-semibold text-foreground">
                     RaidFi
                   </span>
