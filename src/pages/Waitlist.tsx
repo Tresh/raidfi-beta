@@ -138,7 +138,7 @@ const Waitlist = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  No spam. Unsubscribe anytime.
+                  No spam. Early Access.
                 </p>
               </form>
             </div>
