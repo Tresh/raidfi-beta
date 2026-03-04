@@ -78,20 +78,8 @@ const HowItWorks = () => {
             How RaidFi Works
           </h2>
           <p className="text-muted-foreground">
-            A unified intelligence and reputation layer for Web3 communities
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
             RaidFi transforms social activity into structured data and persistent credibility.
           </p>
-        </div>
-
-        {/* Flow indicator */}
-        <div className="flex items-center justify-center gap-2 mb-12 text-xs text-muted-foreground">
-          <span className="text-primary font-medium">Social Activity</span>
-          <span>→</span>
-          <span className="text-primary font-medium">Performance Intelligence</span>
-          <span>→</span>
-          <span className="text-primary font-medium">Reputation</span>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -127,7 +115,7 @@ const HowItWorks = () => {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-12 max-w-2xl mx-auto">
-          RaidFi turns social performance into data — and data into credibility.
+          RaidFi turns social performance into data, and data into credibility.
         </p>
       </div>
     </section>

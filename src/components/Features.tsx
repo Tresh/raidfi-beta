@@ -9,7 +9,7 @@ const features = [
   },
   {
     title: "Unified Social Data Index",
-    description: "Cross-platform aggregation across X, Farcaster, Telegram, and on-chain interactions — all normalized into a single intelligence framework."
+    description: "Cross-platform aggregation across X, Farcaster, Telegram, and on-chain interactions, all normalized into a single intelligence framework."
   },
   {
     title: "Campaign & Activation Infrastructure",
@@ -36,8 +36,6 @@ const features = [
 const Features = () => {
   return (
     <section id="features" className="py-24 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
-
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">

@@ -1,8 +1,6 @@
 const NetworkEffects = () => {
   return (
     <section className="py-24 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
-
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
@@ -16,20 +14,20 @@ const NetworkEffects = () => {
         <div className="max-w-3xl mx-auto space-y-6">
           {[
             {
-              title: "More Contributors → Richer Reputation Graph",
+              title: "More Contributors, Richer Reputation Graph",
               desc: "Every new contributor adds verified performance data. The reputation graph becomes more comprehensive, accurate, and valuable with scale.",
             },
             {
-              title: "More Projects → Deeper Analytics",
+              title: "More Projects, Deeper Analytics",
               desc: "Each project that integrates RaidFi contributes cross-project performance data, creating a unified intelligence layer no single platform can replicate.",
             },
             {
-              title: "More Data → Stronger Signal",
+              title: "More Data, Stronger Signal",
               desc: "As the dataset grows, scoring models improve, contributor differentiation sharpens, and the intelligence becomes decision-grade for projects allocating resources.",
             },
             {
-              title: "Network Effect → Infrastructure Lock-In",
-              desc: "Contributor reputation becomes portable and persistent. Once established, switching costs increase — RaidFi becomes embedded infrastructure, not a replaceable tool.",
+              title: "Network Effect, Infrastructure Lock-In",
+              desc: "Contributor reputation becomes portable and persistent. Once established, switching costs increase, RaidFi becomes embedded infrastructure, not a replaceable tool.",
             },
           ].map((item, index) => (
             <div
