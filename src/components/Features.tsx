@@ -1,35 +1,35 @@
 const features = [
   {
-    title: "Social Identity Profiles",
-    description: "Portable contributor identity that tracks verified contributions across campaigns and platforms"
+    title: "Persistent Social Reputation Graph",
+    description: "A continuously evolving reputation system built from verified performance data. Cross-project scoring, historical credibility tracking, and Sybil-resistant signal weighting."
   },
   {
-    title: "Raid Team Infrastructure",
-    description: "Public and private raid teams with collective reputation, performance history, and coordination tools"
+    title: "Multi-Signal Influence Engine",
+    description: "Proprietary scoring engine analyzing reach velocity, engagement depth, network amplification patterns, consistency over time, and signal-to-noise ratios."
   },
   {
-    title: "Influence Scoring Engine",
-    description: "Multi-signal analysis of reach, relevance, engagement quality, and sustained visibility"
+    title: "Unified Social Data Index",
+    description: "Cross-platform aggregation across X, Farcaster, Telegram, and on-chain interactions — all normalized into a single intelligence framework."
   },
   {
-    title: "Performance Analytics",
-    description: "Real-time dashboards for contributor performance, campaign health, and social ROI metrics"
+    title: "Campaign & Activation Infrastructure",
+    description: "Structured campaign deployment with autonomous contribution tracking, built-in reward pool distribution, and performance-weighted payouts."
   },
   {
-    title: "Cross-Platform Tracking",
-    description: "Unified tracking across X, Discord, Telegram, and on-chain activity in one intelligence layer"
+    title: "Contributor & Team Performance Layer",
+    description: "Individual performance history, team collective reputation, comparative contributor analytics, and leaderboard intelligence driving retention loops."
   },
   {
-    title: "Campaign Intelligence Reports",
-    description: "Structured post-campaign reports with contributor rankings, engagement data, and actionable insights"
+    title: "Intelligence Dashboards",
+    description: "Social ROI metrics, community strength diagnostics, contributor segmentation, engagement efficiency analysis, and growth trend forecasting."
   },
   {
-    title: "Reputation-Based Access",
-    description: "Gate campaigns, tiers, and opportunities based on verified contribution history and reputation score"
+    title: "Reputation-Based Access Control",
+    description: "Gate campaigns by credibility score. Tiered opportunity systems with verified contributor filtering and anti-farm protection through historical performance."
   },
   {
-    title: "Data Exports & Integrations",
-    description: "Export contributor data and analytics to feed into project workflows, DAOs, and partner platforms"
+    title: "Data Portability & Integrations",
+    description: "Exportable contributor intelligence, DAO tooling integration, analytics API potential, and plug-in layer for partner ecosystems."
   }
 ];
 
@@ -41,10 +41,10 @@ const Features = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            Infrastructure Features
+            Infrastructure Layer
           </h2>
           <p className="text-muted-foreground">
-            Web3-native social data infrastructure, built for community and projects
+            The intelligence and reputation backbone for Web3 social ecosystems
           </p>
         </div>
 
