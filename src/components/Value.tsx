@@ -20,20 +20,20 @@ const Value = () => {
 
             <div className="space-y-3">
               {[
-                "Structured cross-platform social data",
-                "Contributor performance analytics",
-                "Engagement efficiency and reach metrics",
-                "ROI tracking across on-chain and off-chain activity",
-                "Data-driven campaign deployment",
-              ].map((item, index) => (
-                <div key={index} className="flex items-start gap-3">
+              "Structured cross-platform social data",
+              "Contributor performance analytics",
+              "Engagement efficiency and reach metrics",
+              "ROI tracking across on-chain and off-chain activity",
+              "Data-driven campaign deployment"].
+              map((item, index) =>
+              <div key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="text-sm text-foreground">{item}</span>
                 </div>
-              ))}
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-4 italic">
-              Allocate incentives based on evidence, not assumptions.
+
             </p>
           </div>
 
@@ -43,20 +43,20 @@ const Value = () => {
 
             <div className="space-y-3">
               {[
-                "Portable reputation built on measured performance",
-                "Historical record of impact across projects",
-                "Eligibility for gated opportunities",
-                "Visibility based on consistent contribution quality",
-                "Activity becomes long-term credibility",
-              ].map((item, index) => (
-                <div key={index} className="flex items-start gap-3">
+              "Portable reputation built on measured performance",
+              "Historical record of impact across projects",
+              "Eligibility for gated opportunities",
+              "Visibility based on consistent contribution quality",
+              "Activity becomes long-term credibility"].
+              map((item, index) =>
+              <div key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="text-sm text-foreground">{item}</span>
                 </div>
-              ))}
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-4 italic">
-              Performance becomes your proof.
+              ​
             </p>
           </div>
 
@@ -66,25 +66,25 @@ const Value = () => {
 
             <div className="space-y-3">
               {[
-                "Standardized performance metrics across communities",
-                "Persistent contributor analytics beyond single campaigns",
-                "Visibility into community strength and influence",
-                "Intelligence graph that compounds over time",
-              ].map((item, index) => (
-                <div key={index} className="flex items-start gap-3">
+              "Standardized performance metrics across communities",
+              "Persistent contributor analytics beyond single campaigns",
+              "Visibility into community strength and influence",
+              "Intelligence graph that compounds over time"].
+              map((item, index) =>
+              <div key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="text-sm text-foreground">{item}</span>
                 </div>
-              ))}
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-4 italic">
-              More data in, more accurate the intelligence becomes.
+
             </p>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default Value;

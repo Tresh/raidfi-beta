@@ -24,29 +24,29 @@ const Footer = () => {
             href="https://x.com/raidfi_app"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
+            className="text-muted-foreground hover:text-foreground transition-colors">
+            
             <Twitter className="w-4 h-4" />
           </a>
           <a
             href="https://discord.gg/kQuabXkDmw"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
+            className="text-muted-foreground hover:text-foreground transition-colors">
+            
             <MessageCircle className="w-4 h-4" />
           </a>
         </div>
 
         <p className="text-xs text-muted-foreground mb-1">
-          Building the credibility layer for Web3 contributor economies.
+
         </p>
         <p className="text-xs text-muted-foreground/60">
           © 2026 RaidFi. All rights reserved.
         </p>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
 
 export default Footer;

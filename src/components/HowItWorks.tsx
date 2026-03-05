@@ -59,7 +59,7 @@ const HowItWorks = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            How RaidFi turns social participation into structured intelligence.
+
           </h2>
           <p className="text-muted-foreground">From Activity → Intelligence → Reputation
 
@@ -99,7 +99,7 @@ const HowItWorks = () => {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-12 max-w-2xl mx-auto">
-          Social performance becomes data. Data becomes credibility.
+
         </p>
       </div>
     </section>);
