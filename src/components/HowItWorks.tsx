@@ -10,7 +10,7 @@ const steps = [
   "Influence spread",
   "Community growth patterns"],
 
-  footer: "All signals are structured automatically."
+  footer: null
 },
 {
   number: "02",
@@ -23,7 +23,7 @@ const steps = [
   "Consistency over time",
   "Influence depth"],
 
-  footer: "Social activity becomes structured impact."
+  footer: null
 },
 {
   number: "03",
@@ -36,7 +36,7 @@ const steps = [
   "Differentiates signal from noise",
   "Builds compounding social capital"],
 
-  footer: "Earned through measurable contribution."
+  footer: null
 },
 {
   number: "04",
@@ -49,7 +49,7 @@ const steps = [
   "Influence mapping",
   "Data-backed decision support"],
 
-  footer: "Decisions move from assumptions to verified data."
+  footer: null
 }];
 
 
