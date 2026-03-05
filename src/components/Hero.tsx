@@ -5,16 +5,12 @@ const Hero = () => {
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 text-foreground tracking-tight leading-tight">
-            The Data &
-            <br />
-            <span className="text-gradient">Reputation Layer</span>
-            <br />
-            for Web3
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-6 text-foreground tracking-tight leading-[1.1]">
+            The Data & <span className="text-gradient">Reputation Layer</span> for Web3
           </h1>
 
-          <p className="text-base text-muted-foreground mb-8 max-w-lg mx-auto">
+          <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto">
             A unified intelligence layer that transforms social activity
             into measurable performance, persistent credibility,
             and structured analytics.
