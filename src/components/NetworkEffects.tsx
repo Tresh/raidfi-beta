@@ -7,27 +7,27 @@ const NetworkEffects = () => {
             Compounding Intelligence
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            RaidFi's defensibility grows with every contributor, project, and data point
+            As more contributors and projects participate, the intelligence graph becomes richer and more valuable
           </p>
         </div>
 
         <div className="max-w-3xl mx-auto space-y-6">
           {[
             {
-              title: "More Contributors, Richer Reputation Graph",
-              desc: "Every new contributor adds verified performance data. The reputation graph becomes more comprehensive, accurate, and valuable with scale.",
+              title: "More Contributors, Richer Graph",
+              desc: "Every new contributor adds verified performance data. The reputation graph becomes more accurate with scale.",
             },
             {
               title: "More Projects, Deeper Analytics",
-              desc: "Each project that integrates RaidFi contributes cross-project performance data, creating a unified intelligence layer no single platform can replicate.",
+              desc: "Each project contributes cross-project data, creating unified intelligence no single platform can replicate.",
             },
             {
               title: "More Data, Stronger Signal",
-              desc: "As the dataset grows, scoring models improve, contributor differentiation sharpens, and the intelligence becomes decision-grade for projects allocating resources.",
+              desc: "As the dataset grows, scoring improves and the intelligence becomes decision-grade.",
             },
             {
-              title: "Network Effect, Infrastructure Lock-In",
-              desc: "Contributor reputation becomes portable and persistent. Once established, switching costs increase, RaidFi becomes embedded infrastructure, not a replaceable tool.",
+              title: "Network Effect Lock-In",
+              desc: "Once reputation is established, switching costs increase. RaidFi becomes embedded infrastructure.",
             },
           ].map((item, index) => (
             <div

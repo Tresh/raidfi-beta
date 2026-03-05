@@ -7,15 +7,14 @@ const CTA = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-2xl mx-auto text-center glass-card rounded-2xl p-12">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            Integrate RaidFi
+            Early Access
           </h2>
           <p className="text-muted-foreground mb-8">
-            Integrate RaidFi into your protocol, DAO, or community infrastructure.
-            We're open to early collaborations with teams building in Web3.
+            RaidFi is opening early collaboration with projects, DAOs, and communities building in Web3.
           </p>
           <Button size="lg" asChild>
             <a href="/contact" className="group">
-              Get in Touch
+              Request Early Access
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </a>
           </Button>

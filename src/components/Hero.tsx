@@ -7,13 +7,11 @@ const Hero = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-6 text-foreground tracking-tight leading-[1.1]">
-            The Data & <span className="text-gradient">Reputation Layer</span> for Web3
+            The Contribution Intelligence & <span className="text-gradient">Reputation Layer</span> for Web3
           </h1>
 
           <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto">
-            A unified intelligence layer that transforms social activity
-            into measurable performance, persistent credibility,
-            and structured analytics.
+            RaidFi introduces the infrastructure layer that makes contribution measurable, reputation portable, and social performance analyzable.
           </p>
 
           <Button size="lg" asChild>
