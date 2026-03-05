@@ -10,7 +10,7 @@ const Footer = () => {
           <span className="text-sm font-semibold text-foreground">RaidFi</span>
         </div>
 
-        <div className="flex items-center justify-center flex-wrap gap-6 mb-5">
+        <div className="flex items-center justify-center flex-wrap gap-x-5 gap-y-1 mb-5">
           <a href="/#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Infrastructure</a>
           <a href="/#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="/#value" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Value</a>
