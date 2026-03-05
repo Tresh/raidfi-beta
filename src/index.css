@@ -81,7 +81,7 @@
   }
 
   .glass-card {
-    @apply bg-gradient-to-br from-white/[0.05] to-white/[0.02] backdrop-blur-xl border border-white/[0.1] shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+    @apply bg-gradient-to-br from-white/[0.05] to-white/[0.02] backdrop-blur-xl border border-white/[0.1];
   }
 
   .glass-glow {
@@ -95,4 +95,51 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-300 to-primary;
   }
+}
+
+/* Whitepaper markdown styles */
+.whitepaper-content h1 {
+  @apply text-3xl font-bold text-foreground mb-4 mt-8;
+}
+.whitepaper-content h2 {
+  @apply text-2xl font-bold text-foreground mb-3 mt-10 pb-2 border-b border-border;
+}
+.whitepaper-content h3 {
+  @apply text-xl font-semibold text-foreground mb-2 mt-6;
+}
+.whitepaper-content p {
+  @apply text-muted-foreground leading-relaxed mb-4;
+}
+.whitepaper-content strong {
+  @apply text-foreground;
+}
+.whitepaper-content em {
+  @apply text-muted-foreground/80;
+}
+.whitepaper-content blockquote {
+  @apply border-l-2 border-primary pl-4 my-4 text-foreground;
+}
+.whitepaper-content ul, .whitepaper-content ol {
+  @apply pl-6 mb-4 space-y-1;
+}
+.whitepaper-content li {
+  @apply text-muted-foreground;
+}
+.whitepaper-content table {
+  @apply w-full mb-6 text-sm;
+}
+.whitepaper-content thead th {
+  @apply text-left text-foreground font-semibold py-2 px-3 border-b border-border bg-card;
+}
+.whitepaper-content tbody td {
+  @apply py-2 px-3 text-muted-foreground border-b border-border/50;
+}
+.whitepaper-content hr {
+  @apply border-border my-8;
+}
+.whitepaper-content a {
+  @apply text-primary hover:underline;
+}
+.whitepaper-content code {
+  @apply bg-card px-1.5 py-0.5 rounded text-sm text-primary;
 }

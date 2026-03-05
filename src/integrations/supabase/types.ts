@@ -146,6 +146,54 @@ export type Database = {
         }
         Relationships: []
       }
+      whitepaper: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      whitepaper_changelogs: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          version?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

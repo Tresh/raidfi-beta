@@ -20,6 +20,7 @@ const navItems = [
   { label: "Waitlist", to: "/admin/waitlist", icon: Users },
   { label: "Validations", to: "/admin/validations", icon: ClipboardList },
   { label: "Contacts", to: "/admin/contacts", icon: Mail },
+  { label: "Whitepaper", to: "/admin/whitepaper", icon: ClipboardList },
 ];
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
