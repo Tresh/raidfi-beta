@@ -7,22 +7,20 @@ const Solution = () => {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-              The Solution
+              Turning Social Activity Into Intelligence
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              RaidFi is a social data engine, reputation graph, and performance
-              analytics layer, powering contributor intelligence across Web3.
-              Data and reputation come first. Campaigns are an optional activation layer.
+              RaidFi transforms social participation into structured data and persistent reputation. Every contribution becomes measurable. Every contributor builds a long-term performance record.
             </p>
           </div>
 
           {/* Flow diagram */}
           <div className="grid md:grid-cols-4 gap-4 mb-16">
             {[
-              { label: "Track", desc: "Capture contributions across platforms and chains" },
-              { label: "Analyze", desc: "Score quality, reach, consistency, and influence" },
-              { label: "Rank", desc: "Build persistent, portable reputation profiles" },
-              { label: "Unlock", desc: "Gate access and surface structured intelligence" },
+              { label: "Capture", desc: "Monitor social participation across platforms and on-chain interactions" },
+              { label: "Analyze", desc: "Evaluate contribution quality, reach, consistency, and influence" },
+              { label: "Build Reputation", desc: "Feed performance into a persistent reputation graph that compounds over time" },
+              { label: "Unlock Access", desc: "Give projects structured analytics for data-driven decisions" },
             ].map((item, index) => (
               <div key={index} className="relative">
                 <div className="glass-card rounded-xl p-5 text-center hover:border-primary/20 transition-all duration-300">
@@ -45,22 +43,22 @@ const Solution = () => {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                title: "Verified Contribution Tracking",
-                stat: "100%",
-                statLabel: "of contributions tracked",
-                desc: "Every contribution is captured, verified, and structured, creating a trustless record of social impact across platforms.",
+                title: "Measurable Contributions",
+                stat: "Tracked",
+                statLabel: "contributions structured",
+                desc: "Every contribution is captured and structured — social activity becomes intelligence infrastructure.",
               },
               {
-                title: "Persistent Reputation",
-                stat: "Cross-campaign",
+                title: "Portable Reputation",
+                stat: "Persistent",
                 statLabel: "credibility that compounds",
-                desc: "Contributor reputation compounds over time and carries across projects, building long-term credibility and access.",
+                desc: "Reputation compounds over time and travels with contributors across ecosystems.",
               },
               {
-                title: "Structured Intelligence",
+                title: "Project Visibility",
                 stat: "Real-time",
                 statLabel: "performance analytics",
-                desc: "Projects receive structured, actionable analytics on contributor performance, measurable data, not assumptions.",
+                desc: "Projects gain visibility into the people driving real impact — data, not assumptions.",
               },
             ].map((benefit, index) => (
               <div

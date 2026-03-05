@@ -1,23 +1,23 @@
 const problems = [
   {
-    title: "No Contributor Identity",
-    description: "There is no unified, portable identity for social contributors across Web3 campaigns and communities."
+    title: "Surface Metrics",
+    description: "Projects rely on surface metrics. There's no structured way to measure real contribution impact."
   },
   {
-    title: "No Structured Analytics",
-    description: "Projects lack measurable data on social campaign performance, contributor quality, and engagement efficiency."
+    title: "No Portable Reputation",
+    description: "Contributors cannot carry reputation across ecosystems. Performance disappears after every campaign."
   },
   {
-    title: "Reputation Resets Every Campaign",
-    description: "Contributor performance disappears after each campaign, no long-term credibility, no compounding value."
+    title: "No Contribution Infrastructure",
+    description: "Protocols depend on social participation to grow — threads, raids, content, amplification — yet none of it is structured."
   },
   {
-    title: "Fragmented Social Data",
-    description: "On-chain and off-chain social contributions exist in silos with no unified intelligence layer."
+    title: "Fragmented Data",
+    description: "On-chain and off-chain social activity exist in silos with no unified intelligence layer."
   },
   {
     title: "Assumptions Over Evidence",
-    description: "Projects select contributors and allocate resources without structured data or verified performance history."
+    description: "The result is a system driven by assumptions instead of evidence."
   },
 ];
 
@@ -27,12 +27,10 @@ const Problem = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            The Gap in Web3
+            Web3 Runs on Contributors
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Contributor economies are growing. Community-driven campaigns are scaling.
-            Capital is flowing into social activation. But the intelligence layer is missing,
-            contributor value goes untracked, unverified, and unowned.
+            But contribution has no infrastructure.
           </p>
         </div>
 

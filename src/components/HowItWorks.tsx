@@ -1,39 +1,37 @@
 const steps = [
   {
     number: "01",
-    title: "Social Activity Is Captured",
-    description: "RaidFi monitors on-chain and off-chain interactions connected to projects, contributors, and communities.",
-    subtitle: "We analyze:",
+    title: "Capture",
+    description: "RaidFi monitors social participation across supported platforms and on-chain interactions connected to Web3 communities.",
+    subtitle: null,
     items: [
       "Engagement behavior",
       "Mention velocity",
       "Influence spread",
       "Community growth patterns",
-      "Network amplification",
     ],
     footer: "All signals are structured automatically.",
   },
   {
     number: "02",
-    title: "Data Becomes Performance Intelligence",
-    description: "Every interaction is processed into measurable performance metrics.",
-    subtitle: "We evaluate:",
+    title: "Analyze",
+    description: "Behavioral signals are evaluated to measure contribution quality, reach efficiency, consistency, and influence.",
+    subtitle: null,
     items: [
       "Contribution quality",
       "Reach efficiency",
       "Consistency over time",
       "Influence depth",
-      "Signal strength",
     ],
     footer: "Social activity becomes structured impact.",
   },
   {
     number: "03",
-    title: "Reputation Is Built in Real Time",
-    description: "Verified performance feeds into a persistent reputation graph.",
-    subtitle: "Reputation:",
+    title: "Build Reputation",
+    description: "Performance history feeds into a persistent reputation graph that compounds over time and travels with contributors.",
+    subtitle: null,
     items: [
-      "Travels with contributors",
+      "Portable across ecosystems",
       "Reflects long-term credibility",
       "Differentiates signal from noise",
       "Builds compounding social capital",
@@ -42,30 +40,16 @@ const steps = [
   },
   {
     number: "04",
-    title: "Projects Access Actionable Insights",
-    description: "Projects gain access to structured intelligence, including:",
+    title: "Unlock Access",
+    description: "Projects gain structured analytics on contributors and communities, enabling data-driven decisions instead of guesswork.",
     subtitle: null,
     items: [
       "Contributor performance analytics",
       "Community strength metrics",
       "Influence mapping",
-      "Growth diagnostics",
       "Data-backed decision support",
     ],
     footer: "Decisions move from assumptions to verified data.",
-  },
-  {
-    number: "05",
-    title: "Launch Structured Campaigns",
-    description: "Projects can deploy structured on-chain campaigns directly within the system.",
-    subtitle: "Campaign performance:",
-    items: [
-      "Is tracked autonomously",
-      "Feeds into the reputation layer",
-      "Includes reward pool distribution",
-      "Contributes to long-term credibility",
-    ],
-    footer: "Campaigns become measurable components of a larger intelligence framework.",
   },
 ];
 
@@ -75,10 +59,10 @@ const HowItWorks = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-            How RaidFi Works
+            From Activity → Intelligence → Reputation
           </h2>
           <p className="text-muted-foreground">
-            RaidFi transforms social activity into structured data and persistent credibility.
+            How RaidFi turns social participation into structured intelligence.
           </p>
         </div>
 
@@ -115,7 +99,7 @@ const HowItWorks = () => {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-12 max-w-2xl mx-auto">
-          RaidFi turns social performance into data, and data into credibility.
+          Social performance becomes data. Data becomes credibility.
         </p>
       </div>
     </section>
