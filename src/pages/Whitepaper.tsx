@@ -12,29 +12,23 @@ interface WhitepaperData {
   updated_at: string;
 }
 
-interface Changelog {
-  id: string;
-  version: string;
-  description: string;
-  created_at: string;
-}
-
 const Whitepaper = () => {
   const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(null);
-  const [changelogs, setChangelogs] = useState<Changelog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const [wpRes, clRes] = await Promise.all([
-        supabase.from("whitepaper" as any).select("content, version, updated_at").eq("is_published", true).order("created_at", { ascending: false }).limit(1).single(),
-        supabase.from("whitepaper_changelogs" as any).select("*").order("created_at", { ascending: false }),
-      ]);
+    const fetchData = async () => {
+      const wpRes = await supabase
+        .from("whitepaper" as any)
+        .select("content, version, updated_at")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
       if (wpRes.data) setWhitepaper(wpRes.data as any);
-      if (clRes.data) setChangelogs(clRes.data as any);
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, []);
 
   return (
@@ -49,23 +43,6 @@ const Whitepaper = () => {
           <p className="text-center text-muted-foreground py-20">Whitepaper not available.</p>
         ) : (
           <>
-            {changelogs.length > 0 && (
-              <div className="mb-8 p-4 rounded-xl border border-border bg-card">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Changelog</p>
-                <div className="space-y-2">
-                  {changelogs.map((cl) => (
-                    <div key={cl.id} className="flex items-start gap-3 text-sm">
-                      <span className="text-primary font-mono text-xs mt-0.5">v{cl.version}</span>
-                      <span className="text-muted-foreground">{cl.description}</span>
-                      <span className="text-muted-foreground/60 text-xs ml-auto shrink-0">
-                        {new Date(cl.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <article className="prose prose-invert max-w-none whitepaper-content">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
