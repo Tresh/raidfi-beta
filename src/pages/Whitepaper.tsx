@@ -67,7 +67,39 @@ const Whitepaper = () => {
             )}
 
             <article className="prose prose-invert max-w-none whitepaper-content">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{whitepaper.content}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ href, children, ...props }) => {
+                    if (href?.startsWith('#')) {
+                      return (
+                        <a
+                          href={href}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const id = href.slice(1);
+                            const el = document.getElementById(id);
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="text-primary hover:underline cursor-pointer"
+                          {...props}
+                        >
+                          {children}
+                        </a>
+                      );
+                    }
+                    return <a href={href} {...props}>{children}</a>;
+                  },
+                  h2: ({ children, ...props }) => {
+                    const text = typeof children === 'string' ? children : 
+                      Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '';
+                    const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/^-+|-+$/g, '');
+                    return <h2 id={id} {...props}>{children}</h2>;
+                  },
+                }}
+              >
+                {whitepaper.content}
+              </ReactMarkdown>
             </article>
 
             <div className="mt-12 text-center text-xs text-muted-foreground">
