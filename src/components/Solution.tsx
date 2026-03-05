@@ -39,41 +39,6 @@ const Solution = () => {
             ))}
           </div>
 
-          {/* Key benefits */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Measurable Contributions",
-                stat: "Tracked",
-                statLabel: "contributions structured",
-                desc: "Every contribution is captured and structured — social activity becomes intelligence infrastructure.",
-              },
-              {
-                title: "Portable Reputation",
-                stat: "Persistent",
-                statLabel: "credibility that compounds",
-                desc: "Reputation compounds over time and travels with contributors across ecosystems.",
-              },
-              {
-                title: "Project Visibility",
-                stat: "Real-time",
-                statLabel: "performance analytics",
-                desc: "Projects gain visibility into the people driving real impact — data, not assumptions.",
-              },
-            ].map((benefit, index) => (
-              <div
-                key={index}
-                className="glass-card rounded-xl p-6 hover:border-primary/20 transition-all duration-300"
-              >
-                <p className="text-2xl font-semibold text-foreground mb-0.5">{benefit.stat}</p>
-                <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider">{benefit.statLabel}</p>
-                <h3 className="font-medium text-foreground mb-2">
-                  {benefit.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">{benefit.desc}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
