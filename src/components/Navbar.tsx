@@ -18,12 +18,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2.5">
             <img src={logo} alt="RaidFi" className="w-7 h-7 rounded-full" />
-            <span className="text-xl font-semibold text-foreground">
+            <span className="text-lg font-semibold text-foreground tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               RaidFi
             </span>
           </a>
@@ -33,7 +33,7 @@ const Navbar = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
               >
                 {link.label}
               </a>
@@ -53,7 +53,7 @@ const Navbar = () => {
               <div className="flex flex-col gap-6 mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <img src={logo} alt="RaidFi" className="w-7 h-7 rounded-full" />
-                  <span className="text-xl font-semibold text-foreground">
+                  <span className="text-lg font-semibold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     RaidFi
                   </span>
                 </div>
@@ -63,7 +63,7 @@ const Navbar = () => {
                     key={link.href}
                     href={link.href}
                     onClick={handleLinkClick}
-                    className="text-foreground hover:text-primary transition-colors text-lg font-medium"
+                    className="text-foreground hover:text-primary transition-colors text-base font-medium"
                   >
                     {link.label}
                   </a>
