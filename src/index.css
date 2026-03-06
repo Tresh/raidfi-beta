@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @layer base {
   html {
@@ -10,44 +10,83 @@
   }
 
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
+    --background: 180 14% 97%;
+    --foreground: 180 10% 7%;
 
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 180 10% 7%;
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 10% 7%;
 
-    --primary: 180 100% 50%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 168 48% 25%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 170 67% 66%;
+    --secondary-foreground: 168 48% 15%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 180 10% 93%;
+    --muted-foreground: 180 5% 40%;
 
-    --accent: 180 100% 50%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 163 87% 44%;
+    --accent-foreground: 168 48% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 12%;
-    --ring: 180 100% 50%;
+    --border: 180 8% 88%;
+    --input: 180 8% 88%;
+    --ring: 168 48% 25%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
 
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 180 100% 50%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 180 100% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 180 10% 7%;
+    --sidebar-primary: 168 48% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 180 10% 95%;
+    --sidebar-accent-foreground: 180 10% 7%;
+    --sidebar-border: 180 8% 88%;
+    --sidebar-ring: 168 48% 25%;
+  }
+
+  .dark {
+    --background: 180 29% 3%;
+    --foreground: 180 10% 94%;
+
+    --card: 180 15% 6%;
+    --card-foreground: 180 10% 94%;
+
+    --popover: 180 15% 5%;
+    --popover-foreground: 180 10% 94%;
+
+    --primary: 170 50% 73%;
+    --primary-foreground: 180 29% 3%;
+
+    --secondary: 170 54% 34%;
+    --secondary-foreground: 180 10% 94%;
+
+    --muted: 180 10% 12%;
+    --muted-foreground: 180 5% 55%;
+
+    --accent: 163 83% 57%;
+    --accent-foreground: 180 29% 3%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 180 8% 18%;
+    --input: 180 8% 15%;
+    --ring: 170 50% 73%;
+
+    --sidebar-background: 180 15% 5%;
+    --sidebar-foreground: 180 10% 94%;
+    --sidebar-primary: 170 50% 73%;
+    --sidebar-primary-foreground: 180 29% 3%;
+    --sidebar-accent: 180 10% 12%;
+    --sidebar-accent-foreground: 180 10% 94%;
+    --sidebar-border: 180 8% 18%;
+    --sidebar-ring: 170 50% 73%;
   }
 }
 
@@ -58,11 +97,11 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'DM Sans', sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     @apply font-semibold tracking-tight;
   }
 }
@@ -72,28 +111,8 @@
     text-wrap: balance;
   }
 
-  .glass {
-    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
-  }
-
-  .glass-strong {
-    @apply bg-white/[0.06] backdrop-blur-2xl border border-white/[0.12];
-  }
-
-  .glass-card {
-    @apply bg-gradient-to-br from-white/[0.05] to-white/[0.02] backdrop-blur-xl border border-white/[0.1];
-  }
-
-  .glass-glow {
-    @apply relative;
-  }
-
-  .glow-cyan {
-    box-shadow: none;
-  }
-
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-300 to-primary;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
 }
 
