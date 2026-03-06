@@ -22,12 +22,12 @@ const Hero = () => {
           </Button>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Protocol-grade infrastructure · Limited early slots
+
           </p>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default Hero;

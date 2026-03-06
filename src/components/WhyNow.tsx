@@ -1,7 +1,5 @@
 const WhyNow = () => {
-  return (
-    <section className="py-24">
-      
+  return;
 
 
 
@@ -37,8 +35,10 @@ const WhyNow = () => {
 
 
 
-      
-    </section>);
+
+
+
+
 
 };
 
