@@ -1,5 +1,5 @@
 const WhyNow = () => {
-  return;
+  return null;
 
 
 

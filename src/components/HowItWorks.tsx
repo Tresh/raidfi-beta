@@ -54,7 +54,7 @@ const steps = [
 
 
 const HowItWorks = () => {
-  return;
+  return null;
 
 
 

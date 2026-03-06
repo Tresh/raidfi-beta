@@ -1,5 +1,5 @@
 const NetworkEffects = () => {
-  return;
+  return null;
 
 
 
