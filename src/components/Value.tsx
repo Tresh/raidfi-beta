@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 
 const columns = [
@@ -37,31 +38,46 @@ const columns = [
 
 const Value = () => {
   return (
-    <section id="value" className="py-24">
+    <section id="value" className="py-32 bg-card">
       <div className="container mx-auto px-6">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <p className="text-sm font-medium text-primary mb-3 tracking-wide uppercase">Value</p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            A New Infrastructure Layer
-          </h2>
-          <p className="text-muted-foreground">For contributor economies</p>
-        </div>
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-20"
+          >
+            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">Value</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-5 text-foreground">
+              A New Infrastructure Layer
+            </h2>
+            <p className="text-lg text-muted-foreground font-light">For contributor economies</p>
+          </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {columns.map((col, i) => (
-            <div key={i} className="border border-border rounded-xl p-8 bg-card">
-              <h3 className="text-lg font-semibold mb-1 text-foreground">{col.title}</h3>
-              <p className="text-sm text-muted-foreground mb-6">{col.subtitle}</p>
-              <div className="space-y-3">
-                {col.items.map((item, j) => (
-                  <div key={j} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="grid md:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden">
+            {columns.map((col, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="bg-background p-10"
+              >
+                <h3 className="text-lg font-semibold mb-1 text-foreground">{col.title}</h3>
+                <p className="text-sm text-muted-foreground mb-8">{col.subtitle}</p>
+                <div className="space-y-4">
+                  {col.items.map((item, j) => (
+                    <div key={j} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
