@@ -12,9 +12,28 @@ interface WhitepaperData {
   updated_at: string;
 }
 
+const CACHE_KEY = "raidfi_whitepaper_cache";
+const CACHE_TTL = 1000 * 60 * 30; // 30 minutes
+
+const getCached = (): WhitepaperData | null => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+const setCache = (data: WhitepaperData) => {
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+};
+
 const Whitepaper = () => {
-  const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(getCached);
+  const [loading, setLoading] = useState(!getCached());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,7 +44,14 @@ const Whitepaper = () => {
         .order("created_at", { ascending: false })
         .limit(1)
         .single();
-      if (wpRes.data) setWhitepaper(wpRes.data as any);
+      if (wpRes.data) {
+        const d = wpRes.data as any;
+        // Only update if version changed
+        if (!whitepaper || d.version !== whitepaper.version || d.updated_at !== whitepaper.updated_at) {
+          setWhitepaper(d);
+          setCache(d);
+        }
+      }
       setLoading(false);
     };
     fetchData();
