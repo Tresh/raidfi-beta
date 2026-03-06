@@ -54,9 +54,7 @@ const steps = [
 
 
 const HowItWorks = () => {
-  return (
-    <section id="how-it-works" className="py-24 relative">
-      
+  return;
 
 
 
@@ -101,8 +99,10 @@ const HowItWorks = () => {
 
 
 
-      
-    </section>);
+
+
+
+
 
 };
 
