@@ -1,7 +1,5 @@
 const NetworkEffects = () => {
-  return (
-    <section className="py-24 relative">
-      
+  return;
 
 
 
@@ -46,8 +44,10 @@ const NetworkEffects = () => {
 
 
 
-      
-    </section>);
+
+
+
+
 
 };
 
