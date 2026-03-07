@@ -54,7 +54,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       >
         <div className="p-5 flex items-center justify-between border-b border-sidebar-border shrink-0">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="RaidFi" className="w-8 h-8 rounded-full" />
+            <img src={logo} alt="RaidFi" className="w-8 h-8" />
             <div>
               <p className="font-semibold text-sidebar-foreground text-sm">Admin Panel</p>
               <p className="text-xs text-muted-foreground">RaidFi</p>
