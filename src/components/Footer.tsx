@@ -1,5 +1,5 @@
 import { Twitter, MessageCircle } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "/logo.png";
 
 const Footer = () => {
   return (
