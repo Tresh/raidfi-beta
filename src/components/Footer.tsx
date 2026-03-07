@@ -10,7 +10,7 @@ const Footer = () => {
             <div className="flex items-center gap-2">
               <img src={logo} alt="RaidFi" className="w-7 h-7"/>
               <span className="text-sm font-semibold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Raid<span className="text-primary">Fi</span>
+                Raid<span className="text-gradient">Fi</span>
               </span>
             </div>
 
