@@ -37,7 +37,7 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
-          <img src={logo} alt="RaidFi" className="w-12 h-12 rounded-full mx-auto mb-4" />
+          <img src={logo} alt="RaidFi" className="w-12 h-12 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
           <p className="text-sm text-muted-foreground mt-1">Sign in with your admin email</p>
         </div>
