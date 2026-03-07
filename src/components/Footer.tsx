@@ -8,9 +8,9 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="RaidFi" className="w-7 h-7 rounded-full" />
+              <img src={logo} alt="RaidFi" className="w-7 h-7"/>
               <span className="text-sm font-semibold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                RaidFi
+                Raid<span className="text-secondary">Fi</span>
               </span>
             </div>
 
