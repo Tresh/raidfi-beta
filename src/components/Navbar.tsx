@@ -26,10 +26,10 @@ const Navbar = () => {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-md border-b border-border' : 'bg-transparent'}`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2.5">
+          <a href="/" className="flex items-center gap-2">
             <img src={logo} alt="RaidFi" className="w-7 h-7" />
-            <span className="text-base font-semibold text-foreground tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Raid<span className="text-gradient">Fi</span>
+            <span className="text-base font-semibold text-gradient tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              RaidFi
             </span>
           </a>
 
