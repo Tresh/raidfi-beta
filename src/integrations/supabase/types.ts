@@ -44,6 +44,68 @@ export type Database = {
         }
         Relationships: []
       }
+      contribution_engagements: {
+        Row: {
+          contribution_id: string
+          created_at: string
+          id: string
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          contribution_id: string
+          created_at?: string
+          id?: string
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          contribution_id?: string
+          created_at?: string
+          id?: string
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribution_engagements_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contributions: {
+        Row: {
+          created_at: string
+          engagement_count: number
+          id: string
+          points_earned: number
+          post_url: string
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          engagement_count?: number
+          id?: string
+          points_earned?: number
+          post_url: string
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          engagement_count?: number
+          id?: string
+          points_earned?: number
+          post_url?: string
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
