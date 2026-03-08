@@ -15,6 +15,7 @@ import ContactsManager from "./pages/admin/ContactsManager";
 import WhitepaperManager from "./pages/admin/WhitepaperManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import Whitepaper from "./pages/Whitepaper";
+import Contributions from "./pages/Contributions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/waitlist/confirmed" element={<WaitlistConfirmed />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/whitepaper" element={<Whitepaper />} />
+          <Route path="/contributions" element={<Contributions />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
           <Route path="/admin/waitlist" element={<AdminLayout><WaitlistManager /></AdminLayout>} />
