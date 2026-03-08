@@ -157,7 +157,7 @@ const Contributions = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setOtpSent(true);
-      toast({ title: "Check your email", description: "We've sent you a magic link to sign in." });
+      toast({ title: "Check your email", description: "We've sent you a 6-digit code to sign in." });
     }
     setSubmittingAuth(false);
   };
