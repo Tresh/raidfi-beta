@@ -32,6 +32,7 @@ const App = () => (
           <Route path="/waitlist/confirmed" element={<WaitlistConfirmed />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/whitepaper" element={<Whitepaper />} />
+          <Route path="/contributions" element={<Contributions />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
           <Route path="/admin/waitlist" element={<AdminLayout><WaitlistManager /></AdminLayout>} />
