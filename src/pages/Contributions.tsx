@@ -384,7 +384,7 @@ const Contributions = () => {
                           onChange={(e) => setOtp(e.target.value)}
                           required
                           className="h-10 text-sm text-center tracking-widest"
-                          maxLength={6}
+                          maxLength={8}
                         />
                         <Button type="submit" className="w-full h-9 text-xs" disabled={submittingAuth}>
                           {submittingAuth && <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />}
