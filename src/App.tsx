@@ -15,6 +15,7 @@ import ContactsManager from "./pages/admin/ContactsManager";
 import WhitepaperManager from "./pages/admin/WhitepaperManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import Whitepaper from "./pages/Whitepaper";
+import Contributions from "./pages/Contributions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
