@@ -157,7 +157,7 @@ const Contributions = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setOtpSent(true);
-      toast({ title: "Check your email", description: "We've sent you a magic link to sign in." });
+      toast({ title: "Check your email", description: "We've sent you a 6-digit code to sign in." });
     }
     setSubmittingAuth(false);
   };
@@ -369,7 +369,7 @@ const Contributions = () => {
                         />
                         <Button type="submit" className="w-full h-9 text-xs" disabled={submittingAuth}>
                           {submittingAuth && <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />}
-                          Send Magic Link
+                          Send Code
                         </Button>
                       </form>
                     ) : (
