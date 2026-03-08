@@ -369,7 +369,7 @@ const Contributions = () => {
                         />
                         <Button type="submit" className="w-full h-9 text-xs" disabled={submittingAuth}>
                           {submittingAuth && <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />}
-                          Send Magic Link
+                          Send Code
                         </Button>
                       </form>
                     ) : (
