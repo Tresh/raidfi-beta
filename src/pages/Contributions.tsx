@@ -25,6 +25,11 @@ interface Contribution {
   created_at: string;
 }
 
+interface LeaderboardEntry {
+  user_email: string;
+  total_points: number;
+}
+
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
