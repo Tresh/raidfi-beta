@@ -153,9 +153,37 @@ const Contributions = () => {
     setLoadingFeed(false);
   }, []);
 
+  const fetchLeaderboard = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("contributions")
+      .select("user_email, points_earned");
+
+    if (error) {
+      console.error("Failed to fetch leaderboard:", error);
+      setLoadingLeaderboard(false);
+      return;
+    }
+
+    if (data) {
+      const userPoints: Record<string, number> = {};
+      data.forEach((c) => {
+        userPoints[c.user_email] = (userPoints[c.user_email] || 0) + c.points_earned;
+      });
+
+      const sorted = Object.entries(userPoints)
+        .map(([user_email, total_points]) => ({ user_email, total_points }))
+        .sort((a, b) => b.total_points - a.total_points)
+        .slice(0, 10);
+
+      setLeaderboard(sorted);
+    }
+    setLoadingLeaderboard(false);
+  }, []);
+
   useEffect(() => {
     fetchContributions(0);
-  }, [fetchContributions]);
+    fetchLeaderboard();
+  }, [fetchContributions, fetchLeaderboard]);
 
   // Fetch user points
   useEffect(() => {
