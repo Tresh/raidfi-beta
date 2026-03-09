@@ -212,8 +212,12 @@ const Contributions = () => {
 
   useEffect(() => {
     fetchContributions(0);
-    fetchLeaderboard();
-  }, [fetchContributions, fetchLeaderboard]);
+  }, [fetchContributions]);
+
+  useEffect(() => {
+    setLeaderboardPage(0);
+    fetchLeaderboard(leaderboardFilter, 0);
+  }, [leaderboardFilter, fetchLeaderboard]);
 
   // Fetch user points
   useEffect(() => {
