@@ -25,6 +25,11 @@ interface Contribution {
   created_at: string;
 }
 
+interface LeaderboardEntry {
+  user_email: string;
+  total_points: number;
+}
+
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
@@ -103,10 +108,14 @@ const Contributions = () => {
   const [loadingFeed, setLoadingFeed] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const PAGE_SIZE = 30;
+  const PAGE_SIZE = 20;
 
   // Points
   const [userPoints, setUserPoints] = useState(0);
+
+  // Leaderboard
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -144,9 +153,37 @@ const Contributions = () => {
     setLoadingFeed(false);
   }, []);
 
+  const fetchLeaderboard = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("contributions")
+      .select("user_email, points_earned");
+
+    if (error) {
+      console.error("Failed to fetch leaderboard:", error);
+      setLoadingLeaderboard(false);
+      return;
+    }
+
+    if (data) {
+      const userPoints: Record<string, number> = {};
+      data.forEach((c) => {
+        userPoints[c.user_email] = (userPoints[c.user_email] || 0) + c.points_earned;
+      });
+
+      const sorted = Object.entries(userPoints)
+        .map(([user_email, total_points]) => ({ user_email, total_points }))
+        .sort((a, b) => b.total_points - a.total_points)
+        .slice(0, 10);
+
+      setLeaderboard(sorted);
+    }
+    setLoadingLeaderboard(false);
+  }, []);
+
   useEffect(() => {
     fetchContributions(0);
-  }, [fetchContributions]);
+    fetchLeaderboard();
+  }, [fetchContributions, fetchLeaderboard]);
 
   // Fetch user points
   useEffect(() => {
@@ -231,6 +268,7 @@ const Contributions = () => {
       setPostUrl("");
       setPage(0);
       fetchContributions(0);
+      fetchLeaderboard();
     }
     setSubmittingPost(false);
   };
@@ -364,6 +402,51 @@ const Contributions = () => {
                   )}
                 </>
               )}
+
+              {/* Leaderboard */}
+              <div className="mt-8 pt-8 border-t border-border">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-primary" />
+                  Top Contributors
+                </h2>
+                {loadingLeaderboard ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : leaderboard.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No contributors yet.</p>
+                ) : (
+                  <Card>
+                    <CardContent className="p-0">
+                      <div className="divide-y divide-border">
+                        {leaderboard.map((entry, index) => (
+                          <div
+                            key={entry.user_email}
+                            className="flex items-center justify-between px-4 py-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                index === 0 ? "bg-yellow-500/20 text-yellow-500" :
+                                index === 1 ? "bg-gray-400/20 text-gray-400" :
+                                index === 2 ? "bg-orange-500/20 text-orange-500" :
+                                "bg-muted text-muted-foreground"
+                              }`}>
+                                {index + 1}
+                              </span>
+                              <span className="text-sm text-foreground">
+                                {entry.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-primary">
+                              {entry.total_points} pts
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
 
             {/* Sidebar */}
