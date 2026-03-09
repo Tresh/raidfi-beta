@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,38 +26,57 @@ interface Contribution {
 }
 
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
-  const [loaded, setLoaded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load Twitter widget script
-    const script = document.getElementById("twitter-widget-script");
-    if (!script) {
-      const s = document.createElement("script");
-      s.id = "twitter-widget-script";
-      s.src = "https://platform.twitter.com/widgets.js";
-      s.async = true;
-      s.onload = () => {
-        (window as any).twttr?.widgets?.load();
-        setLoaded(true);
+    setLoading(true);
+    
+    const renderTweet = () => {
+      if (!containerRef.current) return;
+      
+      // Clear previous content
+      containerRef.current.innerHTML = '';
+      
+      const twttr = (window as any).twttr;
+      if (twttr?.widgets?.createTweet) {
+        twttr.widgets.createTweet(tweetId, containerRef.current, {
+          theme: 'dark',
+          dnt: true,
+        }).then(() => {
+          setLoading(false);
+        }).catch(() => {
+          // Fallback to link on error
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    };
+
+    // Load Twitter widget script if not loaded
+    if (!(window as any).twttr) {
+      const script = document.createElement("script");
+      script.src = "https://platform.twitter.com/widgets.js";
+      script.async = true;
+      script.onload = () => {
+        (window as any).twttr?.ready?.(renderTweet);
       };
-      document.head.appendChild(s);
+      document.head.appendChild(script);
     } else {
-      // Script already loaded, re-render widgets
-      setTimeout(() => {
-        (window as any).twttr?.widgets?.load();
-        setLoaded(true);
-      }, 100);
+      (window as any).twttr.ready?.(renderTweet) || renderTweet();
     }
   }, [tweetId]);
 
   return (
     <div className="min-h-[200px]">
-      <blockquote className="twitter-tweet" data-theme="dark" data-dnt="true">
-        <a href={postUrl}>Loading tweet...</a>
-      </blockquote>
-      {!loaded && (
+      <div ref={containerRef} />
+      {loading && (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          <a href={postUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs text-muted-foreground hover:text-primary">
+            Open post
+          </a>
         </div>
       )}
     </div>
