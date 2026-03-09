@@ -302,7 +302,7 @@ const Contributions = () => {
       setPostUrl("");
       setPage(0);
       fetchContributions(0);
-      fetchLeaderboard();
+      fetchLeaderboard(leaderboardFilter, 0);
     }
     setSubmittingPost(false);
   };
