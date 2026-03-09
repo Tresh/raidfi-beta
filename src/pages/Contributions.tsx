@@ -157,10 +157,28 @@ const Contributions = () => {
     setLoadingFeed(false);
   }, []);
 
-  const fetchLeaderboard = useCallback(async () => {
-    const { data, error } = await supabase
+  const fetchLeaderboard = useCallback(async (filter: "all" | "day" | "week" | "month", pageNum: number, append = false) => {
+    if (!append) setLoadingLeaderboard(true);
+    
+    let query = supabase
       .from("contributions")
-      .select("user_email, points_earned");
+      .select("user_email, points_earned, created_at");
+
+    // Apply time filter
+    if (filter !== "all") {
+      const now = new Date();
+      let startDate: Date;
+      if (filter === "day") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (filter === "week") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      query = query.gte("created_at", startDate.toISOString());
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Failed to fetch leaderboard:", error);
@@ -169,17 +187,25 @@ const Contributions = () => {
     }
 
     if (data) {
-      const userPoints: Record<string, number> = {};
+      const userPointsMap: Record<string, number> = {};
       data.forEach((c) => {
-        userPoints[c.user_email] = (userPoints[c.user_email] || 0) + c.points_earned;
+        userPointsMap[c.user_email] = (userPointsMap[c.user_email] || 0) + c.points_earned;
       });
 
-      const sorted = Object.entries(userPoints)
+      const sorted = Object.entries(userPointsMap)
         .map(([user_email, total_points]) => ({ user_email, total_points }))
-        .sort((a, b) => b.total_points - a.total_points)
-        .slice(0, 10);
+        .sort((a, b) => b.total_points - a.total_points);
 
-      setLeaderboard(sorted);
+      const from = pageNum * LEADERBOARD_PAGE_SIZE;
+      const to = from + LEADERBOARD_PAGE_SIZE;
+      const paged = sorted.slice(from, to);
+
+      if (append) {
+        setLeaderboard(prev => [...prev, ...paged]);
+      } else {
+        setLeaderboard(paged);
+      }
+      setHasMoreLeaderboard(to < sorted.length);
     }
     setLoadingLeaderboard(false);
   }, []);
