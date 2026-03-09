@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Send, LogOut, ExternalLink, Heart, Trophy } from "lucide-react";
+import { Loader2, Send, LogOut, ExternalLink, Heart, Trophy, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -116,6 +116,10 @@ const Contributions = () => {
   // Leaderboard
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+  const [leaderboardFilter, setLeaderboardFilter] = useState<"all" | "day" | "week" | "month">("all");
+  const [leaderboardPage, setLeaderboardPage] = useState(0);
+  const [hasMoreLeaderboard, setHasMoreLeaderboard] = useState(true);
+  const LEADERBOARD_PAGE_SIZE = 20;
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -153,10 +157,28 @@ const Contributions = () => {
     setLoadingFeed(false);
   }, []);
 
-  const fetchLeaderboard = useCallback(async () => {
-    const { data, error } = await supabase
+  const fetchLeaderboard = useCallback(async (filter: "all" | "day" | "week" | "month", pageNum: number, append = false) => {
+    if (!append) setLoadingLeaderboard(true);
+    
+    let query = supabase
       .from("contributions")
-      .select("user_email, points_earned");
+      .select("user_email, points_earned, created_at");
+
+    // Apply time filter
+    if (filter !== "all") {
+      const now = new Date();
+      let startDate: Date;
+      if (filter === "day") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (filter === "week") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      query = query.gte("created_at", startDate.toISOString());
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Failed to fetch leaderboard:", error);
@@ -165,25 +187,37 @@ const Contributions = () => {
     }
 
     if (data) {
-      const userPoints: Record<string, number> = {};
+      const userPointsMap: Record<string, number> = {};
       data.forEach((c) => {
-        userPoints[c.user_email] = (userPoints[c.user_email] || 0) + c.points_earned;
+        userPointsMap[c.user_email] = (userPointsMap[c.user_email] || 0) + c.points_earned;
       });
 
-      const sorted = Object.entries(userPoints)
+      const sorted = Object.entries(userPointsMap)
         .map(([user_email, total_points]) => ({ user_email, total_points }))
-        .sort((a, b) => b.total_points - a.total_points)
-        .slice(0, 10);
+        .sort((a, b) => b.total_points - a.total_points);
 
-      setLeaderboard(sorted);
+      const from = pageNum * LEADERBOARD_PAGE_SIZE;
+      const to = from + LEADERBOARD_PAGE_SIZE;
+      const paged = sorted.slice(from, to);
+
+      if (append) {
+        setLeaderboard(prev => [...prev, ...paged]);
+      } else {
+        setLeaderboard(paged);
+      }
+      setHasMoreLeaderboard(to < sorted.length);
     }
     setLoadingLeaderboard(false);
   }, []);
 
   useEffect(() => {
     fetchContributions(0);
-    fetchLeaderboard();
-  }, [fetchContributions, fetchLeaderboard]);
+  }, [fetchContributions]);
+
+  useEffect(() => {
+    setLeaderboardPage(0);
+    fetchLeaderboard(leaderboardFilter, 0);
+  }, [leaderboardFilter, fetchLeaderboard]);
 
   // Fetch user points
   useEffect(() => {
@@ -268,7 +302,7 @@ const Contributions = () => {
       setPostUrl("");
       setPage(0);
       fetchContributions(0);
-      fetchLeaderboard();
+      fetchLeaderboard(leaderboardFilter, 0);
     }
     setSubmittingPost(false);
   };
@@ -305,6 +339,12 @@ const Contributions = () => {
     const nextPage = page + 1;
     setPage(nextPage);
     fetchContributions(nextPage, true);
+  };
+
+  const loadMoreLeaderboard = () => {
+    const nextPage = leaderboardPage + 1;
+    setLeaderboardPage(nextPage);
+    fetchLeaderboard(leaderboardFilter, nextPage, true);
   };
 
   return (
@@ -405,10 +445,30 @@ const Contributions = () => {
 
               {/* Leaderboard */}
               <div className="mt-8 pt-8 border-t border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-primary" />
-                  Top Contributors
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-primary" />
+                    Top Contributors
+                  </h2>
+                  <div className="flex items-center gap-1">
+                    <Filter className="w-4 h-4 text-muted-foreground" />
+                    <div className="flex gap-1">
+                      {(["all", "day", "week", "month"] as const).map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setLeaderboardFilter(f)}
+                          className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                            leaderboardFilter === f
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          }`}
+                        >
+                          {f === "all" ? "All" : f === "day" ? "24h" : f === "week" ? "7d" : "30d"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
                 {loadingLeaderboard ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -416,35 +476,44 @@ const Contributions = () => {
                 ) : leaderboard.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No contributors yet.</p>
                 ) : (
-                  <Card>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-border">
-                        {leaderboard.map((entry, index) => (
-                          <div
-                            key={entry.user_email}
-                            className="flex items-center justify-between px-4 py-3"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                index === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                                index === 1 ? "bg-gray-400/20 text-gray-400" :
-                                index === 2 ? "bg-orange-500/20 text-orange-500" :
-                                "bg-muted text-muted-foreground"
-                              }`}>
-                                {index + 1}
-                              </span>
-                              <span className="text-sm text-foreground">
-                                {entry.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}
+                  <>
+                    <Card>
+                      <CardContent className="p-0">
+                        <div className="divide-y divide-border">
+                          {leaderboard.map((entry, index) => (
+                            <div
+                              key={entry.user_email}
+                              className="flex items-center justify-between px-4 py-3"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                  index === 0 ? "bg-yellow-500/20 text-yellow-500" :
+                                  index === 1 ? "bg-gray-400/20 text-gray-400" :
+                                  index === 2 ? "bg-orange-500/20 text-orange-500" :
+                                  "bg-muted text-muted-foreground"
+                                }`}>
+                                  {leaderboardPage * LEADERBOARD_PAGE_SIZE + index + 1}
+                                </span>
+                                <span className="text-sm text-foreground">
+                                  {entry.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}
+                                </span>
+                              </div>
+                              <span className="text-sm font-semibold text-primary">
+                                {entry.total_points} pts
                               </span>
                             </div>
-                            <span className="text-sm font-semibold text-primary">
-                              {entry.total_points} pts
-                            </span>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    {hasMoreLeaderboard && (
+                      <div className="text-center pt-4">
+                        <Button variant="outline" size="sm" onClick={loadMoreLeaderboard}>
+                          Load More
+                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    )}
+                  </>
                 )}
               </div>
             </div>
