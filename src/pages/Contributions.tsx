@@ -402,6 +402,51 @@ const Contributions = () => {
                   )}
                 </>
               )}
+
+              {/* Leaderboard */}
+              <div className="mt-8 pt-8 border-t border-border">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-primary" />
+                  Top Contributors
+                </h2>
+                {loadingLeaderboard ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : leaderboard.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No contributors yet.</p>
+                ) : (
+                  <Card>
+                    <CardContent className="p-0">
+                      <div className="divide-y divide-border">
+                        {leaderboard.map((entry, index) => (
+                          <div
+                            key={entry.user_email}
+                            className="flex items-center justify-between px-4 py-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                index === 0 ? "bg-yellow-500/20 text-yellow-500" :
+                                index === 1 ? "bg-gray-400/20 text-gray-400" :
+                                index === 2 ? "bg-orange-500/20 text-orange-500" :
+                                "bg-muted text-muted-foreground"
+                              }`}>
+                                {index + 1}
+                              </span>
+                              <span className="text-sm text-foreground">
+                                {entry.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-primary">
+                              {entry.total_points} pts
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
 
             {/* Sidebar */}
