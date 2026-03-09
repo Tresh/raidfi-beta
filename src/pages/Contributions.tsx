@@ -116,6 +116,10 @@ const Contributions = () => {
   // Leaderboard
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+  const [leaderboardFilter, setLeaderboardFilter] = useState<"all" | "day" | "week" | "month">("all");
+  const [leaderboardPage, setLeaderboardPage] = useState(0);
+  const [hasMoreLeaderboard, setHasMoreLeaderboard] = useState(true);
+  const LEADERBOARD_PAGE_SIZE = 20;
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
