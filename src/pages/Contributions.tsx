@@ -341,6 +341,12 @@ const Contributions = () => {
     fetchContributions(nextPage, true);
   };
 
+  const loadMoreLeaderboard = () => {
+    const nextPage = leaderboardPage + 1;
+    setLeaderboardPage(nextPage);
+    fetchLeaderboard(leaderboardFilter, nextPage, true);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
