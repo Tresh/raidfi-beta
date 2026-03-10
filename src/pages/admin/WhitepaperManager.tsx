@@ -122,7 +122,7 @@ const WhitepaperManager = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="font-semibold text-foreground text-sm mb-3">Saved Versions</h3>
             {allVersions.length === 0 ? (
               <p className="text-xs text-muted-foreground">No versions found.</p>
