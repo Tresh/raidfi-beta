@@ -255,7 +255,7 @@ const WhitepaperManager = () => {
             </Button>
           </div>
 
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="font-semibold text-foreground text-sm mb-3">Recent Changes</h3>
             {changelogs.length === 0 ? (
               <p className="text-xs text-muted-foreground">No entries yet.</p>
