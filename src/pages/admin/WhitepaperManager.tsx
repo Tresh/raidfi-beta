@@ -211,7 +211,7 @@ const WhitepaperManager = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-3 mb-4">
               <label className="text-sm text-muted-foreground">Version</label>
               <input
