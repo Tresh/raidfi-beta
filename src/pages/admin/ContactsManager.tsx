@@ -82,7 +82,7 @@ const ContactsManager = () => {
         </div>
       </div>
 
-      <div className="glass-card rounded-xl p-1 mb-4">
+      <div className="bg-card border border-border rounded-xl p-1 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
