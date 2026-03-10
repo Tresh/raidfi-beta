@@ -55,7 +55,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map((card) => (
-          <div key={card.label} className="glass-card rounded-xl p-5">
+          <div key={card.label} className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-muted-foreground">{card.label}</span>
               <card.icon className={`w-5 h-5 ${card.color}`} />
