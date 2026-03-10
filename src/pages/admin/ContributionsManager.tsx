@@ -159,7 +159,7 @@ const ContributionsManager = () => {
       {/* Detail modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="glass-card rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card border border-border rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Contribution Details</h2>
               <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground">

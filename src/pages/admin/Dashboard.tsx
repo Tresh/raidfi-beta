@@ -85,7 +85,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="glass-card rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="font-semibold text-foreground mb-4">Recent Contact Messages</h2>
           {recentContacts.length === 0 ? (
             <p className="text-sm text-muted-foreground">No messages yet.</p>
