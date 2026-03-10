@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,23 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [verifying, setVerifying] = useState(false);
+
+  // If already logged in as admin, redirect
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: admin } = await supabase.rpc("has_role", {
+          _user_id: session.user.id,
+          _role: "admin",
+        });
+        if (admin) navigate("/admin");
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +39,7 @@ const AdminLogin = () => {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
+          shouldCreateUser: false,
         },
       });
       if (error) throw error;
@@ -30,6 +48,40 @@ const AdminLogin = () => {
       toast({ title: "Login failed", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 8) return;
+    setVerifying(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: "email",
+      });
+      if (error) throw error;
+
+      // Check admin role
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Session not found");
+
+      const { data: admin } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin",
+      });
+
+      if (!admin) {
+        await supabase.auth.signOut();
+        throw new Error("You do not have admin access.");
+      }
+
+      navigate("/admin");
+    } catch (err: any) {
+      toast({ title: "Verification failed", description: err.message, variant: "destructive" });
+      setOtp("");
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -54,17 +106,44 @@ const AdminLogin = () => {
             />
             <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Send Magic Link
+              Send Code
             </Button>
           </form>
         ) : (
-          <div className="glass-card p-6 rounded-xl text-center">
-            <p className="text-foreground mb-2">Check your email</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              We sent a login link to <span className="text-primary">{email}</span>
-            </p>
+          <div className="glass-card p-6 rounded-xl text-center space-y-5">
+            <div>
+              <p className="text-foreground mb-1">Enter verification code</p>
+              <p className="text-sm text-muted-foreground">
+                Sent to <span className="text-primary">{email}</span>
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <InputOTP maxLength={8} value={otp} onChange={setOtp}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                  <InputOTPSlot index={6} />
+                  <InputOTPSlot index={7} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            <Button
+              className="w-full h-11 font-semibold"
+              disabled={otp.length !== 8 || verifying}
+              onClick={handleVerifyOtp}
+            >
+              {verifying && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Verify & Sign In
+            </Button>
+
             <button
-              onClick={() => { setSent(false); setEmail(""); }}
+              onClick={() => { setSent(false); setEmail(""); setOtp(""); }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Try a different email
