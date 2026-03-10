@@ -66,7 +66,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="font-semibold text-foreground mb-4">Recent Waitlist Signups</h2>
           {recentWaitlist.length === 0 ? (
             <p className="text-sm text-muted-foreground">No signups yet.</p>
