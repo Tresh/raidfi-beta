@@ -110,7 +110,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
-        <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background/80 backdrop-blur-sm sticky top-0 z-30">
+        <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background sticky top-0 z-30">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground">
             <Menu className="w-5 h-5" />
           </button>

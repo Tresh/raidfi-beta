@@ -122,7 +122,7 @@ const WhitepaperManager = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="font-semibold text-foreground text-sm mb-3">Saved Versions</h3>
             {allVersions.length === 0 ? (
               <p className="text-xs text-muted-foreground">No versions found.</p>
@@ -156,7 +156,7 @@ const WhitepaperManager = () => {
             )}
           </div>
 
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="font-semibold text-foreground text-sm mb-3">Changelog</h3>
             {changelogs.length === 0 ? (
               <p className="text-xs text-muted-foreground">No entries yet.</p>
@@ -211,7 +211,7 @@ const WhitepaperManager = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-3 mb-4">
               <label className="text-sm text-muted-foreground">Version</label>
               <input
@@ -236,7 +236,7 @@ const WhitepaperManager = () => {
         </div>
 
         <div>
-          <div className="glass-card rounded-xl p-4 mb-4">
+          <div className="bg-card border border-border rounded-xl p-4 mb-4">
             <h3 className="font-semibold text-foreground text-sm mb-3">Add Changelog</h3>
             <input
               value={newChangeVersion}
@@ -255,7 +255,7 @@ const WhitepaperManager = () => {
             </Button>
           </div>
 
-          <div className="glass-card rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="font-semibold text-foreground text-sm mb-3">Recent Changes</h3>
             {changelogs.length === 0 ? (
               <p className="text-xs text-muted-foreground">No entries yet.</p>

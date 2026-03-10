@@ -110,7 +110,7 @@ const AdminLogin = () => {
             </Button>
           </form>
         ) : (
-          <div className="glass-card p-6 rounded-xl text-center space-y-5">
+          <div className="bg-card border border-border p-6 rounded-xl text-center space-y-5">
             <div>
               <p className="text-foreground mb-1">Enter verification code</p>
               <p className="text-sm text-muted-foreground">

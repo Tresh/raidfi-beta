@@ -86,7 +86,7 @@ const ContributionsManager = () => {
         </Button>
       </div>
 
-      <div className="glass-card rounded-xl p-1 mb-4">
+      <div className="bg-card border border-border rounded-xl p-1 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -98,7 +98,7 @@ const ContributionsManager = () => {
         </div>
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -159,7 +159,7 @@ const ContributionsManager = () => {
       {/* Detail modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="glass-card rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card border border-border rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Contribution Details</h2>
               <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground">

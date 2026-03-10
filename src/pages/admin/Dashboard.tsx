@@ -55,7 +55,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map((card) => (
-          <div key={card.label} className="glass-card rounded-xl p-5">
+          <div key={card.label} className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-muted-foreground">{card.label}</span>
               <card.icon className={`w-5 h-5 ${card.color}`} />
@@ -66,7 +66,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="font-semibold text-foreground mb-4">Recent Waitlist Signups</h2>
           {recentWaitlist.length === 0 ? (
             <p className="text-sm text-muted-foreground">No signups yet.</p>
@@ -85,7 +85,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="glass-card rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="font-semibold text-foreground mb-4">Recent Contact Messages</h2>
           {recentContacts.length === 0 ? (
             <p className="text-sm text-muted-foreground">No messages yet.</p>
