@@ -21,6 +21,7 @@ const navItems = [
   { label: "Validations", to: "/admin/validations", icon: ClipboardList },
   { label: "Contacts", to: "/admin/contacts", icon: Mail },
   { label: "Whitepaper", to: "/admin/whitepaper", icon: ClipboardList },
+  { label: "Contributions", to: "/admin/contributions", icon: Users },
 ];
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {

@@ -13,6 +13,7 @@ import WaitlistManager from "./pages/admin/WaitlistManager";
 import ValidationsManager from "./pages/admin/ValidationsManager";
 import ContactsManager from "./pages/admin/ContactsManager";
 import WhitepaperManager from "./pages/admin/WhitepaperManager";
+import ContributionsManager from "./pages/admin/ContributionsManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import Whitepaper from "./pages/Whitepaper";
 import Contributions from "./pages/Contributions";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/admin/validations" element={<AdminLayout><ValidationsManager /></AdminLayout>} />
           <Route path="/admin/contacts" element={<AdminLayout><ContactsManager /></AdminLayout>} />
           <Route path="/admin/whitepaper" element={<AdminLayout><WhitepaperManager /></AdminLayout>} />
+          <Route path="/admin/contributions" element={<AdminLayout><ContributionsManager /></AdminLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
