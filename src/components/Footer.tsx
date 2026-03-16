@@ -1,4 +1,4 @@
-import { Twitter, MessageCircle } from "lucide-react";
+import { Twitter, MessageCircle, Send, Mail } from "lucide-react";
 import logo from "/logo.png";
 
 const Footer = () => {
@@ -28,15 +28,23 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Twitter className="w-4 h-4" />
+                <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="https://discord.gg/kQuabXkDmw"
+                href="https://t.me/+dkA3rZoDO_I5MDI0"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <MessageCircle className="w-4 h-4" />
+                <Send className="w-5 h-5" />
+              </a>
+              <a
+                href="mailto:hello.raidfi@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Mail className="w-5 h-5" />
               </a>
             </div>
           </div>
