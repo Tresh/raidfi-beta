@@ -40,8 +40,6 @@ const Footer = () => {
               </a>
               <a
                 href="mailto:hello.raidfi@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Mail className="w-5 h-5" />
