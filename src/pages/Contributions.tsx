@@ -23,6 +23,8 @@ interface Contribution {
   points_earned: number;
   engagement_count: number;
   created_at: string;
+  ai_score?: number;
+  ai_feedback?: string;
 }
 
 interface LeaderboardEntry {
