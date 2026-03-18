@@ -78,6 +78,8 @@ export type Database = {
       }
       contributions: {
         Row: {
+          ai_feedback: string | null
+          ai_score: number | null
           created_at: string
           engagement_count: number
           id: string
@@ -87,6 +89,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          ai_feedback?: string | null
+          ai_score?: number | null
           created_at?: string
           engagement_count?: number
           id?: string
@@ -96,6 +100,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          ai_feedback?: string | null
+          ai_score?: number | null
           created_at?: string
           engagement_count?: number
           id?: string
