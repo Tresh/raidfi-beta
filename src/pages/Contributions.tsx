@@ -660,7 +660,7 @@ const Contributions = () => {
                         </Button>
                       </form>
                       <p className="text-[11px] text-muted-foreground mt-2">
-                        Paste your X post link about RaidFi. AI will review and score your post.
+                        Paste your X post link about RaidFi. Posts require admin approval before appearing.
                       </p>
                     </CardContent>
                   </Card>
