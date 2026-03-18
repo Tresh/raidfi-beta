@@ -191,6 +191,13 @@ const ContributionsManager = () => {
                   <p className="text-foreground">{selected.engagement_count}</p>
                 </div>
               </div>
+              {selected.ai_feedback && (
+                <div>
+                  <p className="text-muted-foreground text-xs">AI Feedback</p>
+                  <p className="text-foreground text-sm">{selected.ai_feedback}</p>
+                  <p className="text-muted-foreground text-xs mt-1">AI Score: {selected.ai_score ?? "—"}</p>
+                </div>
+              )}
               <div>
                 <p className="text-muted-foreground text-xs">Date</p>
                 <p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p>
