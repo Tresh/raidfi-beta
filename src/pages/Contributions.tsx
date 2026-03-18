@@ -651,7 +651,7 @@ const Contributions = () => {
                           {submittingPost ? (
                             <>
                               <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-                              Analyzing...
+                              Submitting...
                             </>
                           ) : (
                             <Send className="w-3 h-3 mr-1.5" />
