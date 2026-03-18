@@ -113,9 +113,9 @@ const ContributionsManager = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No contributions found.</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No contributions found.</td></tr>
               ) : (
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
