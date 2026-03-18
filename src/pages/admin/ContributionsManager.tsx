@@ -123,6 +123,9 @@ const ContributionsManager = () => {
                     <td className="p-4 hidden md:table-cell">
                       <span className="text-primary font-medium">{r.points_earned}</span>
                     </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <span className="text-xs text-muted-foreground truncate max-w-[200px] block">{r.ai_feedback || "—"}</span>
+                    </td>
                     <td className="p-4 hidden md:table-cell text-muted-foreground">{r.engagement_count}</td>
                     <td className="p-4 text-muted-foreground hidden lg:table-cell">
                       {new Date(r.created_at).toLocaleDateString()}
