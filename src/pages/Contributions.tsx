@@ -145,6 +145,7 @@ const Contributions = () => {
     const { data, error } = await supabase
       .from("contributions")
       .select("*")
+      .eq("status", "approved")
       .order("created_at", { ascending: false })
       .range(from, to);
 
