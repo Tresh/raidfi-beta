@@ -436,6 +436,19 @@ const Contributions = () => {
                             </a>
                           )}
 
+                          {/* AI Feedback */}
+                          {c.ai_feedback && (
+                            <div className="mt-2 px-3 py-2 rounded-md bg-muted/50 text-xs text-muted-foreground">
+                              <span className="font-medium text-foreground">AI Review:</span>{" "}
+                              {c.ai_feedback}
+                              {c.ai_score != null && (
+                                <span className={`ml-2 font-semibold ${c.ai_score >= 10 ? "text-green-500" : c.ai_score >= 8 ? "text-foreground" : "text-yellow-500"}`}>
+                                  ({c.points_earned} pts)
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
                             <button
                               onClick={() => handleEngage(c)}
