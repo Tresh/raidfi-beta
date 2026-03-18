@@ -25,6 +25,7 @@ interface Contribution {
   created_at: string;
   ai_score?: number;
   ai_feedback?: string;
+  status?: string;
 }
 
 interface LeaderboardEntry {
@@ -144,6 +145,7 @@ const Contributions = () => {
     const { data, error } = await supabase
       .from("contributions")
       .select("*")
+      .eq("status", "approved")
       .order("created_at", { ascending: false })
       .range(from, to);
 
@@ -164,7 +166,8 @@ const Contributions = () => {
     
     let query = supabase
       .from("contributions")
-      .select("user_email, points_earned, created_at");
+      .select("user_email, points_earned, created_at")
+      .eq("status", "approved");
 
     // Apply time filter
     if (filter !== "all") {
@@ -291,42 +294,35 @@ const Contributions = () => {
     setSubmittingPost(true);
 
     try {
-      // Call AI verification edge function
-      const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
-        "verify-contribution",
-        { body: { post_url: postUrl.trim() } }
-      );
-
-      if (verifyError) {
-        console.error("Verify error:", verifyError);
-      }
-
-      const points = verifyData?.points_earned ?? 10;
-      const aiFeedback = verifyData?.feedback ?? null;
-      const aiScore = verifyData?.score_modifier != null ? 10 + verifyData.score_modifier : 10;
-      const verdict = verifyData?.verdict ?? "acceptable";
+      const contributionId = crypto.randomUUID();
 
       const { error } = await supabase.from("contributions").insert({
+        id: contributionId,
         user_email: session.user.email!,
         user_id: session.user.id,
         post_url: postUrl.trim(),
-        points_earned: points,
-        ai_score: aiScore,
-        ai_feedback: aiFeedback,
+        points_earned: 10,
+        status: "pending",
       });
 
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        const verdictEmoji = verdict === "excellent" ? "🔥" : verdict === "good" ? "👍" : verdict === "spam" ? "🚫" : verdict === "low_effort" ? "⚠️" : verdict === "ai_generated" ? "🤖" : "✅";
         toast({
-          title: `${verdictEmoji} +${points} RaidFi Points`,
-          description: aiFeedback || "Post submitted successfully!",
+          title: "⏳ Post Submitted",
+          description: "Your post is pending admin approval. You'll earn points once approved!",
         });
+
+        // Notify admin in background
+        supabase.functions.invoke("notify-admin-contribution", {
+          body: {
+            post_url: postUrl.trim(),
+            user_email: session.user.email,
+            contribution_id: contributionId,
+          },
+        }).catch(console.error);
+
         setPostUrl("");
-        setPage(0);
-        fetchContributions(0);
-        fetchLeaderboard(leaderboardFilter, 0);
       }
     } catch (err) {
       console.error("Submission error:", err);
@@ -655,7 +651,7 @@ const Contributions = () => {
                           {submittingPost ? (
                             <>
                               <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-                              Analyzing...
+                              Submitting...
                             </>
                           ) : (
                             <Send className="w-3 h-3 mr-1.5" />
@@ -664,7 +660,7 @@ const Contributions = () => {
                         </Button>
                       </form>
                       <p className="text-[11px] text-muted-foreground mt-2">
-                        Paste your X post link about RaidFi. AI will review and score your post.
+                        Paste your X post link about RaidFi. Posts require admin approval before appearing.
                       </p>
                     </CardContent>
                   </Card>

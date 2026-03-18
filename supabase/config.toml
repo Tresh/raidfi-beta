@@ -5,3 +5,5 @@ project_id = "auwshrplreosybqgeoop"
     verify_jwt = false
   [functions.verify-contribution]
     verify_jwt = false
+  [functions.notify-admin-contribution]
+    verify_jwt = false

@@ -2,15 +2,28 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Search, Eye, X, Download, Loader2, ExternalLink } from "lucide-react";
+import { Trash2, Search, Eye, X, Download, Loader2, ExternalLink, Check, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const BATCH_SIZE = 30;
+
+type StatusFilter = "all" | "pending" | "approved" | "rejected";
+
+const statusBadge = (status: string) => {
+  const map: Record<string, { label: string; cls: string }> = {
+    pending: { label: "Pending", cls: "bg-yellow-500/20 text-yellow-500" },
+    approved: { label: "Approved", cls: "bg-green-500/20 text-green-500" },
+    rejected: { label: "Rejected", cls: "bg-destructive/20 text-destructive" },
+  };
+  const s = map[status] || { label: status, cls: "bg-muted text-muted-foreground" };
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>;
+};
 
 const ContributionsManager = () => {
   const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -21,11 +34,17 @@ const ContributionsManager = () => {
     if (offset === 0) setLoading(true);
     else setLoadingMore(true);
 
-    const { data, count } = await supabase
+    let query = supabase
       .from("contributions")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(offset, offset + BATCH_SIZE - 1);
+
+    if (statusFilter !== "all") {
+      query = query.eq("status", statusFilter);
+    }
+
+    const { data, count } = await query;
 
     const fetched = data || [];
     if (append) setRows((prev) => [...prev, ...fetched]);
@@ -36,7 +55,7 @@ const ContributionsManager = () => {
     setLoadingMore(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [statusFilter]);
 
   const handleLoadMore = () => fetchData(rows.length, true);
 
@@ -52,12 +71,23 @@ const ContributionsManager = () => {
     }
   };
 
+  const handleUpdateStatus = async (id: string, status: "approved" | "rejected") => {
+    const { error } = await supabase.from("contributions").update({ status }).eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+      if (selected?.id === id) setSelected({ ...selected, status });
+      toast({ title: status === "approved" ? "Approved ✅" : "Rejected ❌", description: `Contribution ${status}.` });
+    }
+  };
+
   const handleExportCSV = () => {
-    const headers = ["Email", "Post URL", "Points", "AI Score", "AI Feedback", "Engagements", "Created At"];
+    const headers = ["Email", "Post URL", "Points", "Status", "AI Score", "AI Feedback", "Engagements", "Created At"];
     const csv = [
       headers.join(","),
       ...rows.map((r) =>
-        [r.user_email, `"${r.post_url}"`, r.points_earned, r.ai_score, `"${(r.ai_feedback || '').replace(/"/g, '""')}"`, r.engagement_count, r.created_at].join(",")
+        [r.user_email, `"${r.post_url}"`, r.points_earned, r.status, r.ai_score, `"${(r.ai_feedback || '').replace(/"/g, '""')}"`, r.engagement_count, r.created_at].join(",")
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -79,11 +109,28 @@ const ContributionsManager = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Contributions</h1>
-          <p className="text-muted-foreground text-sm mt-1">{totalCount} total contributions</p>
+          <p className="text-muted-foreground text-sm mt-1">{totalCount} {statusFilter !== "all" ? statusFilter : "total"} contributions</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleExportCSV}>
           <Download className="w-4 h-4 mr-2" /> Export CSV
         </Button>
+      </div>
+
+      {/* Status filter tabs */}
+      <div className="flex gap-1 mb-4">
+        {(["pending", "all", "approved", "rejected"] as StatusFilter[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => setStatusFilter(f)}
+            className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+              statusFilter === f
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
       </div>
 
       <div className="bg-card border border-border rounded-xl p-1 mb-4">
@@ -104,33 +151,39 @@ const ContributionsManager = () => {
             <thead>
               <tr className="border-b border-border/50">
                 <th className="text-left p-4 text-muted-foreground font-medium">Email</th>
+                <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Points</th>
-                <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">AI Feedback</th>
-                <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Engagements</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden lg:table-cell">Date</th>
                 <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
+                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No contributions found.</td></tr>
+                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No contributions found.</td></tr>
               ) : (
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-foreground">{r.user_email}</td>
+                    <td className="p-4">{statusBadge(r.status)}</td>
                     <td className="p-4 hidden md:table-cell">
                       <span className="text-primary font-medium">{r.points_earned}</span>
                     </td>
-                    <td className="p-4 hidden md:table-cell">
-                      <span className="text-xs text-muted-foreground truncate max-w-[200px] block">{r.ai_feedback || "—"}</span>
-                    </td>
-                    <td className="p-4 hidden md:table-cell text-muted-foreground">{r.engagement_count}</td>
                     <td className="p-4 text-muted-foreground hidden lg:table-cell">
                       {new Date(r.created_at).toLocaleDateString()}
                     </td>
                     <td className="p-4 text-right space-x-1">
+                      {r.status === "pending" && (
+                        <>
+                          <Button variant="ghost" size="icon" className="text-green-500 hover:bg-green-500/10" onClick={() => handleUpdateStatus(r.id, "approved")}>
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleUpdateStatus(r.id, "rejected")}>
+                            <XCircle className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
                       <Button variant="ghost" size="icon" onClick={() => setSelected(r)}>
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -183,6 +236,10 @@ const ContributionsManager = () => {
               </div>
               <div className="flex gap-6">
                 <div>
+                  <p className="text-muted-foreground text-xs">Status</p>
+                  {statusBadge(selected.status)}
+                </div>
+                <div>
                   <p className="text-muted-foreground text-xs">Points</p>
                   <p className="text-primary font-semibold">{selected.points_earned}</p>
                 </div>
@@ -203,8 +260,18 @@ const ContributionsManager = () => {
                 <p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p>
               </div>
             </div>
-            <div className="mt-6">
-              <Button size="sm" variant="destructive" onClick={() => handleDelete(selected.id)}>
+            <div className="mt-6 flex gap-2">
+              {selected.status === "pending" && (
+                <>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleUpdateStatus(selected.id, "approved")}>
+                    <Check className="w-4 h-4 mr-2" /> Approve
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleUpdateStatus(selected.id, "rejected")}>
+                    <XCircle className="w-4 h-4 mr-2" /> Reject
+                  </Button>
+                </>
+              )}
+              <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(selected.id)}>
                 <Trash2 className="w-4 h-4 mr-2" /> Delete
               </Button>
             </div>
