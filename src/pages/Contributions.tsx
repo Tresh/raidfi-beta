@@ -290,22 +290,49 @@ const Contributions = () => {
 
     setSubmittingPost(true);
 
-    const { error } = await supabase.from("contributions").insert({
-      user_email: session.user.email!,
-      user_id: session.user.id,
-      post_url: postUrl.trim(),
-      points_earned: 10,
-    });
+    try {
+      // Call AI verification edge function
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
+        "verify-contribution",
+        { body: { post_url: postUrl.trim() } }
+      );
 
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Post submitted!", description: "+10 RaidFi Points earned" });
-      setPostUrl("");
-      setPage(0);
-      fetchContributions(0);
-      fetchLeaderboard(leaderboardFilter, 0);
+      if (verifyError) {
+        console.error("Verify error:", verifyError);
+      }
+
+      const points = verifyData?.points_earned ?? 10;
+      const aiFeedback = verifyData?.feedback ?? null;
+      const aiScore = verifyData?.score_modifier != null ? 10 + verifyData.score_modifier : 10;
+      const verdict = verifyData?.verdict ?? "acceptable";
+
+      const { error } = await supabase.from("contributions").insert({
+        user_email: session.user.email!,
+        user_id: session.user.id,
+        post_url: postUrl.trim(),
+        points_earned: points,
+        ai_score: aiScore,
+        ai_feedback: aiFeedback,
+      });
+
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        const verdictEmoji = verdict === "excellent" ? "🔥" : verdict === "good" ? "👍" : verdict === "spam" ? "🚫" : verdict === "low_effort" ? "⚠️" : verdict === "ai_generated" ? "🤖" : "✅";
+        toast({
+          title: `${verdictEmoji} +${points} RaidFi Points`,
+          description: aiFeedback || "Post submitted successfully!",
+        });
+        setPostUrl("");
+        setPage(0);
+        fetchContributions(0);
+        fetchLeaderboard(leaderboardFilter, 0);
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     }
+
     setSubmittingPost(false);
   };
 
