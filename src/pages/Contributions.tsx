@@ -166,7 +166,8 @@ const Contributions = () => {
     
     let query = supabase
       .from("contributions")
-      .select("user_email, points_earned, created_at");
+      .select("user_email, points_earned, created_at")
+      .eq("status", "approved");
 
     // Apply time filter
     if (filter !== "all") {
