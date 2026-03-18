@@ -105,6 +105,7 @@ const ContributionsManager = () => {
               <tr className="border-b border-border/50">
                 <th className="text-left p-4 text-muted-foreground font-medium">Email</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Points</th>
+                <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">AI Feedback</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Engagements</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden lg:table-cell">Date</th>
                 <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
