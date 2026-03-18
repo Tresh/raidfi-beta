@@ -23,6 +23,8 @@ interface Contribution {
   points_earned: number;
   engagement_count: number;
   created_at: string;
+  ai_score?: number;
+  ai_feedback?: string;
 }
 
 interface LeaderboardEntry {
@@ -288,22 +290,49 @@ const Contributions = () => {
 
     setSubmittingPost(true);
 
-    const { error } = await supabase.from("contributions").insert({
-      user_email: session.user.email!,
-      user_id: session.user.id,
-      post_url: postUrl.trim(),
-      points_earned: 10,
-    });
+    try {
+      // Call AI verification edge function
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
+        "verify-contribution",
+        { body: { post_url: postUrl.trim() } }
+      );
 
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Post submitted!", description: "+10 RaidFi Points earned" });
-      setPostUrl("");
-      setPage(0);
-      fetchContributions(0);
-      fetchLeaderboard(leaderboardFilter, 0);
+      if (verifyError) {
+        console.error("Verify error:", verifyError);
+      }
+
+      const points = verifyData?.points_earned ?? 10;
+      const aiFeedback = verifyData?.feedback ?? null;
+      const aiScore = verifyData?.score_modifier != null ? 10 + verifyData.score_modifier : 10;
+      const verdict = verifyData?.verdict ?? "acceptable";
+
+      const { error } = await supabase.from("contributions").insert({
+        user_email: session.user.email!,
+        user_id: session.user.id,
+        post_url: postUrl.trim(),
+        points_earned: points,
+        ai_score: aiScore,
+        ai_feedback: aiFeedback,
+      });
+
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        const verdictEmoji = verdict === "excellent" ? "🔥" : verdict === "good" ? "👍" : verdict === "spam" ? "🚫" : verdict === "low_effort" ? "⚠️" : verdict === "ai_generated" ? "🤖" : "✅";
+        toast({
+          title: `${verdictEmoji} +${points} RaidFi Points`,
+          description: aiFeedback || "Post submitted successfully!",
+        });
+        setPostUrl("");
+        setPage(0);
+        fetchContributions(0);
+        fetchLeaderboard(leaderboardFilter, 0);
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     }
+
     setSubmittingPost(false);
   };
 
@@ -405,6 +434,19 @@ const Contributions = () => {
                             >
                               {c.post_url}
                             </a>
+                          )}
+
+                          {/* AI Feedback */}
+                          {c.ai_feedback && (
+                            <div className="mt-2 px-3 py-2 rounded-md bg-muted/50 text-xs text-muted-foreground">
+                              <span className="font-medium text-foreground">AI Review:</span>{" "}
+                              {c.ai_feedback}
+                              {c.ai_score != null && (
+                                <span className={`ml-2 font-semibold ${c.ai_score >= 10 ? "text-green-500" : c.ai_score >= 8 ? "text-foreground" : "text-yellow-500"}`}>
+                                  ({c.points_earned} pts)
+                                </span>
+                              )}
+                            </div>
                           )}
 
                           <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
@@ -611,15 +653,18 @@ const Contributions = () => {
                         />
                         <Button type="submit" className="w-full h-9 text-xs" disabled={submittingPost}>
                           {submittingPost ? (
-                            <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                            <>
+                              <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                              Analyzing...
+                            </>
                           ) : (
                             <Send className="w-3 h-3 mr-1.5" />
                           )}
-                          Submit Post (+10 pts)
+                          {!submittingPost && "Submit Post"}
                         </Button>
                       </form>
                       <p className="text-[11px] text-muted-foreground mt-2">
-                        Paste your X post link about RaidFi to earn points.
+                        Paste your X post link about RaidFi. AI will review and score your post.
                       </p>
                     </CardContent>
                   </Card>

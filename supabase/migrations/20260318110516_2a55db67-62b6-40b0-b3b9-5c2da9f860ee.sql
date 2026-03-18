@@ -1,0 +1,1 @@
+ALTER TABLE public.contributions ADD COLUMN ai_score integer DEFAULT 10, ADD COLUMN ai_feedback text;

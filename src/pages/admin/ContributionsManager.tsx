@@ -53,11 +53,11 @@ const ContributionsManager = () => {
   };
 
   const handleExportCSV = () => {
-    const headers = ["Email", "Post URL", "Points", "Engagements", "Created At"];
+    const headers = ["Email", "Post URL", "Points", "AI Score", "AI Feedback", "Engagements", "Created At"];
     const csv = [
       headers.join(","),
       ...rows.map((r) =>
-        [r.user_email, `"${r.post_url}"`, r.points_earned, r.engagement_count, r.created_at].join(",")
+        [r.user_email, `"${r.post_url}"`, r.points_earned, r.ai_score, `"${(r.ai_feedback || '').replace(/"/g, '""')}"`, r.engagement_count, r.created_at].join(",")
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -105,6 +105,7 @@ const ContributionsManager = () => {
               <tr className="border-b border-border/50">
                 <th className="text-left p-4 text-muted-foreground font-medium">Email</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Points</th>
+                <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">AI Feedback</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden md:table-cell">Engagements</th>
                 <th className="text-left p-4 text-muted-foreground font-medium hidden lg:table-cell">Date</th>
                 <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
@@ -112,15 +113,18 @@ const ContributionsManager = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No contributions found.</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No contributions found.</td></tr>
               ) : (
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-foreground">{r.user_email}</td>
                     <td className="p-4 hidden md:table-cell">
                       <span className="text-primary font-medium">{r.points_earned}</span>
+                    </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <span className="text-xs text-muted-foreground truncate max-w-[200px] block">{r.ai_feedback || "—"}</span>
                     </td>
                     <td className="p-4 hidden md:table-cell text-muted-foreground">{r.engagement_count}</td>
                     <td className="p-4 text-muted-foreground hidden lg:table-cell">
@@ -187,6 +191,13 @@ const ContributionsManager = () => {
                   <p className="text-foreground">{selected.engagement_count}</p>
                 </div>
               </div>
+              {selected.ai_feedback && (
+                <div>
+                  <p className="text-muted-foreground text-xs">AI Feedback</p>
+                  <p className="text-foreground text-sm">{selected.ai_feedback}</p>
+                  <p className="text-muted-foreground text-xs mt-1">AI Score: {selected.ai_score ?? "—"}</p>
+                </div>
+              )}
               <div>
                 <p className="text-muted-foreground text-xs">Date</p>
                 <p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p>
