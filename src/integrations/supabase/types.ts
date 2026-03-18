@@ -85,6 +85,7 @@ export type Database = {
           id: string
           points_earned: number
           post_url: string
+          status: string
           user_email: string
           user_id: string | null
         }
@@ -96,6 +97,7 @@ export type Database = {
           id?: string
           points_earned?: number
           post_url: string
+          status?: string
           user_email: string
           user_id?: string | null
         }
@@ -107,6 +109,7 @@ export type Database = {
           id?: string
           points_earned?: number
           post_url?: string
+          status?: string
           user_email?: string
           user_id?: string | null
         }
