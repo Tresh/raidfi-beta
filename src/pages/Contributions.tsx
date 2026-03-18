@@ -25,6 +25,7 @@ interface Contribution {
   created_at: string;
   ai_score?: number;
   ai_feedback?: string;
+  status?: string;
 }
 
 interface LeaderboardEntry {
