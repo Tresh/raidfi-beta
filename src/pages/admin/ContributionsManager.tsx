@@ -53,11 +53,11 @@ const ContributionsManager = () => {
   };
 
   const handleExportCSV = () => {
-    const headers = ["Email", "Post URL", "Points", "Engagements", "Created At"];
+    const headers = ["Email", "Post URL", "Points", "AI Score", "AI Feedback", "Engagements", "Created At"];
     const csv = [
       headers.join(","),
       ...rows.map((r) =>
-        [r.user_email, `"${r.post_url}"`, r.points_earned, r.engagement_count, r.created_at].join(",")
+        [r.user_email, `"${r.post_url}"`, r.points_earned, r.ai_score, `"${(r.ai_feedback || '').replace(/"/g, '""')}"`, r.engagement_count, r.created_at].join(",")
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });

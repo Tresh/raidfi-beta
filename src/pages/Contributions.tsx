@@ -653,15 +653,18 @@ const Contributions = () => {
                         />
                         <Button type="submit" className="w-full h-9 text-xs" disabled={submittingPost}>
                           {submittingPost ? (
-                            <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                            <>
+                              <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                              Analyzing...
+                            </>
                           ) : (
                             <Send className="w-3 h-3 mr-1.5" />
                           )}
-                          Submit Post (+10 pts)
+                          {!submittingPost && "Submit Post"}
                         </Button>
                       </form>
                       <p className="text-[11px] text-muted-foreground mt-2">
-                        Paste your X post link about RaidFi to earn points.
+                        Paste your X post link about RaidFi. AI will review and score your post.
                       </p>
                     </CardContent>
                   </Card>
