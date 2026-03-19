@@ -8,6 +8,8 @@ import Waitlist from "./pages/Waitlist";
 import WaitlistConfirmed from "./pages/WaitlistConfirmed";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import Contributions from "./pages/Contributions";
+import Feed from "./pages/Feed";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import WaitlistManager from "./pages/admin/WaitlistManager";
@@ -16,11 +18,8 @@ import ContactsManager from "./pages/admin/ContactsManager";
 import WhitepaperManager from "./pages/admin/WhitepaperManager";
 import ContributionsManager from "./pages/admin/ContributionsManager";
 import TasksManager from "./pages/admin/TasksManager";
+import ContributeTasksManager from "./pages/admin/ContributeTasksManager";
 import AdminLayout from "./components/admin/AdminLayout";
-import DashboardLayout from "./components/dashboard/DashboardLayout";
-import Contribute from "./pages/dashboard/Contribute";
-import Referrals from "./pages/dashboard/Referrals";
-import RaidFi from "./pages/dashboard/RaidFi";
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
 
@@ -39,17 +38,17 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/whitepaper" element={<Whitepaper />} />
-          {/* Redirect old contributions route */}
-          <Route path="/contributions" element={<Navigate to="/dashboard" replace />} />
-          {/* User dashboard */}
-          <Route path="/dashboard" element={<DashboardLayout><Contribute /></DashboardLayout>} />
-          <Route path="/dashboard/referrals" element={<DashboardLayout><Referrals /></DashboardLayout>} />
-          <Route path="/dashboard/raidfi" element={<DashboardLayout><RaidFi /></DashboardLayout>} />
+          <Route path="/contributions" element={<Contributions />} />
+          <Route path="/feed" element={<Feed />} />
+          {/* Legacy redirects */}
+          <Route path="/dashboard" element={<Navigate to="/contributions" replace />} />
+          <Route path="/dashboard/*" element={<Navigate to="/contributions" replace />} />
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
           <Route path="/admin/waitlist" element={<AdminLayout><WaitlistManager /></AdminLayout>} />
           <Route path="/admin/tasks" element={<AdminLayout><TasksManager /></AdminLayout>} />
+          <Route path="/admin/contribute-tasks" element={<AdminLayout><ContributeTasksManager /></AdminLayout>} />
           <Route path="/admin/validations" element={<AdminLayout><ValidationsManager /></AdminLayout>} />
           <Route path="/admin/contacts" element={<AdminLayout><ContactsManager /></AdminLayout>} />
           <Route path="/admin/whitepaper" element={<AdminLayout><WhitepaperManager /></AdminLayout>} />

@@ -13,61 +13,74 @@ interface WhitepaperData {
 }
 
 const CACHE_KEY = "raidfi_whitepaper_cache";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-const getCached = (): WhitepaperData | null => {
+const getCached = (): { data: WhitepaperData; timestamp: number } | null => {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw).data;
-  } catch {
-    return null;
-  }
+    return JSON.parse(raw);
+  } catch { return null; }
 };
 
 const setCache = (data: WhitepaperData) => {
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ data }));
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
 };
 
 const Whitepaper = () => {
-  const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(getCached);
-  const [loading, setLoading] = useState(!getCached());
+  const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Always check for latest version/updated_at (lightweight)
+      const cached = getCached();
+
+      // Always fetch meta to check for updates
       const { data: meta } = await supabase
-        .from("whitepaper" as any)
+        .from("whitepaper")
         .select("version, updated_at")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!meta) {
+        // Use cache if available, otherwise show empty
+        if (cached) setWhitepaper(cached.data);
         setLoading(false);
         return;
       }
 
-      const cached = getCached();
-      // If cache matches, no need to fetch full content
-      if (cached && cached.version === (meta as any).version && cached.updated_at === (meta as any).updated_at) {
+      // Check if cache is still valid
+      if (
+        cached &&
+        cached.data.version === meta.version &&
+        cached.data.updated_at === meta.updated_at
+      ) {
+        setWhitepaper(cached.data);
         setLoading(false);
         return;
       }
 
       // Fetch full content
       const { data: full } = await supabase
-        .from("whitepaper" as any)
+        .from("whitepaper")
         .select("content, version, updated_at")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (full) {
-        const d = full as any;
-        setWhitepaper(d);
-        setCache(d);
+        const wpData: WhitepaperData = {
+          content: full.content,
+          version: full.version,
+          updated_at: full.updated_at,
+        };
+        setWhitepaper(wpData);
+        setCache(wpData);
+      } else if (cached) {
+        setWhitepaper(cached.data);
       }
       setLoading(false);
     };
@@ -79,9 +92,7 @@ const Whitepaper = () => {
       <Navbar />
       <div className="container mx-auto px-6 pt-28 pb-16 max-w-4xl">
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
+          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
         ) : !whitepaper ? (
           <p className="text-center text-muted-foreground py-20">Whitepaper not available.</p>
         ) : (
