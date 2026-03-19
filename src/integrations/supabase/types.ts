@@ -488,6 +488,33 @@ export type Database = {
         }
         Relationships: []
       }
+      whitepaper_live: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          source_whitepaper_id: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          source_whitepaper_id?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          source_whitepaper_id?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -516,6 +543,7 @@ export type Database = {
         Args: { _email: string }
         Returns: undefined
       }
+      refresh_whitepaper_live: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -18,27 +18,50 @@ const Whitepaper = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchData = async () => {
-      const { data: full } = await supabase
-        .from("whitepaper")
+      const result = await (supabase as any)
+        .from("whitepaper_live")
         .select("content, version, updated_at")
-        .eq("is_published", true)
-        .order("updated_at", { ascending: false })
-        .limit(1)
+        .eq("id", "live")
         .maybeSingle();
 
-      if (full) {
-        setWhitepaper({
-          content: full.content,
-          version: full.version,
-          updated_at: full.updated_at,
-        });
-      } else {
+      const data = (result?.data ?? null) as WhitepaperData | null;
+      const error = (result?.error ?? null) as { message?: string } | null;
+
+      if (!mounted) return;
+
+      if (error || !data) {
         setWhitepaper(null);
+      } else {
+        setWhitepaper({
+          content: data.content,
+          version: data.version,
+          updated_at: data.updated_at,
+        });
       }
+
       setLoading(false);
     };
+
     fetchData();
+
+    const channel = supabase
+      .channel("whitepaper-live-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "whitepaper_live" },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
