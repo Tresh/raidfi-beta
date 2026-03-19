@@ -12,19 +12,6 @@ interface WhitepaperData {
   updated_at: string;
 }
 
-const CACHE_KEY = "raidfi_whitepaper_cache";
-
-const getCached = (): { data: WhitepaperData; timestamp: number } | null => {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch { return null; }
-};
-
-const setCache = (data: WhitepaperData) => {
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-};
 
 const Whitepaper = () => {
   const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(null);

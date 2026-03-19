@@ -180,13 +180,13 @@ const Contributions = () => {
       return;
     }
 
-    const { data } = await supabase
+    const { data } = await (supabase
       .from("leaderboard_scores" as any)
       .select("total_xp")
       .eq("email", userEmail)
-      .maybeSingle();
+      .maybeSingle() as any);
 
-    setUserTotalPoints(data?.total_xp || 0);
+    setUserTotalPoints((data?.total_xp as number) || 0);
   }, [session]);
 
   useEffect(() => { calculatePoints(); }, [calculatePoints]);
