@@ -34,7 +34,13 @@ const Whitepaper = () => {
     const fetchData = async () => {
       const cached = getCached();
 
-      // Always fetch meta to check for updates
+      // Show cached immediately while we check for updates
+      if (cached) {
+        setWhitepaper(cached.data);
+        setLoading(false);
+      }
+
+      // Always fetch latest metadata
       const { data: meta } = await supabase
         .from("whitepaper")
         .select("version, updated_at")
@@ -44,24 +50,21 @@ const Whitepaper = () => {
         .maybeSingle();
 
       if (!meta) {
-        // Use cache if available, otherwise show empty
-        if (cached) setWhitepaper(cached.data);
         setLoading(false);
         return;
       }
 
-      // Check if cache is still valid
+      // If cache matches, we're done
       if (
         cached &&
         cached.data.version === meta.version &&
         cached.data.updated_at === meta.updated_at
       ) {
-        setWhitepaper(cached.data);
         setLoading(false);
         return;
       }
 
-      // Fetch full content
+      // Cache is stale or missing — fetch full content
       const { data: full } = await supabase
         .from("whitepaper")
         .select("content, version, updated_at")
@@ -78,8 +81,6 @@ const Whitepaper = () => {
         };
         setWhitepaper(wpData);
         setCache(wpData);
-      } else if (cached) {
-        setWhitepaper(cached.data);
       }
       setLoading(false);
     };
