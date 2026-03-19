@@ -11,7 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const SIGNUP_STORAGE_KEY = "raidfi_waitlist_signup";
 const SIGNUP_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
-const MIN_VERIFY_DELAY_MS = 10000; // 10 seconds anti-abuse
+const MIN_VERIFY_DELAY_MS = 10000;
+const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
 
 const generateReferralCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -75,8 +76,9 @@ const Waitlist = () => {
   const [referralCode, setReferralCode] = useState("");
   const [verifyingTask, setVerifyingTask] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [sharePostUrl, setSharePostUrl] = useState("");
+  const [submittingShare, setSubmittingShare] = useState(false);
 
-  // Tick for countdown display
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
@@ -102,7 +104,7 @@ const Waitlist = () => {
   const handleTaskClick = (task: WaitlistTask) => {
     window.open(task.url, "_blank", "noopener,noreferrer");
     setTaskStates(prev => {
-      if (prev[task.id]?.clickedAt) return prev; // already clicked
+      if (prev[task.id]?.clickedAt) return prev;
       return { ...prev, [task.id]: { ...prev[task.id], clickedAt: Date.now() } };
     });
   };
@@ -111,13 +113,11 @@ const Waitlist = () => {
     const state = taskStates[task.id];
     if (!state?.clickedAt) return;
 
-    // Anti-abuse check
     if (Date.now() - state.clickedAt < MIN_VERIFY_DELAY_MS) {
       toast({ title: "Too fast", description: "Please wait before verifying.", variant: "destructive" });
       return;
     }
 
-    // Input validation
     if (task.requires_input && !state.inputValue.trim()) {
       toast({ title: "Required", description: task.input_label || "Please provide the required input.", variant: "destructive" });
       return;
@@ -125,7 +125,6 @@ const Waitlist = () => {
 
     setVerifyingTask(task.id);
 
-    // Store submission
     const { error } = await supabase.from("waitlist_task_submissions" as any).insert({
       submission_email: email || "pre-signup",
       task_id: task.id,
@@ -183,12 +182,10 @@ const Waitlist = () => {
       } as any);
       if (error) throw error;
 
-      // Update task submissions with email
       await supabase.from("waitlist_task_submissions" as any)
         .update({ submission_email: email.trim().toLowerCase() } as any)
         .eq("submission_email", "pre-signup");
 
-      // Process referral
       if (refCode) {
         try { await supabase.rpc("process_referral", { referrer_code: refCode }); } catch (e) { console.error(e); }
       }
@@ -204,17 +201,36 @@ const Waitlist = () => {
     }
   };
 
-  const handleXShare = async () => {
+  const handleXShare = () => {
     const siteUrl = window.location.origin;
     const referralLink = `${siteUrl}/waitlist?ref=${referralCode}`;
     const tweetText = `I just joined the @RaidFi_App waitlist. Don't miss this → ${referralLink}`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank", "noopener,noreferrer");
+    setStep("share");
+  };
 
+  const handleSubmitSharePost = async () => {
+    if (!sharePostUrl.trim()) return;
+    if (!TWEET_URL_REGEX.test(sharePostUrl.trim())) {
+      toast({ title: "Invalid URL", description: "Please paste a valid X post link.", variant: "destructive" });
+      return;
+    }
+    setSubmittingShare(true);
     try {
       await supabase.from("waitlist_submissions").update({ x_shared: true } as any).eq("id", submissionId);
-    } catch (err) { console.error(err); }
-
-    setStep("share");
+      // Store the share post as a task submission
+      await supabase.from("waitlist_task_submissions" as any).insert({
+        submission_email: email.trim().toLowerCase(),
+        task_id: tasks[0]?.id || submissionId, // fallback
+        clicked_at: new Date().toISOString(),
+        verified_at: new Date().toISOString(),
+        input_value: sharePostUrl.trim(),
+      } as any);
+      toast({ title: "Post submitted!", description: "You're all set." });
+    } catch (err) {
+      console.error(err);
+    }
+    setSubmittingShare(false);
   };
 
   const slideVariants = {
@@ -260,7 +276,6 @@ const Waitlist = () => {
                       <div key={task.id} className={`rounded-xl border transition-all ${
                         state.verified ? "border-primary/30 bg-primary/5" : "border-border bg-card"
                       }`}>
-                        {/* Main task button */}
                         <button
                           onClick={() => handleTaskClick(task)}
                           disabled={state.verified}
@@ -281,7 +296,6 @@ const Waitlist = () => {
                           {!hasClicked && <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />}
                         </button>
 
-                        {/* Verify section */}
                         {hasClicked && !state.verified && (
                           <div className="px-4 pb-4 space-y-2">
                             {task.requires_input && (
@@ -348,7 +362,7 @@ const Waitlist = () => {
                   <CheckCircle2 className="w-10 h-10 text-primary" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">Congrats, you joined the waitlist!</h2>
-                <p className="text-primary font-semibold text-lg mb-1">+50 RaidFi Points</p>
+                <p className="text-primary font-semibold text-lg mb-1">+50 RaidFi XP</p>
                 <p className="text-sm text-muted-foreground mb-8">One last step — share on X to verify and unlock contributions.</p>
                 <Button size="lg" onClick={handleXShare} className="h-12 px-8 text-base">
                   <Twitter className="w-5 h-5 mr-2" /> Share on X to Verify
@@ -361,11 +375,41 @@ const Waitlist = () => {
                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
                   <CheckCircle2 className="w-10 h-10 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">You're Verified!</h2>
-                <p className="text-sm text-muted-foreground mb-8">Head to the Contributions page to sign in and start earning points.</p>
-                <Button size="lg" asChild className="h-12 px-8 text-base">
-                  <a href="/contributions">Go to Contributions</a>
-                </Button>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Submit Your Post</h2>
+                <p className="text-sm text-muted-foreground mb-6">Paste the link to your X post to complete verification.</p>
+
+                <div className="glass-card p-6 rounded-xl space-y-4 text-left">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Your X Post URL</label>
+                    <Input
+                      type="url"
+                      placeholder="https://x.com/you/status/..."
+                      value={sharePostUrl}
+                      onChange={(e) => setSharePostUrl(e.target.value)}
+                      className="h-11 text-sm"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSubmitSharePost}
+                    className="w-full h-11 text-sm font-semibold"
+                    disabled={submittingShare || !sharePostUrl.trim()}
+                  >
+                    {submittingShare && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Submit & Complete
+                  </Button>
+                </div>
+
+                <div className="mt-6">
+                  <p className="text-xs text-muted-foreground mb-3">Then head to contributions to start earning XP.</p>
+                  <Button variant="outline" size="lg" asChild className="h-12 px-8 text-base">
+                    <a href="/contributions">Go to Contributions</a>
+                  </Button>
+                </div>
+
+                {/* OG preview */}
+                <div className="mt-8 rounded-xl overflow-hidden border border-border">
+                  <img src="/og-image.jpg" alt="RaidFi" className="w-full" />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Loader2, Send, LogOut, Trophy, Copy, Check, ExternalLink,
+  Loader2, Send, LogOut, Copy, Check, ExternalLink,
   Mail, KeyRound, User, Link2, ClipboardList
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ValidationForm from "@/components/validation/ValidationForm";
 import type { Session } from "@supabase/supabase-js";
 
 const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
@@ -64,6 +65,10 @@ const Contributions = () => {
   const [contributeTasks, setContributeTasks] = useState<ContributeTask[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set());
 
+  // Validation form inline
+  const [showValidationForm, setShowValidationForm] = useState(false);
+  const [validationCompleted, setValidationCompleted] = useState(false);
+
   // Leaderboard
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
@@ -100,11 +105,10 @@ const Contributions = () => {
         .maybeSingle();
 
       if (data) {
-        // Fix missing referral_code
         if (!(data as any).referral_code) {
           const { data: updated } = await supabase
             .from("profiles")
-            .update({ referral_code: undefined } as any) // triggers default
+            .update({ referral_code: undefined } as any)
             .eq("user_id", session.user.id)
             .select()
             .single();
@@ -113,7 +117,6 @@ const Contributions = () => {
           setProfile(data as any);
         }
       } else {
-        // Create profile if missing
         const { data: newProfile } = await supabase
           .from("profiles")
           .insert({
@@ -127,6 +130,20 @@ const Contributions = () => {
       }
     };
     fetchProfile();
+  }, [session]);
+
+  // Check if validation already completed
+  useEffect(() => {
+    if (!session?.user?.email) return;
+    const check = async () => {
+      const { data } = await supabase
+        .from("validation_submissions")
+        .select("id")
+        .eq("email", session.user!.email!)
+        .maybeSingle();
+      if (data) setValidationCompleted(true);
+    };
+    check();
   }, [session]);
 
   // Fetch contribute tasks
@@ -155,26 +172,26 @@ const Contributions = () => {
     fetch();
   }, [session]);
 
-  // Calculate user total points
+  // Calculate user total points - deduplicated
   const calculatePoints = useCallback(async () => {
     if (!session?.user?.email) return;
     const userEmail = session.user.email;
 
-    // Waitlist points
+    // Waitlist points - take max per email (should be single but dedup)
     const { data: wl } = await supabase
       .from("waitlist_submissions")
       .select("points")
       .eq("email", userEmail);
-    const waitlistPts = wl?.reduce((s, r) => s + r.points, 0) || 0;
+    const waitlistPts = wl?.length ? Math.max(...wl.map(r => r.points)) : 0;
 
-    // Validation points
+    // Validation points - take max (dedup: only count once)
     const { data: val } = await supabase
       .from("validation_submissions")
       .select("points_earned")
       .eq("email", userEmail);
-    const valPts = val?.reduce((s, r) => s + r.points_earned, 0) || 0;
+    const valPts = val?.length ? Math.max(...val.map(r => r.points_earned)) : 0;
 
-    // Contribution points (approved)
+    // Contribution points (approved) - sum all
     const { data: cont } = await supabase
       .from("contributions")
       .select("points_earned")
@@ -200,11 +217,10 @@ const Contributions = () => {
 
   useEffect(() => { calculatePoints(); }, [calculatePoints]);
 
-  // Fetch leaderboard
+  // Fetch leaderboard - deduplicated
   const fetchLeaderboard = useCallback(async (filter: typeof leaderboardFilter) => {
     setLoadingLeaderboard(true);
 
-    // Get all contributions (approved)
     let query = supabase.from("contributions").select("user_email, points_earned, created_at").eq("status", "approved");
     if (filter !== "all") {
       const now = new Date();
@@ -216,11 +232,8 @@ const Contributions = () => {
     }
     const { data: contData } = await query;
 
-    // Get waitlist points
     const { data: wlData } = await supabase.from("waitlist_submissions").select("email, points");
-    // Get validation points
     const { data: valData } = await supabase.from("validation_submissions").select("email, points_earned");
-    // Get profiles for names
     const { data: profilesData } = await supabase.from("profiles").select("email, name") as any;
 
     const pointsMap: Record<string, number> = {};
@@ -230,12 +243,20 @@ const Contributions = () => {
       (profilesData as any[]).forEach(p => { if (p.name) namesMap[p.email] = p.name; });
     }
 
-    // Only add base points for "all" filter
+    // Only add base points for "all" filter - DEDUPLICATED: max per email
     if (filter === "all") {
-      wlData?.forEach(w => { pointsMap[w.email] = (pointsMap[w.email] || 0) + w.points; });
-      valData?.forEach(v => { pointsMap[v.email] = (pointsMap[v.email] || 0) + v.points_earned; });
+      // Waitlist: take max points per email
+      const wlMax: Record<string, number> = {};
+      wlData?.forEach(w => { wlMax[w.email] = Math.max(wlMax[w.email] || 0, w.points); });
+      Object.entries(wlMax).forEach(([email, pts]) => { pointsMap[email] = (pointsMap[email] || 0) + pts; });
+
+      // Validation: take max points_earned per email (count only once)
+      const valMax: Record<string, number> = {};
+      valData?.forEach(v => { valMax[v.email] = Math.max(valMax[v.email] || 0, v.points_earned); });
+      Object.entries(valMax).forEach(([email, pts]) => { pointsMap[email] = (pointsMap[email] || 0) + pts; });
     }
 
+    // Contributions: sum all (each is unique)
     contData?.forEach(c => { pointsMap[c.user_email] = (pointsMap[c.user_email] || 0) + c.points_earned; });
 
     const sorted = Object.entries(pointsMap)
@@ -250,7 +271,6 @@ const Contributions = () => {
     setLeaderboard(sorted.slice(0, 10));
     setLeaderboardVisible(10);
 
-    // Find user rank
     if (session?.user?.email) {
       const idx = sorted.findIndex(e => e.email === session.user.email);
       setUserRank(idx >= 0 ? idx + 1 : null);
@@ -368,10 +388,12 @@ const Contributions = () => {
     if (!session?.user) return;
     if (completedTaskIds.has(task.id)) return;
 
-    if (task.task_type === "form" && task.url) {
-      window.open(task.url, "_blank");
+    // Special: validation form task - show inline
+    if (task.task_type === "form") {
+      setShowValidationForm(true);
       return;
     }
+
     if (task.task_type === "link" && task.url) {
       window.open(task.url, "_blank");
     }
@@ -381,15 +403,37 @@ const Contributions = () => {
       .insert({ user_id: session.user.id, task_id: task.id } as any);
     if (!error) {
       setCompletedTaskIds(prev => new Set([...prev, task.id]));
-      toast({ title: `+${task.points} Points`, description: task.label });
+      toast({ title: `+${task.points} XP`, description: task.label });
       calculatePoints();
     }
+  };
+
+  // Handle validation form complete
+  const handleValidationComplete = async () => {
+    setValidationCompleted(true);
+    setShowValidationForm(false);
+    // Mark the form task as completed
+    const formTask = contributeTasks.find(t => t.task_type === "form");
+    if (formTask && session?.user) {
+      await supabase
+        .from("contribute_task_completions" as any)
+        .insert({ user_id: session.user.id, task_id: formTask.id } as any);
+      setCompletedTaskIds(prev => new Set([...prev, formTask.id]));
+    }
+    calculatePoints();
+    fetchLeaderboard(leaderboardFilter);
   };
 
   const loadMoreLeaderboard = () => {
     const next = leaderboardVisible + 10;
     setLeaderboard(allLeaderboard.slice(0, next));
     setLeaderboardVisible(next);
+  };
+
+  // Check if validation form task should show as done
+  const isTaskDone = (task: ContributeTask) => {
+    if (task.task_type === "form") return validationCompleted || completedTaskIds.has(task.id);
+    return completedTaskIds.has(task.id);
   };
 
   return (
@@ -403,7 +447,7 @@ const Contributions = () => {
               Community <span className="text-gradient">Contributions</span>
             </h1>
             <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-              Share your RaidFi posts, complete tasks, and earn points.
+              Share your RaidFi posts, complete tasks, and earn XP.
             </p>
           </div>
 
@@ -451,7 +495,7 @@ const Contributions = () => {
                         Verify
                       </Button>
                       <button type="button" onClick={() => { setOtpSent(false); setOtp(""); }}
-                        className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
+                        className="text-xs text-muted-foreground w-full text-center">
                         Use different email
                       </button>
                     </form>
@@ -462,8 +506,27 @@ const Contributions = () => {
           ) : (
             /* LOGGED IN */
             <div className="space-y-6">
+              {/* Validation form overlay */}
+              {showValidationForm && (
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold text-foreground">Complete Validation Form</h3>
+                      <button onClick={() => setShowValidationForm(false)} className="text-xs text-muted-foreground">
+                        Cancel
+                      </button>
+                    </div>
+                    <ValidationForm
+                      userId={session.user.id}
+                      userEmail={session.user.email || ""}
+                      onComplete={handleValidationComplete}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Name prompt */}
-              {profile && !profile.name && (
+              {profile && !profile.name && !showValidationForm && (
                 <Card>
                   <CardContent className="p-5">
                     <div className="flex items-center gap-3 mb-3">
@@ -482,185 +545,185 @@ const Contributions = () => {
                 </Card>
               )}
 
-              {/* User Stats + Sign Out */}
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
-                        {(profile?.name || session.user.email || "?").charAt(0).toUpperCase()}
+              {!showValidationForm && (
+                <>
+                  {/* User Stats + Sign Out */}
+                  <Card>
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
+                            {(profile?.name || session.user.email || "?").charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{profile?.name || session.user.email}</p>
+                            {profile?.name && <p className="text-xs text-muted-foreground">{session.user.email}</p>}
+                          </div>
+                        </div>
+                        <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
+                          <LogOut className="w-3 h-3" /> Sign out
+                        </button>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{profile?.name || session.user.email}</p>
-                        {profile?.name && <p className="text-xs text-muted-foreground">{session.user.email}</p>}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="p-3 rounded-lg bg-primary/10 text-center">
+                          <p className="text-lg font-bold text-foreground">{userTotalPoints}</p>
+                          <p className="text-[10px] text-muted-foreground">XP</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-muted text-center">
+                          <p className="text-lg font-bold text-foreground">{userRank ? `#${userRank}` : "—"}</p>
+                          <p className="text-[10px] text-muted-foreground">Rank</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-muted text-center">
+                          <p className="text-lg font-bold text-foreground">{profile?.referral_count || 0}</p>
+                          <p className="text-[10px] text-muted-foreground">Referrals</p>
+                        </div>
                       </div>
-                    </div>
-                    <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                      <LogOut className="w-3 h-3" /> Sign out
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="p-3 rounded-lg bg-primary/10 text-center">
-                      <Trophy className="w-4 h-4 text-primary mx-auto mb-1" />
-                      <p className="text-lg font-bold text-foreground">{userTotalPoints}</p>
-                      <p className="text-[10px] text-muted-foreground">Points</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-muted text-center">
-                      <p className="text-lg font-bold text-foreground">{userRank ? `#${userRank}` : "—"}</p>
-                      <p className="text-[10px] text-muted-foreground">Rank</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-muted text-center">
-                      <p className="text-lg font-bold text-foreground">{profile?.referral_count || 0}</p>
-                      <p className="text-[10px] text-muted-foreground">Referrals</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
 
-              {/* Referral */}
-              {profile?.referral_code && (
-                <Card>
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Link2 className="w-4 h-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-foreground">Your Referral Link</h3>
-                    </div>
-                    <div className="flex gap-2">
-                      <Input readOnly value={`${window.location.origin}/waitlist?ref=${profile.referral_code}`}
-                        className="h-9 text-xs flex-1 bg-muted" />
-                      <Button size="sm" variant="outline" onClick={handleCopyReferral} className="h-9 px-3">
-                        {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Post Submission */}
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Send className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-semibold text-foreground">Submit a Post</h3>
-                  </div>
-                  <form onSubmit={handleSubmitPost} className="flex gap-2">
-                    <Input type="url" placeholder="https://x.com/user/status/..." value={postUrl}
-                      onChange={(e) => setPostUrl(e.target.value)} required className="h-9 text-sm flex-1" />
-                    <Button type="submit" size="sm" className="h-9 px-4" disabled={submittingPost}>
-                      {submittingPost ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                    </Button>
-                  </form>
-                  <p className="text-[11px] text-muted-foreground mt-2">Posts require admin approval before earning points.</p>
-                </CardContent>
-              </Card>
-
-              {/* Contribute Tasks */}
-              {contributeTasks.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <ClipboardList className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-semibold text-foreground">Tasks</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {contributeTasks.map(task => {
-                      const done = completedTaskIds.has(task.id);
-                      return (
-                        <Card key={task.id} className={done ? "opacity-60" : ""}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium text-foreground">{task.label}</p>
-                                {task.description && <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>}
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <span className="text-xs font-semibold text-primary">+{task.points} pts</span>
-                                <Button size="sm" variant={done ? "ghost" : "outline"} disabled={done}
-                                  onClick={() => handleCompleteTask(task)} className="h-8 text-xs">
-                                  {done ? <><Check className="w-3 h-3 mr-1" /> Done</> : "Complete"}
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Leaderboard */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-primary" /> Leaderboard
-                  </h3>
-                  <div className="flex gap-1">
-                    {(["all", "day", "week", "month"] as const).map(f => (
-                      <button key={f} onClick={() => setLeaderboardFilter(f)}
-                        className={`px-2 py-1 text-xs rounded-md transition-colors ${
-                          leaderboardFilter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        }`}>
-                        {f === "all" ? "All" : f === "day" ? "24h" : f === "week" ? "7d" : "30d"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {loadingLeaderboard ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
-                ) : leaderboard.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No contributors yet.</p>
-                ) : (
-                  <>
+                  {/* Referral */}
+                  {profile?.referral_code && (
                     <Card>
-                      <CardContent className="p-0">
-                        <div className="divide-y divide-border">
-                          {leaderboard.map((entry, i) => {
-                            const isUser = entry.email === session?.user?.email;
-                            return (
-                              <div key={entry.email} className={`flex items-center justify-between px-4 py-3 ${isUser ? "bg-primary/5" : ""}`}>
-                                <div className="flex items-center gap-3">
-                                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                    i === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                                    i === 1 ? "bg-gray-400/20 text-gray-400" :
-                                    i === 2 ? "bg-orange-500/20 text-orange-500" :
-                                    "bg-muted text-muted-foreground"
-                                  }`}>{i + 1}</span>
-                                  <span className={`text-sm ${isUser ? "text-primary font-medium" : "text-foreground"}`}>
-                                    {entry.display_name} {isUser && "(You)"}
-                                  </span>
-                                </div>
-                                <span className="text-sm font-semibold text-primary">{entry.total_points} pts</span>
-                              </div>
-                            );
-                          })}
+                      <CardContent className="p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Link2 className="w-4 h-4 text-primary" />
+                          <h3 className="text-sm font-semibold text-foreground">Your Referral Link</h3>
+                        </div>
+                        <div className="flex gap-2">
+                          <Input readOnly value={`${window.location.origin}/waitlist?ref=${profile.referral_code}`}
+                            className="h-9 text-xs flex-1 bg-muted" />
+                          <Button size="sm" variant="outline" onClick={handleCopyReferral} className="h-9 px-3">
+                            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
+                  )}
 
-                    {/* User position if not in view */}
-                    {userRank && userRank > leaderboardVisible && (
-                      <div className="mt-2 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-sm text-foreground flex justify-between">
-                        <span>Your position: <strong>#{userRank}</strong></span>
-                        <span className="font-semibold text-primary">{userTotalPoints} pts</span>
+                  {/* Post Submission */}
+                  <Card>
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Send className="w-4 h-4 text-primary" />
+                        <h3 className="text-sm font-semibold text-foreground">Submit a Post</h3>
                       </div>
-                    )}
+                      <form onSubmit={handleSubmitPost} className="flex gap-2">
+                        <Input type="url" placeholder="https://x.com/user/status/..." value={postUrl}
+                          onChange={(e) => setPostUrl(e.target.value)} required className="h-9 text-sm flex-1" />
+                        <Button type="submit" size="sm" className="h-9 px-4" disabled={submittingPost}>
+                          {submittingPost ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                        </Button>
+                      </form>
+                      <p className="text-[11px] text-muted-foreground mt-2">Posts require admin approval before earning XP.</p>
+                    </CardContent>
+                  </Card>
 
-                    {leaderboardVisible < allLeaderboard.length && (
-                      <div className="text-center pt-3">
-                        <Button variant="outline" size="sm" onClick={loadMoreLeaderboard}>See More</Button>
+                  {/* Contribute Tasks */}
+                  {contributeTasks.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <ClipboardList className="w-4 h-4 text-primary" />
+                        <h3 className="text-sm font-semibold text-foreground">Tasks</h3>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
+                      <div className="space-y-2">
+                        {contributeTasks.map(task => {
+                          const done = isTaskDone(task);
+                          return (
+                            <Card key={task.id} className={done ? "opacity-60" : ""}>
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">{task.label}</p>
+                                    {task.description && <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>}
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-xs font-semibold text-primary">+{task.points} XP</span>
+                                    <Button size="sm" variant={done ? "ghost" : "outline"} disabled={done}
+                                      onClick={() => handleCompleteTask(task)} className="h-8 text-xs">
+                                      {done ? <><Check className="w-3 h-3 mr-1" /> Done</> : "Complete"}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
-              {/* Link to feed */}
-              <div className="text-center pt-4">
-                <a href="/feed" className="text-sm text-primary hover:underline flex items-center gap-1 justify-center">
-                  <ExternalLink className="w-3.5 h-3.5" /> View Live Feed
-                </a>
-              </div>
+                  {/* Leaderboard */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-foreground">Leaderboard</h3>
+                      <div className="flex gap-1">
+                        {(["all", "day", "week", "month"] as const).map(f => (
+                          <button key={f} onClick={() => setLeaderboardFilter(f)}
+                            className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                              leaderboardFilter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                            }`}>
+                            {f === "all" ? "All" : f === "day" ? "24h" : f === "week" ? "7d" : "30d"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {loadingLeaderboard ? (
+                      <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+                    ) : leaderboard.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">No contributors yet.</p>
+                    ) : (
+                      <>
+                        <Card>
+                          <CardContent className="p-0">
+                            <div className="divide-y divide-border">
+                              {leaderboard.map((entry, i) => {
+                                const isUser = entry.email === session?.user?.email;
+                                return (
+                                  <div key={entry.email} className={`flex items-center justify-between px-4 py-3 ${isUser ? "bg-primary/5" : ""}`}>
+                                    <div className="flex items-center gap-3">
+                                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                        i === 0 ? "bg-yellow-500/20 text-yellow-500" :
+                                        i === 1 ? "bg-gray-400/20 text-gray-400" :
+                                        i === 2 ? "bg-orange-500/20 text-orange-500" :
+                                        "bg-muted text-muted-foreground"
+                                      }`}>{i + 1}</span>
+                                      <span className={`text-sm ${isUser ? "text-primary font-medium" : "text-foreground"}`}>
+                                        {entry.display_name} {isUser && "(You)"}
+                                      </span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-primary">{entry.total_points} XP</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {userRank && userRank > leaderboardVisible && (
+                          <div className="mt-2 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-sm text-foreground flex justify-between">
+                            <span>Your position: <strong>#{userRank}</strong></span>
+                            <span className="font-semibold text-primary">{userTotalPoints} XP</span>
+                          </div>
+                        )}
+
+                        {leaderboardVisible < allLeaderboard.length && (
+                          <div className="text-center pt-3">
+                            <Button variant="outline" size="sm" onClick={loadMoreLeaderboard}>See More</Button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Link to feed */}
+                  <div className="text-center pt-4">
+                    <a href="/feed" className="text-sm text-primary flex items-center gap-1 justify-center">
+                      <ExternalLink className="w-3.5 h-3.5" /> View Live Feed
+                    </a>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
