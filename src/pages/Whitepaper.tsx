@@ -21,11 +21,14 @@ const Whitepaper = () => {
     let mounted = true;
 
     const fetchData = async () => {
-      const { data, error } = await supabase
-        .from("whitepaper_live" as any)
+      const result = await (supabase as any)
+        .from("whitepaper_live")
         .select("content, version, updated_at")
         .eq("id", "live")
         .maybeSingle();
+
+      const data = (result?.data ?? null) as WhitepaperData | null;
+      const error = (result?.error ?? null) as { message?: string } | null;
 
       if (!mounted) return;
 
