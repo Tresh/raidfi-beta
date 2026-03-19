@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, Mail, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -42,23 +42,19 @@ const Contact = () => {
       toast({ title: "Validation error", description: parsed.error.issues[0].message, variant: "destructive" });
       return;
     }
-
     setLoading(true);
     try {
       const { name, email, subject, message } = parsed.data;
-
       const { data: existing } = await supabase
         .from("contact_submissions")
         .select("id")
         .eq("email", email)
         .maybeSingle();
-
       if (existing) {
-        toast({ title: "Already submitted", description: "This email has already sent a message. We'll get back to you soon!", variant: "destructive" });
+        toast({ title: "Already submitted", description: "We'll get back to you soon!", variant: "destructive" });
         setLoading(false);
         return;
       }
-
       const { error } = await supabase.from("contact_submissions").insert([{ name, email, subject, message }]);
       if (error) throw error;
       setSent(true);
@@ -74,75 +70,74 @@ const Contact = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center px-6 py-8 pt-24">
-        <div className="max-w-sm w-full">
+      <main className="flex-1 flex items-center justify-center px-6 py-12 pt-24">
+        <div className="max-w-4xl w-full">
           {!sent ? (
-            <>
-              <div className="text-center mb-5">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-10 items-start">
+              {/* Left - Contact Info */}
+              <div>
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  Get in <span className="text-primary">Touch</span>
+                  Get in <span className="text-gradient">Touch</span>
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                  Have a question or partnership idea? We'd love to hear from you.
+                <p className="text-sm text-muted-foreground mb-8">
+                  Have a question or partnership idea? Reach out to us.
                 </p>
+
+                <div className="space-y-4">
+                  <a
+                    href="mailto:hello.raidfi@gmail.com"
+                    className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Email</p>
+                      <p className="text-xs text-muted-foreground">hello.raidfi@gmail.com</p>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://x.com/raidfi_app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Twitter className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">X (Twitter)</p>
+                      <p className="text-xs text-muted-foreground">@raidfi_app</p>
+                    </div>
+                  </a>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="glass-card p-5 rounded-xl space-y-3">
-                <Input
-                  name="name"
-                  placeholder="Your name"
-                  value={form.name}
-                  onChange={handleChange}
-                  className="bg-white/[0.05] border-white/[0.1] text-foreground h-9 text-sm"
-                  required
-                  maxLength={100}
-                />
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-                  className="bg-white/[0.05] border-white/[0.1] text-foreground h-9 text-sm"
-                  required
-                  maxLength={255}
-                />
-                <Input
-                  name="subject"
-                  placeholder="Subject"
-                  value={form.subject}
-                  onChange={handleChange}
-                  className="bg-white/[0.05] border-white/[0.1] text-foreground h-9 text-sm"
-                  required
-                  maxLength={200}
-                />
-                <Textarea
-                  name="message"
-                  placeholder="Your message..."
-                  value={form.message}
-                  onChange={handleChange}
-                  className="bg-white/[0.05] border-white/[0.1] text-foreground min-h-[80px] text-sm"
-                  required
-                  maxLength={2000}
-                />
-                <Button type="submit" className="w-full h-9 text-sm font-semibold" disabled={loading}>
+              {/* Right - Form */}
+              <form onSubmit={handleSubmit} className="glass-card p-6 rounded-xl space-y-3">
+                <Input name="name" placeholder="Your name" value={form.name} onChange={handleChange}
+                  className="bg-white/[0.05] border-white/[0.1] text-foreground h-10 text-sm" required maxLength={100} />
+                <Input name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange}
+                  className="bg-white/[0.05] border-white/[0.1] text-foreground h-10 text-sm" required maxLength={255} />
+                <Input name="subject" placeholder="Subject" value={form.subject} onChange={handleChange}
+                  className="bg-white/[0.05] border-white/[0.1] text-foreground h-10 text-sm" required maxLength={200} />
+                <Textarea name="message" placeholder="Your message..." value={form.message} onChange={handleChange}
+                  className="bg-white/[0.05] border-white/[0.1] text-foreground min-h-[120px] text-sm" required maxLength={2000} />
+                <Button type="submit" className="w-full h-10 text-sm font-semibold" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Send Message
                 </Button>
               </form>
-            </>
+            </div>
           ) : (
-            <div className="glass-card p-6 rounded-xl text-center">
+            <div className="max-w-sm mx-auto glass-card p-6 rounded-xl text-center">
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-7 h-7 text-primary" />
               </div>
               <h2 className="text-xl font-semibold text-foreground mb-2">Message sent</h2>
-              <p className="text-sm text-muted-foreground mb-5">
-                Thanks for reaching out! We'll get back to you soon.
-              </p>
-              <Button variant="outline" size="sm" onClick={() => navigate("/")}>
-                Back to Home
-              </Button>
+              <p className="text-sm text-muted-foreground mb-5">Thanks for reaching out! We'll get back to you soon.</p>
+              <Button variant="outline" size="sm" onClick={() => navigate("/")}>Back to Home</Button>
             </div>
           )}
         </div>

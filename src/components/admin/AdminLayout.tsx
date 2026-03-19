@@ -9,6 +9,7 @@ import {
   Home,
   Menu,
   X,
+  ListChecks,
 } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Loader2 } from "lucide-react";
@@ -18,6 +19,7 @@ import logo from "@/assets/logo.png";
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
   { label: "Waitlist", to: "/admin/waitlist", icon: Users },
+  { label: "Tasks", to: "/admin/tasks", icon: ListChecks },
   { label: "Validations", to: "/admin/validations", icon: ClipboardList },
   { label: "Contacts", to: "/admin/contacts", icon: Mail },
   { label: "Whitepaper", to: "/admin/whitepaper", icon: ClipboardList },
@@ -42,22 +44,20 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar-background border-r border-sidebar-border flex flex-col transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border flex flex-col transition-transform lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-5 flex items-center justify-between border-b border-sidebar-border shrink-0">
+        <div className="p-5 flex items-center justify-between border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <img src={logo} alt="RaidFi" className="w-8 h-8" />
             <div>
-              <p className="font-semibold text-sidebar-foreground text-sm">Admin Panel</p>
+              <p className="font-semibold text-foreground text-sm">Admin Panel</p>
               <p className="text-xs text-muted-foreground">RaidFi</p>
             </div>
           </div>
@@ -80,7 +80,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                   isActive(item.to, item.end)
                     ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`
               }
             >
@@ -90,10 +90,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-sidebar-border space-y-1 shrink-0">
+        <div className="p-3 border-t border-border space-y-1 shrink-0">
           <NavLink
             to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <Home className="w-4 h-4" />
             Back to Site
@@ -108,7 +108,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background sticky top-0 z-30">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground">

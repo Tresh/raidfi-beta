@@ -16,9 +16,9 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/contributions", label: "Contribute" },
     { href: "/whitepaper", label: "Whitepaper" },
     { href: "/contact", label: "Contact" },
+    { href: "/login", label: "Login" },
   ];
 
   const handleLinkClick = () => setOpen(false);
@@ -36,11 +36,7 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <a key={link.href} href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {link.label}
               </a>
             ))}
@@ -63,18 +59,12 @@ const Navbar = () => {
                     RaidFi
                   </span>
                 </div>
-
                 {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={handleLinkClick}
-                    className="text-foreground hover:text-primary transition-colors text-base font-medium"
-                  >
+                  <a key={link.href} href={link.href} onClick={handleLinkClick}
+                    className="text-foreground hover:text-primary transition-colors text-base font-medium">
                     {link.label}
                   </a>
                 ))}
-
                 <Button className="mt-4" asChild>
                   <a href="/waitlist" onClick={handleLinkClick}>Request Access</a>
                 </Button>
