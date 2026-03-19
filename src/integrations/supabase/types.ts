@@ -180,6 +180,36 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_scores: {
+        Row: {
+          contribution_xp: number
+          display_name: string
+          email: string
+          total_xp: number
+          updated_at: string
+          validation_xp: number
+          waitlist_xp: number
+        }
+        Insert: {
+          contribution_xp?: number
+          display_name: string
+          email: string
+          total_xp?: number
+          updated_at?: string
+          validation_xp?: number
+          waitlist_xp?: number
+        }
+        Update: {
+          contribution_xp?: number
+          display_name?: string
+          email?: string
+          total_xp?: number
+          updated_at?: string
+          validation_xp?: number
+          waitlist_xp?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
