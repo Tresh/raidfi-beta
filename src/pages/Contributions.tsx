@@ -172,114 +172,82 @@ const Contributions = () => {
     fetch();
   }, [session]);
 
-  // Calculate user total points - deduplicated
+  // User XP from backend score table
   const calculatePoints = useCallback(async () => {
-    if (!session?.user?.email) return;
-    const userEmail = session.user.email;
-
-    // Waitlist points - take max per email (should be single but dedup)
-    const { data: wl } = await supabase
-      .from("waitlist_submissions")
-      .select("points")
-      .eq("email", userEmail);
-    const waitlistPts = wl?.length ? Math.max(...wl.map(r => r.points)) : 0;
-
-    // Validation points - take max (dedup: only count once)
-    const { data: val } = await supabase
-      .from("validation_submissions")
-      .select("points_earned")
-      .eq("email", userEmail);
-    const valPts = val?.length ? Math.max(...val.map(r => r.points_earned)) : 0;
-
-    // Contribution points (approved) - sum all
-    const { data: cont } = await supabase
-      .from("contributions")
-      .select("points_earned")
-      .eq("user_email", userEmail)
-      .eq("status", "approved");
-    const contPts = cont?.reduce((s, r) => s + r.points_earned, 0) || 0;
-
-    // Contribute task points
-    let taskPts = 0;
-    if (session.user.id) {
-      const { data: completions } = await supabase
-        .from("contribute_task_completions" as any)
-        .select("task_id")
-        .eq("user_id", session.user.id);
-      if (completions && contributeTasks.length) {
-        const taskMap = new Map(contributeTasks.map(t => [t.id, t.points]));
-        taskPts = (completions as any[]).reduce((s, c) => s + (taskMap.get(c.task_id) || 0), 0);
-      }
+    const userEmail = session?.user?.email?.trim().toLowerCase();
+    if (!userEmail) {
+      setUserTotalPoints(0);
+      return;
     }
 
-    setUserTotalPoints(waitlistPts + valPts + contPts + taskPts);
-  }, [session, contributeTasks]);
+    const { data } = await (supabase
+      .from("leaderboard_scores" as any)
+      .select("total_xp")
+      .eq("email", userEmail)
+      .maybeSingle() as any);
+
+    setUserTotalPoints((data?.total_xp as number) || 0);
+  }, [session]);
 
   useEffect(() => { calculatePoints(); }, [calculatePoints]);
 
-  // Fetch leaderboard - deduplicated
+  // Leaderboard now comes from backend RPC (source of truth)
   const fetchLeaderboard = useCallback(async (filter: typeof leaderboardFilter) => {
     setLoadingLeaderboard(true);
 
-    let query = supabase.from("contributions").select("user_email, points_earned, created_at").eq("status", "approved");
-    if (filter !== "all") {
-      const now = new Date();
-      let start: Date;
-      if (filter === "day") start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      else if (filter === "week") start = new Date(now.getTime() - 7 * 86400000);
-      else start = new Date(now.getFullYear(), now.getMonth(), 1);
-      query = query.gte("created_at", start.toISOString());
-    }
-    const { data: contData } = await query;
+    const { data, error } = await supabase.rpc("get_leaderboard", { _period: filter });
 
-    const { data: wlData } = await supabase.from("waitlist_submissions").select("email, points");
-    const { data: valData } = await supabase.from("validation_submissions").select("email, points_earned");
-    const { data: profilesData } = await supabase.from("profiles").select("email, name") as any;
-
-    const pointsMap: Record<string, number> = {};
-    const namesMap: Record<string, string> = {};
-
-    if (profilesData) {
-      (profilesData as any[]).forEach(p => { if (p.name) namesMap[p.email] = p.name; });
+    if (error) {
+      setAllLeaderboard([]);
+      setLeaderboard([]);
+      setUserRank(null);
+      setLoadingLeaderboard(false);
+      return;
     }
 
-    // Only add base points for "all" filter - DEDUPLICATED: max per email
-    if (filter === "all") {
-      // Waitlist: take max points per email
-      const wlMax: Record<string, number> = {};
-      wlData?.forEach(w => { wlMax[w.email] = Math.max(wlMax[w.email] || 0, w.points); });
-      Object.entries(wlMax).forEach(([email, pts]) => { pointsMap[email] = (pointsMap[email] || 0) + pts; });
-
-      // Validation: take max points_earned per email (count only once)
-      const valMax: Record<string, number> = {};
-      valData?.forEach(v => { valMax[v.email] = Math.max(valMax[v.email] || 0, v.points_earned); });
-      Object.entries(valMax).forEach(([email, pts]) => { pointsMap[email] = (pointsMap[email] || 0) + pts; });
-    }
-
-    // Contributions: sum all (each is unique)
-    contData?.forEach(c => { pointsMap[c.user_email] = (pointsMap[c.user_email] || 0) + c.points_earned; });
-
-    const sorted = Object.entries(pointsMap)
-      .map(([email, total_points]) => ({
-        email,
-        display_name: namesMap[email] || email.replace(/(.{3}).*(@.*)/, "$1***$2"),
-        total_points,
-      }))
-      .sort((a, b) => b.total_points - a.total_points);
+    const sorted: LeaderboardEntry[] = ((data || []) as any[]).map((row) => ({
+      email: row.email,
+      display_name: row.display_name,
+      total_points: row.total_xp,
+    }));
 
     setAllLeaderboard(sorted);
     setLeaderboard(sorted.slice(0, 10));
     setLeaderboardVisible(10);
 
-    if (session?.user?.email) {
-      const idx = sorted.findIndex(e => e.email === session.user.email);
+    const userEmail = session?.user?.email?.trim().toLowerCase();
+    if (userEmail) {
+      const idx = sorted.findIndex((entry) => entry.email === userEmail);
       setUserRank(idx >= 0 ? idx + 1 : null);
+    } else {
+      setUserRank(null);
     }
 
     setLoadingLeaderboard(false);
   }, [session]);
 
   useEffect(() => { fetchLeaderboard(leaderboardFilter); }, [leaderboardFilter, fetchLeaderboard]);
+
+  // Live updates whenever backend leaderboard table changes
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const channel = supabase
+      .channel("leaderboard-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "leaderboard_scores" },
+        () => {
+          fetchLeaderboard(leaderboardFilter);
+          calculatePoints();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session, leaderboardFilter, fetchLeaderboard, calculatePoints]);
 
   // Auth handlers
   const handleSendOtp = async (e: React.FormEvent) => {

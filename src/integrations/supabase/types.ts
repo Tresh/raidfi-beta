@@ -180,6 +180,36 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_scores: {
+        Row: {
+          contribution_xp: number
+          display_name: string
+          email: string
+          total_xp: number
+          updated_at: string
+          validation_xp: number
+          waitlist_xp: number
+        }
+        Insert: {
+          contribution_xp?: number
+          display_name: string
+          email: string
+          total_xp?: number
+          updated_at?: string
+          validation_xp?: number
+          waitlist_xp?: number
+        }
+        Update: {
+          contribution_xp?: number
+          display_name?: string
+          email?: string
+          total_xp?: number
+          updated_at?: string
+          validation_xp?: number
+          waitlist_xp?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -465,6 +495,14 @@ export type Database = {
     Functions: {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       generate_referral_code: { Args: never; Returns: string }
+      get_leaderboard: {
+        Args: { _period?: string }
+        Returns: {
+          display_name: string
+          email: string
+          total_xp: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -473,6 +511,11 @@ export type Database = {
         Returns: boolean
       }
       process_referral: { Args: { referrer_code: string }; Returns: undefined }
+      recalculate_all_leaderboard_scores: { Args: never; Returns: undefined }
+      recalculate_leaderboard_score: {
+        Args: { _email: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

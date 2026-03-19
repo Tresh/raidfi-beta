@@ -12,19 +12,6 @@ interface WhitepaperData {
   updated_at: string;
 }
 
-const CACHE_KEY = "raidfi_whitepaper_cache";
-
-const getCached = (): { data: WhitepaperData; timestamp: number } | null => {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch { return null; }
-};
-
-const setCache = (data: WhitepaperData) => {
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-};
 
 const Whitepaper = () => {
   const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(null);
@@ -32,55 +19,22 @@ const Whitepaper = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const cached = getCached();
-
-      // Show cached immediately while we check for updates
-      if (cached) {
-        setWhitepaper(cached.data);
-        setLoading(false);
-      }
-
-      // Always fetch latest metadata
-      const { data: meta } = await supabase
-        .from("whitepaper")
-        .select("version, updated_at")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!meta) {
-        setLoading(false);
-        return;
-      }
-
-      // If cache matches, we're done
-      if (
-        cached &&
-        cached.data.version === meta.version &&
-        cached.data.updated_at === meta.updated_at
-      ) {
-        setLoading(false);
-        return;
-      }
-
-      // Cache is stale or missing — fetch full content
       const { data: full } = await supabase
         .from("whitepaper")
         .select("content, version, updated_at")
         .eq("is_published", true)
-        .order("created_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (full) {
-        const wpData: WhitepaperData = {
+        setWhitepaper({
           content: full.content,
           version: full.version,
           updated_at: full.updated_at,
-        };
-        setWhitepaper(wpData);
-        setCache(wpData);
+        });
+      } else {
+        setWhitepaper(null);
       }
       setLoading(false);
     };
