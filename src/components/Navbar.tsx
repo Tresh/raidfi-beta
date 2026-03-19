@@ -17,8 +17,8 @@ const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/whitepaper", label: "Whitepaper" },
+    { href: "/contributions", label: "Contribute" },
     { href: "/contact", label: "Contact" },
-    { href: "/login", label: "Login" },
   ];
 
   const handleLinkClick = () => setOpen(false);

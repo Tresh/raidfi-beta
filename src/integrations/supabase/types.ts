@@ -44,6 +44,71 @@ export type Database = {
         }
         Relationships: []
       }
+      contribute_task_completions: {
+        Row: {
+          completed_at: string | null
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribute_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "contribute_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contribute_tasks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          points: number
+          sort_order: number | null
+          task_type: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          points?: number
+          sort_order?: number | null
+          task_type?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          points?: number
+          sort_order?: number | null
+          task_type?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       contribution_engagements: {
         Row: {
           contribution_id: string
@@ -120,8 +185,10 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
+          name: string | null
           referral_code: string
           referral_count: number | null
+          total_points: number | null
           user_id: string
           waitlist_completed: boolean | null
           x_shared: boolean | null
@@ -130,8 +197,10 @@ export type Database = {
           created_at?: string | null
           email: string
           id?: string
+          name?: string | null
           referral_code?: string
           referral_count?: number | null
+          total_points?: number | null
           user_id: string
           waitlist_completed?: boolean | null
           x_shared?: boolean | null
@@ -140,8 +209,10 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
+          name?: string | null
           referral_code?: string
           referral_count?: number | null
+          total_points?: number | null
           user_id?: string
           waitlist_completed?: boolean | null
           x_shared?: boolean | null
@@ -259,33 +330,83 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_task_submissions: {
+        Row: {
+          clicked_at: string | null
+          created_at: string | null
+          id: string
+          input_value: string | null
+          submission_email: string
+          task_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          input_value?: string | null
+          submission_email: string
+          task_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          input_value?: string | null
+          submission_email?: string
+          task_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_task_submissions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "waitlist_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist_tasks: {
         Row: {
           created_at: string | null
           id: string
+          input_label: string | null
+          input_placeholder: string | null
           is_active: boolean | null
           label: string
+          requires_input: boolean | null
           sort_order: number | null
           task_type: string
           url: string
+          verification_type: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          input_label?: string | null
+          input_placeholder?: string | null
           is_active?: boolean | null
           label: string
+          requires_input?: boolean | null
           sort_order?: number | null
           task_type: string
           url: string
+          verification_type?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          input_label?: string | null
+          input_placeholder?: string | null
           is_active?: boolean | null
           label?: string
+          requires_input?: boolean | null
           sort_order?: number | null
           task_type?: string
           url?: string
+          verification_type?: string | null
         }
         Relationships: []
       }

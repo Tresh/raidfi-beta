@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CheckCircle2, Mail, Twitter } from "lucide-react";
+import { Loader2, CheckCircle2, Mail, Twitter, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -109,6 +109,21 @@ const Contact = () => {
                     <div>
                       <p className="text-sm font-medium text-foreground">X (Twitter)</p>
                       <p className="text-xs text-muted-foreground">@raidfi_app</p>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://t.me/raidfi_community"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Send className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Community</p>
+                      <p className="text-xs text-muted-foreground">t.me/raidfi_community</p>
                     </div>
                   </a>
                 </div>

@@ -1,15 +1,7 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  Mail,
-  ClipboardList,
-  LogOut,
-  Home,
-  Menu,
-  X,
-  ListChecks,
+  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award,
 } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Loader2 } from "lucide-react";
@@ -19,7 +11,8 @@ import logo from "@/assets/logo.png";
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
   { label: "Waitlist", to: "/admin/waitlist", icon: Users },
-  { label: "Tasks", to: "/admin/tasks", icon: ListChecks },
+  { label: "Waitlist Tasks", to: "/admin/tasks", icon: ListChecks },
+  { label: "Contribute Tasks", to: "/admin/contribute-tasks", icon: Award },
   { label: "Validations", to: "/admin/validations", icon: ClipboardList },
   { label: "Contacts", to: "/admin/contacts", icon: Mail },
   { label: "Whitepaper", to: "/admin/whitepaper", icon: ClipboardList },
@@ -48,11 +41,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border flex flex-col transition-transform lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border flex flex-col transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-5 flex items-center justify-between border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <img src={logo} alt="RaidFi" className="w-8 h-8" />
@@ -67,23 +56,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto min-h-0">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">
-            Management
-          </p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">Management</p>
           {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={() => setSidebarOpen(false)}
-              className={() =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  isActive(item.to, item.end)
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`
-              }
-            >
+            <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setSidebarOpen(false)}
+              className={() => `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                isActive(item.to, item.end) ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}>
               <item.icon className="w-4 h-4" />
               {item.label}
             </NavLink>
@@ -91,28 +69,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         </nav>
 
         <div className="p-3 border-t border-border space-y-1 shrink-0">
-          <NavLink
-            to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            <Home className="w-4 h-4" />
-            Back to Site
+          <NavLink to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <Home className="w-4 h-4" /> Back to Site
           </NavLink>
-          <button
-            onClick={signOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors w-full"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
+          <button onClick={signOut} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors w-full">
+            <LogOut className="w-4 h-4" /> Sign Out
           </button>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground">
-            <Menu className="w-5 h-5" />
-          </button>
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground"><Menu className="w-5 h-5" /></button>
           <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">{userEmail}</span>
@@ -121,10 +89,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </div>
         </header>
-
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );
