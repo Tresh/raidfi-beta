@@ -115,6 +115,39 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          referral_code: string
+          referral_count: number | null
+          user_id: string
+          waitlist_completed: boolean | null
+          x_shared: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          referral_code?: string
+          referral_count?: number | null
+          user_id: string
+          waitlist_completed?: boolean | null
+          x_shared?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          referral_code?: string
+          referral_count?: number | null
+          user_id?: string
+          waitlist_completed?: boolean | null
+          x_shared?: boolean | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -199,21 +232,60 @@ export type Database = {
           email: string
           id: string
           points: number
+          referral_code: string | null
+          referred_by: string | null
           user_id: string | null
+          x_shared: boolean | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
           points?: number
+          referral_code?: string | null
+          referred_by?: string | null
           user_id?: string | null
+          x_shared?: boolean | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
           points?: number
+          referral_code?: string | null
+          referred_by?: string | null
           user_id?: string | null
+          x_shared?: boolean | null
+        }
+        Relationships: []
+      }
+      waitlist_tasks: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          sort_order: number | null
+          task_type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          sort_order?: number | null
+          task_type: string
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          sort_order?: number | null
+          task_type?: string
+          url?: string
         }
         Relationships: []
       }
@@ -271,6 +343,7 @@ export type Database = {
     }
     Functions: {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
+      generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -278,6 +351,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      process_referral: { Args: { referrer_code: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
