@@ -495,6 +495,14 @@ export type Database = {
     Functions: {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       generate_referral_code: { Args: never; Returns: string }
+      get_leaderboard: {
+        Args: { _period?: string }
+        Returns: {
+          display_name: string
+          email: string
+          total_xp: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
