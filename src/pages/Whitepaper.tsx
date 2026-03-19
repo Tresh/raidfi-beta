@@ -13,22 +13,19 @@ interface WhitepaperData {
 }
 
 const CACHE_KEY = "raidfi_whitepaper_cache";
-const CACHE_TTL = 1000 * 60 * 30; // 30 minutes
 
 const getCached = (): WhitepaperData | null => {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts > CACHE_TTL) return null;
-    return data;
+    return JSON.parse(raw).data;
   } catch {
     return null;
   }
 };
 
 const setCache = (data: WhitepaperData) => {
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data }));
 };
 
 const Whitepaper = () => {
@@ -37,20 +34,40 @@ const Whitepaper = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const wpRes = await supabase
+      // Always check for latest version/updated_at (lightweight)
+      const { data: meta } = await supabase
+        .from("whitepaper" as any)
+        .select("version, updated_at")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!meta) {
+        setLoading(false);
+        return;
+      }
+
+      const cached = getCached();
+      // If cache matches, no need to fetch full content
+      if (cached && cached.version === (meta as any).version && cached.updated_at === (meta as any).updated_at) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch full content
+      const { data: full } = await supabase
         .from("whitepaper" as any)
         .select("content, version, updated_at")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(1)
         .single();
-      if (wpRes.data) {
-        const d = wpRes.data as any;
-        // Only update if version changed
-        if (!whitepaper || d.version !== whitepaper.version || d.updated_at !== whitepaper.updated_at) {
-          setWhitepaper(d);
-          setCache(d);
-        }
+
+      if (full) {
+        const d = full as any;
+        setWhitepaper(d);
+        setCache(d);
       }
       setLoading(false);
     };
@@ -76,26 +93,14 @@ const Whitepaper = () => {
                   a: ({ href, children, ...props }) => {
                     if (href?.startsWith('#')) {
                       return (
-                        <a
-                          href={href}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            const id = href.slice(1);
-                            const el = document.getElementById(id);
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }}
-                          className="text-primary hover:underline cursor-pointer"
-                          {...props}
-                        >
-                          {children}
-                        </a>
+                        <a href={href} onClick={(e) => { e.preventDefault(); const el = document.getElementById(href.slice(1)); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                          className="text-primary hover:underline cursor-pointer" {...props}>{children}</a>
                       );
                     }
                     return <a href={href} {...props}>{children}</a>;
                   },
                   h2: ({ children, ...props }) => {
-                    const text = typeof children === 'string' ? children : 
-                      Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '';
+                    const text = typeof children === 'string' ? children : Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '';
                     const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/^-+|-+$/g, '');
                     return <h2 id={id} {...props}>{children}</h2>;
                   },
@@ -104,7 +109,6 @@ const Whitepaper = () => {
                 {whitepaper.content}
               </ReactMarkdown>
             </article>
-
             <div className="mt-12 text-center text-xs text-muted-foreground">
               Version {whitepaper.version} · Last updated {new Date(whitepaper.updated_at).toLocaleDateString()}
             </div>
