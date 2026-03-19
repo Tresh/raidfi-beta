@@ -48,21 +48,15 @@ const Navbar = () => {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="sm" className="border-0 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:ring-0">
+              <button className="p-2 text-foreground" aria-label="Open menu">
                 <Menu className="w-5 h-5" />
-              </Button>
+              </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            <SheetContent side="right" className="w-72 [&>button]:hidden">
               <div className="flex flex-col gap-6 mt-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <img src={logo} alt="RaidFi" className="w-7 h-7 rounded-full" />
-                  <span className="text-lg font-semibold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    RaidFi
-                  </span>
-                </div>
                 {navLinks.map((link) => (
                   <a key={link.href} href={link.href} onClick={handleLinkClick}
-                    className="text-foreground transition-colors text-base font-medium">
+                    className="text-foreground text-base font-medium">
                     {link.label}
                   </a>
                 ))}
