@@ -190,7 +190,7 @@ const Waitlist = () => {
 
       // Process referral
       if (refCode) {
-        await supabase.rpc("process_referral", { referrer_code: refCode }).catch(console.error);
+        try { await supabase.rpc("process_referral", { referrer_code: refCode }); } catch (e) { console.error(e); }
       }
 
       recordSignup(email);
