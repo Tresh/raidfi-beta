@@ -18,6 +18,7 @@ const Navbar = () => {
     { href: "/", label: "Home" },
     { href: "/whitepaper", label: "Whitepaper" },
     { href: "/contributions", label: "Contribute" },
+    { href: "/feed", label: "Live Feed" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -36,7 +37,7 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a key={link.href} href={link.href} className="text-sm text-muted-foreground transition-colors">
                 {link.label}
               </a>
             ))}
@@ -47,7 +48,7 @@ const Navbar = () => {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="border-0 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:ring-0">
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
@@ -61,7 +62,7 @@ const Navbar = () => {
                 </div>
                 {navLinks.map((link) => (
                   <a key={link.href} href={link.href} onClick={handleLinkClick}
-                    className="text-foreground hover:text-primary transition-colors text-base font-medium">
+                    className="text-foreground transition-colors text-base font-medium">
                     {link.label}
                   </a>
                 ))}
