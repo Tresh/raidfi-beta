@@ -503,6 +503,11 @@ export type Database = {
         Returns: boolean
       }
       process_referral: { Args: { referrer_code: string }; Returns: undefined }
+      recalculate_all_leaderboard_scores: { Args: never; Returns: undefined }
+      recalculate_leaderboard_score: {
+        Args: { _email: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
