@@ -78,6 +78,12 @@ const Contributions = () => {
   const [userTotalPoints, setUserTotalPoints] = useState(0);
   const [allLeaderboard, setAllLeaderboard] = useState<LeaderboardEntry[]>([]);
 
+  // Activities
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [activitiesVisible, setActivitiesVisible] = useState(5);
+  const [allActivitiesCount, setAllActivitiesCount] = useState(0);
+
   // Referral copy
   const [copied, setCopied] = useState(false);
 
