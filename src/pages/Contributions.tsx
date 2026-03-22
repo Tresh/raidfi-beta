@@ -255,6 +255,25 @@ const Contributions = () => {
     };
   }, [session, leaderboardFilter, fetchLeaderboard, calculatePoints]);
 
+  // Fetch user activities
+  const fetchActivities = useCallback(async () => {
+    const userEmail = session?.user?.email?.trim().toLowerCase();
+    if (!userEmail) return;
+    setLoadingActivities(true);
+    const { data, count } = await supabase
+      .from("user_activities")
+      .select("*", { count: "exact" })
+      .eq("user_email", userEmail)
+      .order("created_at", { ascending: false })
+      .range(0, 19); // fetch up to 20
+    setActivities(data || []);
+    setAllActivitiesCount(count || 0);
+    setActivitiesVisible(5);
+    setLoadingActivities(false);
+  }, [session]);
+
+  useEffect(() => { fetchActivities(); }, [fetchActivities]);
+
   // Auth handlers
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
