@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Loader2, Send, LogOut, Copy, Check, ExternalLink,
-  Mail, KeyRound, User, Link2, ClipboardList
+  Mail, KeyRound, User, Link2, ClipboardList, History
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
