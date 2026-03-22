@@ -10,6 +10,7 @@ import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
+  { label: "Points Manager", to: "/admin/points", icon: Coins },
   { label: "Waitlist", to: "/admin/waitlist", icon: Users },
   { label: "Waitlist Tasks", to: "/admin/tasks", icon: ListChecks },
   { label: "Contribute Tasks", to: "/admin/contribute-tasks", icon: Award },

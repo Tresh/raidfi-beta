@@ -54,6 +54,7 @@ const App = () => (
           <Route path="/admin/contacts" element={<AdminLayout><ContactsManager /></AdminLayout>} />
           <Route path="/admin/whitepaper" element={<AdminLayout><WhitepaperManager /></AdminLayout>} />
           <Route path="/admin/contributions" element={<AdminLayout><ContributionsManager /></AdminLayout>} />
+          <Route path="/admin/points" element={<AdminLayout><PointsManager /></AdminLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
