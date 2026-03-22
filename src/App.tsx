@@ -19,6 +19,7 @@ import WhitepaperManager from "./pages/admin/WhitepaperManager";
 import ContributionsManager from "./pages/admin/ContributionsManager";
 import TasksManager from "./pages/admin/TasksManager";
 import ContributeTasksManager from "./pages/admin/ContributeTasksManager";
+import PointsManager from "./pages/admin/PointsManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/admin/contacts" element={<AdminLayout><ContactsManager /></AdminLayout>} />
           <Route path="/admin/whitepaper" element={<AdminLayout><WhitepaperManager /></AdminLayout>} />
           <Route path="/admin/contributions" element={<AdminLayout><ContributionsManager /></AdminLayout>} />
+          <Route path="/admin/points" element={<AdminLayout><PointsManager /></AdminLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

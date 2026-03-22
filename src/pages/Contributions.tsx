@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Loader2, Send, LogOut, Copy, Check, ExternalLink,
-  Mail, KeyRound, User, Link2, ClipboardList
+  Mail, KeyRound, User, Link2, ClipboardList, History
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +77,12 @@ const Contributions = () => {
   const [userRank, setUserRank] = useState<number | null>(null);
   const [userTotalPoints, setUserTotalPoints] = useState(0);
   const [allLeaderboard, setAllLeaderboard] = useState<LeaderboardEntry[]>([]);
+
+  // Activities
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [activitiesVisible, setActivitiesVisible] = useState(5);
+  const [allActivitiesCount, setAllActivitiesCount] = useState(0);
 
   // Referral copy
   const [copied, setCopied] = useState(false);
@@ -248,6 +254,25 @@ const Contributions = () => {
       supabase.removeChannel(channel);
     };
   }, [session, leaderboardFilter, fetchLeaderboard, calculatePoints]);
+
+  // Fetch user activities
+  const fetchActivities = useCallback(async () => {
+    const userEmail = session?.user?.email?.trim().toLowerCase();
+    if (!userEmail) return;
+    setLoadingActivities(true);
+    const { data, count } = await supabase
+      .from("user_activities")
+      .select("*", { count: "exact" })
+      .eq("user_email", userEmail)
+      .order("created_at", { ascending: false })
+      .range(0, 19); // fetch up to 20
+    setActivities(data || []);
+    setAllActivitiesCount(count || 0);
+    setActivitiesVisible(5);
+    setLoadingActivities(false);
+  }, [session]);
+
+  useEffect(() => { fetchActivities(); }, [fetchActivities]);
 
   // Auth handlers
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -619,6 +644,55 @@ const Contributions = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Activity Log */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <History className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-foreground">Your Activity</h3>
+                    </div>
+                    {loadingActivities ? (
+                      <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+                    ) : activities.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-3">No activity yet.</p>
+                    ) : (
+                      <Card>
+                        <CardContent className="p-0">
+                          <div className="divide-y divide-border">
+                            {activities.slice(0, activitiesVisible).map((a) => (
+                              <div key={a.id} className="flex items-center justify-between px-4 py-2.5">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${
+                                    a.activity_type === "admin_grant" ? "bg-primary/20 text-primary" :
+                                    a.activity_type === "contribution" ? "bg-green-500/20 text-green-400" :
+                                    a.activity_type === "validation" ? "bg-purple-500/20 text-purple-400" :
+                                    a.activity_type === "waitlist" ? "bg-blue-500/20 text-blue-400" :
+                                    "bg-muted text-muted-foreground"
+                                  }`}>{a.activity_type === "admin_grant" ? "Bonus" : a.activity_type}</span>
+                                  <span className="text-xs text-muted-foreground truncate">{a.description}</span>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <span className={`text-xs font-semibold ${a.points >= 0 ? "text-green-400" : "text-destructive"}`}>
+                                    {a.points > 0 ? "+" : ""}{a.points} XP
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground hidden sm:block">
+                                    {new Date(a.created_at).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {activitiesVisible < activities.length && (
+                      <div className="text-center pt-2">
+                        <Button variant="ghost" size="sm" onClick={() => setActivitiesVisible(v => v + 10)} className="text-xs">
+                          See more
+                        </Button>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Leaderboard */}
                   <div>
