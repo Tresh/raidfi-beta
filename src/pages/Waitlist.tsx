@@ -101,13 +101,27 @@ const Waitlist = () => {
     fetchTasks();
   }, []);
 
-  const handleTaskClick = (task: WaitlistTask) => {
+const handleTaskClick = (task: WaitlistTask) => {
+  // Comprehensive check for Mobile and Modern iPads
+  const isMobile = 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isMobile) {
+    // FIX: Opens in same tab on mobile to prevent about:blank
+    window.location.href = task.url;
+  } else {
+    // Desktop/Laptop still opens new tab for convenience
     window.open(task.url, "_blank", "noopener,noreferrer");
-    setTaskStates(prev => {
-      if (prev[task.id]?.clickedAt) return prev;
-      return { ...prev, [task.id]: { ...prev[task.id], clickedAt: Date.now() } };
-    });
-  };
+  }
+
+  // Start the verification timer
+  setTaskStates(prev => {
+    if (prev[task.id]?.clickedAt) return prev;
+    return { ...prev, [task.id]: { ...prev[task.id], clickedAt: Date.now() } };
+  });
+};
+
 
   const handleVerify = async (task: WaitlistTask) => {
     const state = taskStates[task.id];
@@ -201,13 +215,24 @@ const Waitlist = () => {
     }
   };
 
-  const handleXShare = () => {
-    const siteUrl = window.location.origin;
-    const referralLink = `${siteUrl}/waitlist?ref=${referralCode}`;
-    const tweetText = `I just joined the @RaidFi_App waitlist. Don't miss this → ${referralLink}`;
-    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank", "noopener,noreferrer");
-    setStep("share");
-  };
+const handleXShare = () => {
+  const isMobile = 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+  const siteUrl = window.location.origin;
+  const referralLink = `${siteUrl}/waitlist?ref=${referralCode}`;
+  const tweetText = `I just joined the @RaidFi_App waitlist. Don't miss this → ${referralLink}`;
+  const xUrl = `https://x.com{encodeURIComponent(tweetText)}`;
+
+  if (isMobile) {
+    window.location.href = xUrl;
+  } else {
+    window.open(xUrl, "_blank", "noopener,noreferrer");
+  }
+  
+  setStep("share");
+};
 
   const handleSubmitSharePost = async () => {
     if (!sharePostUrl.trim()) return;
