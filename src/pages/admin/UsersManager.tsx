@@ -2,8 +2,10 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2, Shield, ShieldCheck, ShieldX, Trash2, UserPlus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Search, Loader2, Shield, ShieldCheck, ShieldX, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ADMIN_PERMISSIONS } from "@/hooks/useAdmin";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 type AppRole = "admin" | "moderator" | "user";
@@ -20,10 +22,11 @@ const UsersManager = () => {
   const [searching, setSearching] = useState(false);
   const [userResult, setUserResult] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<any[]>([]);
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
   const [addingRole, setAddingRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState<AppRole>("moderator");
+  const [savingPerms, setSavingPerms] = useState(false);
 
-  // Confirm states
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{ title: string; desc: string; action: () => void }>({
     title: "", desc: "", action: () => {},
@@ -34,15 +37,18 @@ const UsersManager = () => {
     setConfirmOpen(true);
   };
 
+  const isModerator = userRoles.some(r => r.role === "moderator");
+  const isTargetAdmin = userRoles.some(r => r.role === "admin");
+
   const handleSearch = async () => {
     if (!searchEmail.trim()) return;
     setSearching(true);
     setUserResult(null);
     setUserRoles([]);
+    setUserPermissions([]);
 
     const normalized = searchEmail.trim().toLowerCase();
 
-    // Find profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("*")
@@ -57,20 +63,24 @@ const UsersManager = () => {
 
     setUserResult(profile);
 
-    // Get roles
     const { data: roles } = await supabase
       .from("user_roles")
       .select("*")
       .eq("user_id", profile.user_id);
-
     setUserRoles(roles || []);
+
+    // Fetch permissions
+    const { data: perms } = await supabase
+      .from("moderator_permissions" as any)
+      .select("permission")
+      .eq("user_id", profile.user_id);
+    setUserPermissions((perms || []).map((p: any) => p.permission));
+
     setSearching(false);
   };
 
   const handleAddRole = async () => {
     if (!userResult) return;
-
-    // Check if already has this role
     if (userRoles.some(r => r.role === selectedRole)) {
       toast({ title: "Already assigned", description: `User already has the ${selectedRole} role.`, variant: "destructive" });
       return;
@@ -86,7 +96,6 @@ const UsersManager = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Role assigned", description: `${selectedRole} role added.` });
-      // Refresh roles
       const { data: roles } = await supabase
         .from("user_roles")
         .select("*")
@@ -102,15 +111,51 @@ const UsersManager = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setUserRoles(prev => prev.filter(r => r.id !== roleId));
+      if (roleName === "moderator") {
+        // Also clear permissions
+        await supabase.from("moderator_permissions" as any).delete().eq("user_id", userResult.user_id);
+        setUserPermissions([]);
+      }
       toast({ title: "Role removed", description: `${roleName} role removed.` });
     }
+  };
+
+  const togglePermission = (key: string) => {
+    setUserPermissions(prev =>
+      prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key]
+    );
+  };
+
+  const handleSavePermissions = async () => {
+    if (!userResult) return;
+    setSavingPerms(true);
+
+    // Delete all existing permissions for this user
+    await supabase.from("moderator_permissions" as any).delete().eq("user_id", userResult.user_id);
+
+    // Insert new permissions
+    if (userPermissions.length > 0) {
+      const rows = userPermissions.map(p => ({
+        user_id: userResult.user_id,
+        permission: p,
+      }));
+      const { error } = await supabase.from("moderator_permissions" as any).insert(rows as any);
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        setSavingPerms(false);
+        return;
+      }
+    }
+
+    toast({ title: "Permissions saved", description: `Updated permissions for ${userResult.email}.` });
+    setSavingPerms(false);
   };
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">User Roles</h1>
-        <p className="text-muted-foreground text-sm mt-1">Search users and manage their permissions.</p>
+        <h1 className="text-2xl font-bold text-foreground">User Roles & Permissions</h1>
+        <p className="text-muted-foreground text-sm mt-1">Search users, assign roles, and configure moderator access.</p>
       </div>
 
       {/* Search */}
@@ -132,7 +177,6 @@ const UsersManager = () => {
         </div>
       </div>
 
-      {/* User Result */}
       {userResult && (
         <div className="space-y-4">
           {/* User info */}
@@ -147,7 +191,6 @@ const UsersManager = () => {
                 <p className="text-xs text-foreground font-mono">{userResult.user_id.slice(0, 12)}...</p>
               </div>
             </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
               <div className="p-2 rounded-lg bg-muted">
                 <p className="text-sm font-semibold text-foreground">{userResult.total_points || 0}</p>
@@ -186,7 +229,7 @@ const UsersManager = () => {
                       <button
                         onClick={() => askConfirm(
                           "Remove Role",
-                          `Remove the "${r.role}" role from ${userResult.email}? This will revoke their ${r.role} permissions immediately.`,
+                          `Remove the "${r.role}" role from ${userResult.email}? This will revoke their ${r.role} permissions immediately.${r.role === "moderator" ? " All page permissions will also be removed." : ""}`,
                           () => handleRemoveRole(r.id, r.role)
                         )}
                         className="ml-1 hover:opacity-70"
@@ -223,7 +266,7 @@ const UsersManager = () => {
                   "Assign Role",
                   `Assign "${selectedRole}" role to ${userResult.email}? ${
                     selectedRole === "admin" ? "⚠️ This grants FULL admin access to the entire platform." :
-                    selectedRole === "moderator" ? "This grants moderation privileges." :
+                    selectedRole === "moderator" ? "This grants moderation privileges. You can configure specific page access below." :
                     "This assigns the basic user role."
                   }`,
                   handleAddRole
@@ -234,6 +277,71 @@ const UsersManager = () => {
               </Button>
             </div>
           </div>
+
+          {/* Moderator Permissions - only show for moderators */}
+          {isModerator && !isTargetAdmin && (
+            <div className="bg-card border border-border rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" /> Page Permissions
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Select which admin pages this moderator can access. They will only see these in their sidebar.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                {ADMIN_PERMISSIONS.map((perm) => (
+                  <label
+                    key={perm.key}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={userPermissions.includes(perm.key)}
+                      onCheckedChange={() => togglePermission(perm.key)}
+                    />
+                    <span className="text-sm text-foreground">{perm.label}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  onClick={() => askConfirm(
+                    "Save Permissions",
+                    `Update page access for ${userResult.email}? They will ${userPermissions.length === 0 ? "have no page access" : `be able to access: ${userPermissions.join(", ")}`}.`,
+                    handleSavePermissions
+                  )}
+                  disabled={savingPerms}
+                >
+                  {savingPerms ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                  Save Permissions
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setUserPermissions(ADMIN_PERMISSIONS.map(p => p.key))}
+                >
+                  Select All
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setUserPermissions([])}
+                >
+                  Clear All
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {isTargetAdmin && (
+            <div className="bg-card border border-border rounded-xl p-4">
+              <p className="text-sm text-muted-foreground">
+                <ShieldCheck className="w-4 h-4 inline mr-1 text-primary" />
+                Admins have full access to all pages. No permission configuration needed.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -242,7 +350,7 @@ const UsersManager = () => {
         onOpenChange={setConfirmOpen}
         title={confirmAction.title}
         description={confirmAction.desc}
-        confirmLabel={confirmAction.title.includes("Remove") ? "Remove" : "Assign"}
+        confirmLabel={confirmAction.title.includes("Remove") ? "Remove" : confirmAction.title.includes("Save") ? "Save" : "Assign"}
         variant={confirmAction.title.includes("Remove") ? "destructive" : "default"}
         onConfirm={confirmAction.action}
       />
