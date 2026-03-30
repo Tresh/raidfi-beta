@@ -211,7 +211,7 @@ const AnalyticsPage = () => {
 
   const overviewCards = [
     { label: "Total Users", value: s.totalUsers, icon: Users, color: "text-primary" },
-    { label: "Waitlist Signups", value: s.totalWaitlist, icon: UserCheck, color: "text-green-400" },
+    { label: "Waitlist Signups", value: s.totalWaitlist, icon: UserCheck, color: "text-primary" },
     { label: "Validations", value: s.totalValidations, icon: Target, color: "text-amber-400" },
     { label: "Total XP Distributed", value: s.totalXPDistributed.toLocaleString(), icon: Zap, color: "text-purple-400" },
     { label: "Avg XP / User", value: s.avgXPPerUser, icon: TrendingUp, color: "text-blue-400" },
@@ -222,12 +222,12 @@ const AnalyticsPage = () => {
 
   const contributionBreakdown = [
     { label: "Pending", value: s.pendingContributions, color: "text-yellow-400" },
-    { label: "Approved", value: s.approvedContributions, color: "text-green-400" },
+    { label: "Approved", value: s.approvedContributions, color: "text-primary" },
     { label: "Rejected", value: s.rejectedContributions, color: "text-red-400" },
   ];
 
   return (
-    <div>
+    <div className="w-full min-w-0 overflow-x-hidden">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
         <p className="text-muted-foreground text-sm mt-1">Platform data insights and metrics</p>
@@ -254,7 +254,7 @@ const AnalyticsPage = () => {
           <CardTitle className="text-base">Contribution Status Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-4">
             {contributionBreakdown.map((item) => (
               <div key={item.label} className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${item.color.replace("text-", "bg-")}`} />
@@ -267,7 +267,7 @@ const AnalyticsPage = () => {
             <div className="mt-3 flex h-3 rounded-full overflow-hidden bg-muted">
               {s.approvedContributions > 0 && (
                 <div
-                  className="bg-green-500 h-full"
+                  className="bg-primary h-full"
                   style={{ width: `${(s.approvedContributions / s.totalContributions) * 100}%` }}
                 />
               )}
@@ -279,7 +279,7 @@ const AnalyticsPage = () => {
               )}
               {s.rejectedContributions > 0 && (
                 <div
-                  className="bg-red-500 h-full"
+                  className="bg-destructive h-full"
                   style={{ width: `${(s.rejectedContributions / s.totalContributions) * 100}%` }}
                 />
               )}
@@ -288,13 +288,13 @@ const AnalyticsPage = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="referrers" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="referrers">Top Referrers</TabsTrigger>
-          <TabsTrigger value="leaderboard">Top XP</TabsTrigger>
-          <TabsTrigger value="posters">Most Active Posters</TabsTrigger>
-          <TabsTrigger value="growth">Growth (30d)</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
+      <Tabs defaultValue="referrers" className="space-y-4 w-full min-w-0">
+        <TabsList className="flex w-full min-w-0 flex-wrap gap-1 h-auto p-1">
+          <TabsTrigger value="referrers" className="text-xs">Referrers</TabsTrigger>
+          <TabsTrigger value="leaderboard" className="text-xs">Top XP</TabsTrigger>
+          <TabsTrigger value="posters" className="text-xs">Posters</TabsTrigger>
+          <TabsTrigger value="growth" className="text-xs">Growth</TabsTrigger>
+          <TabsTrigger value="activity" className="text-xs">Activity</TabsTrigger>
         </TabsList>
 
         {/* Top Referrers */}
@@ -409,7 +409,7 @@ const AnalyticsPage = () => {
                         <TableCell className="font-medium">{i + 1}</TableCell>
                         <TableCell className="text-sm">{u.email}</TableCell>
                         <TableCell className="text-right">{u.count}</TableCell>
-                        <TableCell className="text-right text-green-400">{u.approved}</TableCell>
+                        <TableCell className="text-right text-primary">{u.approved}</TableCell>
                         <TableCell className="text-right font-medium">
                           {u.count > 0 ? Math.round((u.approved / u.count) * 100) : 0}%
                         </TableCell>
@@ -428,7 +428,7 @@ const AnalyticsPage = () => {
             <Card className="bg-card border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-green-400" /> Waitlist Signups (30d)
+                  <ArrowUpRight className="w-4 h-4 text-primary" /> Waitlist Signups (30d)
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -441,7 +441,7 @@ const AnalyticsPage = () => {
                         <span className="text-muted-foreground">{d.date}</span>
                         <div className="flex items-center gap-2">
                           <div
-                            className="h-2 bg-green-500 rounded-full"
+                            className="h-2 bg-primary rounded-full"
                             style={{ width: `${Math.max(20, (d.count / Math.max(...recentGrowth.waitlist.map((x) => x.count))) * 120)}px` }}
                           />
                           <span className="text-foreground font-medium w-8 text-right">{d.count}</span>
