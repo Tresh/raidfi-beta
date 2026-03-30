@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Search, Eye, X, CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const BATCH_SIZE = 30;
 
@@ -16,6 +17,8 @@ const ContactsManager = () => {
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<any | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const fetchData = async (offset = 0, append = false) => {
     if (offset === 0) setLoading(true);
@@ -40,16 +43,18 @@ const ContactsManager = () => {
 
   const handleLoadMore = () => fetchData(rows.length, true);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("contact_submissions").delete().eq("id", deleteTarget.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setRows((prev) => prev.filter((r) => r.id !== id));
+      setRows((prev) => prev.filter((r) => r.id !== deleteTarget.id));
       setTotalCount((c) => c - 1);
-      if (selected?.id === id) setSelected(null);
+      if (selected?.id === deleteTarget.id) setSelected(null);
       toast({ title: "Deleted", description: "Message removed." });
     }
+    setDeleteTarget(null);
   };
 
   const handleMarkRead = async (id: string) => {
@@ -85,12 +90,7 @@ const ContactsManager = () => {
       <div className="bg-card border border-border rounded-xl p-1 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search messages..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10"
-          />
+          <Input placeholder="Search messages..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10" />
         </div>
       </div>
 
@@ -117,30 +117,18 @@ const ContactsManager = () => {
                     <td className="p-4 text-foreground">{r.name}</td>
                     <td className="p-4 text-foreground">{r.subject}</td>
                     <td className="p-4 hidden md:table-cell">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        r.status === "new" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                      }`}>
-                        {r.status}
-                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${r.status === "new" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{r.status}</span>
                     </td>
-                    <td className="p-4 text-muted-foreground hidden lg:table-cell">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </td>
+                    <td className="p-4 text-muted-foreground hidden lg:table-cell">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td className="p-4 text-right space-x-1">
-                      <Button variant="ghost" size="icon" onClick={() => setSelected(r)}>
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setSelected(r)}><Eye className="w-4 h-4" /></Button>
                       {r.status === "new" && (
                         <Button variant="ghost" size="icon" className="text-green-400" onClick={() => handleMarkRead(r.id)}>
                           <CheckCircle2 className="w-4 h-4" />
                         </Button>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(r.id)}
-                      >
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"
+                        onClick={() => { setDeleteTarget({ id: r.id, name: r.name }); setConfirmOpen(true); }}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
@@ -154,8 +142,7 @@ const ContactsManager = () => {
         {hasMore && !search && !loading && (
           <div className="p-4 text-center border-t border-border/30">
             <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loadingMore}>
-              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Load more
+              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Load more
             </Button>
           </div>
         )}
@@ -167,23 +154,12 @@ const ContactsManager = () => {
           <div className="bg-card border border-border rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">{selected.subject}</h2>
-              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-muted-foreground text-xs">From</p>
-                <p className="text-foreground">{selected.name} ({selected.email})</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs">Date</p>
-                <p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs">Message</p>
-                <p className="text-foreground whitespace-pre-wrap">{selected.message}</p>
-              </div>
+              <div><p className="text-muted-foreground text-xs">From</p><p className="text-foreground">{selected.name} ({selected.email})</p></div>
+              <div><p className="text-muted-foreground text-xs">Date</p><p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p></div>
+              <div><p className="text-muted-foreground text-xs">Message</p><p className="text-foreground whitespace-pre-wrap">{selected.message}</p></div>
             </div>
             <div className="mt-6 flex gap-2">
               {selected.status === "new" && (
@@ -191,13 +167,24 @@ const ContactsManager = () => {
                   <CheckCircle2 className="w-4 h-4 mr-2" /> Mark as Read
                 </Button>
               )}
-              <Button size="sm" variant="destructive" onClick={() => handleDelete(selected.id)}>
+              <Button size="sm" variant="destructive"
+                onClick={() => { setDeleteTarget({ id: selected.id, name: selected.name }); setConfirmOpen(true); }}>
                 <Trash2 className="w-4 h-4 mr-2" /> Delete
               </Button>
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete Message"
+        description={`Permanently delete the message from ${deleteTarget?.name || "this contact"}? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

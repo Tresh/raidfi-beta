@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, Send, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/useAdmin";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const BATCH_SIZE = 30;
 
@@ -12,7 +13,6 @@ const PointsManager = () => {
   const { toast } = useToast();
   const { userEmail: adminEmail } = useAdmin();
 
-  // Search
   const [searchEmail, setSearchEmail] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<any | null>(null);
@@ -20,16 +20,20 @@ const PointsManager = () => {
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [activitiesHasMore, setActivitiesHasMore] = useState(false);
 
-  // Grant points
   const [grantPoints, setGrantPoints] = useState("");
   const [grantReason, setGrantReason] = useState("");
   const [granting, setGranting] = useState(false);
 
-  // All activities (admin view)
   const [allActivities, setAllActivities] = useState<any[]>([]);
   const [loadingAll, setLoadingAll] = useState(false);
   const [allHasMore, setAllHasMore] = useState(false);
   const [showAll, setShowAll] = useState(false);
+
+  // Confirm
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmData, setConfirmData] = useState<{ title: string; desc: string; action: () => void }>({
+    title: "", desc: "", action: () => {},
+  });
 
   const handleSearch = async () => {
     if (!searchEmail.trim()) return;
@@ -39,26 +43,9 @@ const PointsManager = () => {
 
     const normalized = searchEmail.trim().toLowerCase();
 
-    // Get leaderboard score
-    const { data: score } = await supabase
-      .from("leaderboard_scores")
-      .select("*")
-      .eq("email", normalized)
-      .maybeSingle();
-
-    // Get profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .ilike("email", normalized)
-      .maybeSingle();
-
-    // Check waitlist
-    const { data: waitlist } = await supabase
-      .from("waitlist_submissions")
-      .select("email, points, created_at")
-      .ilike("email", normalized)
-      .maybeSingle();
+    const { data: score } = await supabase.from("leaderboard_scores").select("*").eq("email", normalized).maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("*").ilike("email", normalized).maybeSingle();
+    const { data: waitlist } = await supabase.from("waitlist_submissions").select("email, points, created_at").ilike("email", normalized).maybeSingle();
 
     if (!score && !profile && !waitlist) {
       toast({ title: "Not found", description: "No user found with that email.", variant: "destructive" });
@@ -77,20 +64,13 @@ const PointsManager = () => {
       waitlist_completed: profile?.waitlist_completed || !!waitlist,
     });
 
-    // Fetch activities
     await fetchUserActivities(normalized, 0, false);
     setSearching(false);
   };
 
   const fetchUserActivities = async (email: string, offset: number, append: boolean) => {
     setLoadingActivities(true);
-    const { data } = await supabase
-      .from("user_activities")
-      .select("*")
-      .eq("user_email", email)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + BATCH_SIZE - 1);
-
+    const { data } = await supabase.from("user_activities").select("*").eq("user_email", email).order("created_at", { ascending: false }).range(offset, offset + BATCH_SIZE - 1);
     const fetched = data || [];
     if (append) setUserActivities(prev => [...prev, ...fetched]);
     else setUserActivities(fetched);
@@ -119,7 +99,6 @@ const PointsManager = () => {
       toast({ title: `${points > 0 ? "+" : ""}${points} XP granted`, description: `To ${searchResult.email}` });
       setGrantPoints("");
       setGrantReason("");
-      // Refresh
       setTimeout(() => handleSearch(), 500);
     }
     setGranting(false);
@@ -127,12 +106,7 @@ const PointsManager = () => {
 
   const fetchAllActivities = async (offset: number, append: boolean) => {
     setLoadingAll(true);
-    const { data } = await supabase
-      .from("user_activities")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .range(offset, offset + BATCH_SIZE - 1);
-
+    const { data } = await supabase.from("user_activities").select("*").order("created_at", { ascending: false }).range(offset, offset + BATCH_SIZE - 1);
     const fetched = data || [];
     if (append) setAllActivities(prev => [...prev, ...fetched]);
     else setAllActivities(fetched);
@@ -165,18 +139,11 @@ const PointsManager = () => {
         <p className="text-muted-foreground text-sm mt-1">Search users, view activities, and allocate XP.</p>
       </div>
 
-      {/* Search */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6">
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search user by email..."
-              value={searchEmail}
-              onChange={(e) => setSearchEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="pl-9 h-10 text-sm"
-            />
+            <Input placeholder="Search user by email..." value={searchEmail} onChange={(e) => setSearchEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} className="pl-9 h-10 text-sm" />
           </div>
           <Button onClick={handleSearch} disabled={searching} size="sm" className="h-10 px-4">
             {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
@@ -184,10 +151,8 @@ const PointsManager = () => {
         </div>
       </div>
 
-      {/* User Result */}
       {searchResult && (
         <div className="space-y-4 mb-8">
-          {/* User info card */}
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -218,33 +183,27 @@ const PointsManager = () => {
             </div>
           </div>
 
-          {/* Grant Points */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <Send className="w-4 h-4 text-primary" /> Allocate Points
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Input
-                type="number"
-                placeholder="Points (e.g. 50 or -10)"
-                value={grantPoints}
-                onChange={(e) => setGrantPoints(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <Input
-                placeholder="Reason (optional)"
-                value={grantReason}
-                onChange={(e) => setGrantReason(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <Button onClick={handleGrantPoints} disabled={granting || !grantPoints} size="sm" className="h-9">
-                {granting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Send className="w-3 h-3 mr-1" />}
-                Grant
+              <Input type="number" placeholder="Points (e.g. 50 or -10)" value={grantPoints} onChange={(e) => setGrantPoints(e.target.value)} className="h-9 text-sm" />
+              <Input placeholder="Reason (required)" value={grantReason} onChange={(e) => setGrantReason(e.target.value)} className="h-9 text-sm" />
+              <Button size="sm" className="h-9" disabled={granting || !grantPoints || !grantReason.trim()}
+                onClick={() => {
+                  setConfirmData({
+                    title: `Grant ${grantPoints} XP`,
+                    desc: `Grant ${grantPoints} XP to ${searchResult.email} for "${grantReason}"? This will be logged and reflected immediately.`,
+                    action: handleGrantPoints,
+                  });
+                  setConfirmOpen(true);
+                }}>
+                {granting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Send className="w-3 h-3 mr-1" />} Grant
               </Button>
             </div>
           </div>
 
-          {/* User Activities */}
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="p-4 border-b border-border/50">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -277,9 +236,7 @@ const PointsManager = () => {
                               {a.points > 0 ? "+" : ""}{a.points}
                             </span>
                           </td>
-                          <td className="p-3 text-muted-foreground text-xs hidden md:table-cell">
-                            {new Date(a.created_at).toLocaleString()}
-                          </td>
+                          <td className="p-3 text-muted-foreground text-xs hidden md:table-cell">{new Date(a.created_at).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -287,8 +244,7 @@ const PointsManager = () => {
                 </div>
                 {activitiesHasMore && (
                   <div className="p-3 text-center border-t border-border/30">
-                    <Button variant="ghost" size="sm" onClick={() => fetchUserActivities(searchResult.email, userActivities.length, true)}
-                      disabled={loadingActivities}>
+                    <Button variant="ghost" size="sm" onClick={() => fetchUserActivities(searchResult.email, userActivities.length, true)} disabled={loadingActivities}>
                       {loadingActivities && <Loader2 className="w-3 h-3 mr-1 animate-spin" />} Load more
                     </Button>
                   </div>
@@ -299,7 +255,6 @@ const PointsManager = () => {
         </div>
       )}
 
-      {/* All Activities Section */}
       <div className="border-t border-border pt-6">
         {!showAll ? (
           <Button variant="outline" onClick={handleShowAll} className="w-full">
@@ -336,9 +291,7 @@ const PointsManager = () => {
                               {a.points > 0 ? "+" : ""}{a.points}
                             </span>
                           </td>
-                          <td className="p-3 text-muted-foreground text-xs hidden lg:table-cell">
-                            {new Date(a.created_at).toLocaleString()}
-                          </td>
+                          <td className="p-3 text-muted-foreground text-xs hidden lg:table-cell">{new Date(a.created_at).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -356,6 +309,16 @@ const PointsManager = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={confirmData.title}
+        description={confirmData.desc}
+        confirmLabel="Grant"
+        variant="default"
+        onConfirm={confirmData.action}
+      />
     </div>
   );
 };

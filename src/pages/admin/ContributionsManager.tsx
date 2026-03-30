@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Search, Eye, X, Download, Loader2, ExternalLink, Check, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const BATCH_SIZE = 30;
 
@@ -30,6 +31,17 @@ const ContributionsManager = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<any | null>(null);
 
+  // Confirm dialog
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmData, setConfirmData] = useState<{ title: string; desc: string; label: string; variant: "destructive" | "default"; action: () => void }>({
+    title: "", desc: "", label: "Confirm", variant: "destructive", action: () => {},
+  });
+
+  const askConfirm = (title: string, desc: string, label: string, variant: "destructive" | "default", action: () => void) => {
+    setConfirmData({ title, desc, label, variant, action });
+    setConfirmOpen(true);
+  };
+
   const fetchData = async (offset = 0, append = false) => {
     if (offset === 0) setLoading(true);
     else setLoadingMore(true);
@@ -45,7 +57,6 @@ const ContributionsManager = () => {
     }
 
     const { data, count } = await query;
-
     const fetched = data || [];
     if (append) setRows((prev) => [...prev, ...fetched]);
     else setRows(fetched);
@@ -116,7 +127,6 @@ const ContributionsManager = () => {
         </Button>
       </div>
 
-      {/* Status filter tabs */}
       <div className="flex gap-1 mb-4">
         {(["pending", "all", "approved", "rejected"] as StatusFilter[]).map((f) => (
           <button
@@ -136,12 +146,7 @@ const ContributionsManager = () => {
       <div className="bg-card border border-border rounded-xl p-1 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by email or URL..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10"
-          />
+          <Input placeholder="Search by email or URL..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10" />
         </div>
       </div>
 
@@ -167,19 +172,17 @@ const ContributionsManager = () => {
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-foreground">{r.user_email}</td>
                     <td className="p-4">{statusBadge(r.status)}</td>
-                    <td className="p-4 hidden md:table-cell">
-                      <span className="text-primary font-medium">{r.points_earned}</span>
-                    </td>
-                    <td className="p-4 text-muted-foreground hidden lg:table-cell">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </td>
+                    <td className="p-4 hidden md:table-cell"><span className="text-primary font-medium">{r.points_earned}</span></td>
+                    <td className="p-4 text-muted-foreground hidden lg:table-cell">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td className="p-4 text-right space-x-1">
                       {r.status === "pending" && (
                         <>
-                          <Button variant="ghost" size="icon" className="text-green-500 hover:bg-green-500/10" onClick={() => handleUpdateStatus(r.id, "approved")}>
+                          <Button variant="ghost" size="icon" className="text-green-500 hover:bg-green-500/10"
+                            onClick={() => askConfirm("Approve Contribution", `Approve this contribution from ${r.user_email}? They will earn ${r.points_earned} XP.`, "Approve", "default", () => handleUpdateStatus(r.id, "approved"))}>
                             <Check className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleUpdateStatus(r.id, "rejected")}>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"
+                            onClick={() => askConfirm("Reject Contribution", `Reject this contribution from ${r.user_email}? They will not earn any XP.`, "Reject", "destructive", () => handleUpdateStatus(r.id, "rejected"))}>
                             <XCircle className="w-4 h-4" />
                           </Button>
                         </>
@@ -187,12 +190,8 @@ const ContributionsManager = () => {
                       <Button variant="ghost" size="icon" onClick={() => setSelected(r)}>
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(r.id)}
-                      >
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"
+                        onClick={() => askConfirm("Delete Contribution", `Permanently delete this contribution from ${r.user_email}? This cannot be undone.`, "Delete", "destructive", () => handleDelete(r.id))}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
@@ -206,8 +205,7 @@ const ContributionsManager = () => {
         {hasMore && !search && !loading && (
           <div className="p-4 text-center border-t border-border/30">
             <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loadingMore}>
-              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Load more
+              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Load more
             </Button>
           </div>
         )}
@@ -219,15 +217,10 @@ const ContributionsManager = () => {
           <div className="bg-card border border-border rounded-xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Contribution Details</h2>
-              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-muted-foreground text-xs">Email</p>
-                <p className="text-foreground">{selected.user_email}</p>
-              </div>
+              <div><p className="text-muted-foreground text-xs">Email</p><p className="text-foreground">{selected.user_email}</p></div>
               <div>
                 <p className="text-muted-foreground text-xs">Post URL</p>
                 <a href={selected.post_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
@@ -235,18 +228,9 @@ const ContributionsManager = () => {
                 </a>
               </div>
               <div className="flex gap-6">
-                <div>
-                  <p className="text-muted-foreground text-xs">Status</p>
-                  {statusBadge(selected.status)}
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Points</p>
-                  <p className="text-primary font-semibold">{selected.points_earned}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Engagements</p>
-                  <p className="text-foreground">{selected.engagement_count}</p>
-                </div>
+                <div><p className="text-muted-foreground text-xs">Status</p>{statusBadge(selected.status)}</div>
+                <div><p className="text-muted-foreground text-xs">Points</p><p className="text-primary font-semibold">{selected.points_earned}</p></div>
+                <div><p className="text-muted-foreground text-xs">Engagements</p><p className="text-foreground">{selected.engagement_count}</p></div>
               </div>
               {selected.ai_feedback && (
                 <div>
@@ -255,29 +239,39 @@ const ContributionsManager = () => {
                   <p className="text-muted-foreground text-xs mt-1">AI Score: {selected.ai_score ?? "—"}</p>
                 </div>
               )}
-              <div>
-                <p className="text-muted-foreground text-xs">Date</p>
-                <p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p>
-              </div>
+              <div><p className="text-muted-foreground text-xs">Date</p><p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p></div>
             </div>
             <div className="mt-6 flex gap-2">
               {selected.status === "pending" && (
                 <>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleUpdateStatus(selected.id, "approved")}>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => askConfirm("Approve Contribution", `Approve this contribution?`, "Approve", "default", () => handleUpdateStatus(selected.id, "approved"))}>
                     <Check className="w-4 h-4 mr-2" /> Approve
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleUpdateStatus(selected.id, "rejected")}>
+                  <Button size="sm" variant="destructive"
+                    onClick={() => askConfirm("Reject Contribution", `Reject this contribution?`, "Reject", "destructive", () => handleUpdateStatus(selected.id, "rejected"))}>
                     <XCircle className="w-4 h-4 mr-2" /> Reject
                   </Button>
                 </>
               )}
-              <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(selected.id)}>
+              <Button size="sm" variant="outline" className="text-destructive"
+                onClick={() => askConfirm("Delete Contribution", `Permanently delete this contribution? This cannot be undone.`, "Delete", "destructive", () => handleDelete(selected.id))}>
                 <Trash2 className="w-4 h-4 mr-2" /> Delete
               </Button>
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={confirmData.title}
+        description={confirmData.desc}
+        confirmLabel={confirmData.label}
+        variant={confirmData.variant}
+        onConfirm={confirmData.action}
+      />
     </div>
   );
 };
