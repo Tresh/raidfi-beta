@@ -22,6 +22,7 @@ import ContributeTasksManager from "./pages/admin/ContributeTasksManager";
 import PointsManager from "./pages/admin/PointsManager";
 import UsersManager from "./pages/admin/UsersManager";
 import AdminLayout from "./components/admin/AdminLayout";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/admin/contributions" element={<AdminLayout requiredPermission="contributions"><ContributionsManager /></AdminLayout>} />
           <Route path="/admin/points" element={<AdminLayout requiredPermission="points"><PointsManager /></AdminLayout>} />
           <Route path="/admin/users" element={<AdminLayout requiredPermission="users"><UsersManager /></AdminLayout>} />
+          <Route path="/admin/analytics" element={<AdminLayout requiredPermission="dashboard"><AnalyticsPage /></AdminLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
