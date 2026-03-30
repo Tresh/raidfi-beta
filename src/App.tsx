@@ -47,16 +47,16 @@ const App = () => (
           <Route path="/dashboard/*" element={<Navigate to="/contributions" replace />} />
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
-          <Route path="/admin/waitlist" element={<AdminLayout><WaitlistManager /></AdminLayout>} />
-          <Route path="/admin/tasks" element={<AdminLayout><TasksManager /></AdminLayout>} />
-          <Route path="/admin/contribute-tasks" element={<AdminLayout><ContributeTasksManager /></AdminLayout>} />
-          <Route path="/admin/validations" element={<AdminLayout><ValidationsManager /></AdminLayout>} />
-          <Route path="/admin/contacts" element={<AdminLayout><ContactsManager /></AdminLayout>} />
-          <Route path="/admin/whitepaper" element={<AdminLayout><WhitepaperManager /></AdminLayout>} />
-          <Route path="/admin/contributions" element={<AdminLayout><ContributionsManager /></AdminLayout>} />
-          <Route path="/admin/points" element={<AdminLayout><PointsManager /></AdminLayout>} />
-          <Route path="/admin/users" element={<AdminLayout><UsersManager /></AdminLayout>} />
+          <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
+          <Route path="/admin/waitlist" element={<AdminLayout requiredPermission="waitlist"><WaitlistManager /></AdminLayout>} />
+          <Route path="/admin/tasks" element={<AdminLayout requiredPermission="tasks"><TasksManager /></AdminLayout>} />
+          <Route path="/admin/contribute-tasks" element={<AdminLayout requiredPermission="contribute-tasks"><ContributeTasksManager /></AdminLayout>} />
+          <Route path="/admin/validations" element={<AdminLayout requiredPermission="validations"><ValidationsManager /></AdminLayout>} />
+          <Route path="/admin/contacts" element={<AdminLayout requiredPermission="contacts"><ContactsManager /></AdminLayout>} />
+          <Route path="/admin/whitepaper" element={<AdminLayout requiredPermission="whitepaper"><WhitepaperManager /></AdminLayout>} />
+          <Route path="/admin/contributions" element={<AdminLayout requiredPermission="contributions"><ContributionsManager /></AdminLayout>} />
+          <Route path="/admin/points" element={<AdminLayout requiredPermission="points"><PointsManager /></AdminLayout>} />
+          <Route path="/admin/users" element={<AdminLayout requiredPermission="users"><UsersManager /></AdminLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
