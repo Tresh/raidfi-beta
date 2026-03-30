@@ -20,6 +20,7 @@ import ContributionsManager from "./pages/admin/ContributionsManager";
 import TasksManager from "./pages/admin/TasksManager";
 import ContributeTasksManager from "./pages/admin/ContributeTasksManager";
 import PointsManager from "./pages/admin/PointsManager";
+import UsersManager from "./pages/admin/UsersManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";

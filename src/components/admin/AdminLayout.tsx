@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins,
+  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins, ShieldCheck,
 } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Loader2 } from "lucide-react";
@@ -10,6 +10,7 @@ import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
+  { label: "User Roles", to: "/admin/users", icon: ShieldCheck },
   { label: "Points Manager", to: "/admin/points", icon: Coins },
   { label: "Waitlist", to: "/admin/waitlist", icon: Users },
   { label: "Waitlist Tasks", to: "/admin/tasks", icon: ListChecks },
