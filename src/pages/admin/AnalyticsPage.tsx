@@ -227,7 +227,7 @@ const AnalyticsPage = () => {
   ];
 
   return (
-    <div>
+    <div className="w-full min-w-0 overflow-x-hidden">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
         <p className="text-muted-foreground text-sm mt-1">Platform data insights and metrics</p>
@@ -254,7 +254,7 @@ const AnalyticsPage = () => {
           <CardTitle className="text-base">Contribution Status Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-4">
             {contributionBreakdown.map((item) => (
               <div key={item.label} className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${item.color.replace("text-", "bg-")}`} />
@@ -267,7 +267,7 @@ const AnalyticsPage = () => {
             <div className="mt-3 flex h-3 rounded-full overflow-hidden bg-muted">
               {s.approvedContributions > 0 && (
                 <div
-                  className="bg-green-500 h-full"
+                  className="bg-primary h-full"
                   style={{ width: `${(s.approvedContributions / s.totalContributions) * 100}%` }}
                 />
               )}
@@ -279,7 +279,7 @@ const AnalyticsPage = () => {
               )}
               {s.rejectedContributions > 0 && (
                 <div
-                  className="bg-red-500 h-full"
+                  className="bg-destructive h-full"
                   style={{ width: `${(s.rejectedContributions / s.totalContributions) * 100}%` }}
                 />
               )}
@@ -288,13 +288,13 @@ const AnalyticsPage = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="referrers" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="referrers">Top Referrers</TabsTrigger>
-          <TabsTrigger value="leaderboard">Top XP</TabsTrigger>
-          <TabsTrigger value="posters">Most Active Posters</TabsTrigger>
-          <TabsTrigger value="growth">Growth (30d)</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
+      <Tabs defaultValue="referrers" className="space-y-4 w-full min-w-0">
+        <TabsList className="flex w-full min-w-0 flex-wrap gap-1 h-auto p-1">
+          <TabsTrigger value="referrers" className="text-xs">Referrers</TabsTrigger>
+          <TabsTrigger value="leaderboard" className="text-xs">Top XP</TabsTrigger>
+          <TabsTrigger value="posters" className="text-xs">Posters</TabsTrigger>
+          <TabsTrigger value="growth" className="text-xs">Growth</TabsTrigger>
+          <TabsTrigger value="activity" className="text-xs">Activity</TabsTrigger>
         </TabsList>
 
         {/* Top Referrers */}
