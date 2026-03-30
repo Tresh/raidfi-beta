@@ -222,7 +222,7 @@ const AnalyticsPage = () => {
 
   const contributionBreakdown = [
     { label: "Pending", value: s.pendingContributions, color: "text-yellow-400" },
-    { label: "Approved", value: s.approvedContributions, color: "text-green-400" },
+    { label: "Approved", value: s.approvedContributions, color: "text-primary" },
     { label: "Rejected", value: s.rejectedContributions, color: "text-red-400" },
   ];
 
