@@ -409,7 +409,7 @@ const AnalyticsPage = () => {
                         <TableCell className="font-medium">{i + 1}</TableCell>
                         <TableCell className="text-sm">{u.email}</TableCell>
                         <TableCell className="text-right">{u.count}</TableCell>
-                        <TableCell className="text-right text-green-400">{u.approved}</TableCell>
+                        <TableCell className="text-right text-primary">{u.approved}</TableCell>
                         <TableCell className="text-right font-medium">
                           {u.count > 0 ? Math.round((u.approved / u.count) * 100) : 0}%
                         </TableCell>
