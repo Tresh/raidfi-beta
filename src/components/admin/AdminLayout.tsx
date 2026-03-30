@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Navigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins, ShieldCheck,
 } from "lucide-react";
@@ -8,21 +8,21 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
 
-const navItems = [
-  { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
-  { label: "User Roles", to: "/admin/users", icon: ShieldCheck },
-  { label: "Points Manager", to: "/admin/points", icon: Coins },
-  { label: "Waitlist", to: "/admin/waitlist", icon: Users },
-  { label: "Waitlist Tasks", to: "/admin/tasks", icon: ListChecks },
-  { label: "Contribute Tasks", to: "/admin/contribute-tasks", icon: Award },
-  { label: "Validations", to: "/admin/validations", icon: ClipboardList },
-  { label: "Contacts", to: "/admin/contacts", icon: Mail },
-  { label: "Whitepaper", to: "/admin/whitepaper", icon: ClipboardList },
-  { label: "Contributions", to: "/admin/contributions", icon: Users },
+const allNavItems = [
+  { label: "Dashboard", to: "/admin", permKey: "dashboard", icon: LayoutDashboard, end: true },
+  { label: "User Roles", to: "/admin/users", permKey: "users", icon: ShieldCheck, adminOnly: true },
+  { label: "Points Manager", to: "/admin/points", permKey: "points", icon: Coins },
+  { label: "Waitlist", to: "/admin/waitlist", permKey: "waitlist", icon: Users },
+  { label: "Waitlist Tasks", to: "/admin/tasks", permKey: "tasks", icon: ListChecks },
+  { label: "Contribute Tasks", to: "/admin/contribute-tasks", permKey: "contribute-tasks", icon: Award },
+  { label: "Validations", to: "/admin/validations", permKey: "validations", icon: ClipboardList },
+  { label: "Contacts", to: "/admin/contacts", permKey: "contacts", icon: Mail },
+  { label: "Whitepaper", to: "/admin/whitepaper", permKey: "whitepaper", icon: ClipboardList },
+  { label: "Contributions", to: "/admin/contributions", permKey: "contributions", icon: Users },
 ];
 
-const AdminLayout = ({ children }: { children: ReactNode }) => {
-  const { loading, userEmail, signOut } = useAdmin();
+const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; requiredPermission?: string }) => {
+  const { loading, isAdmin, isModerator, hasPermission, userEmail, signOut } = useAdmin();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -33,6 +33,21 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       </div>
     );
   }
+
+  // Check page-level permission
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    // Find first permitted page to redirect to
+    const firstAllowed = allNavItems.find(item => 
+      !item.adminOnly && hasPermission(item.permKey)
+    );
+    return <Navigate to={firstAllowed?.to || "/admin"} replace />;
+  }
+
+  // Filter nav items based on permissions
+  const navItems = allNavItems.filter(item => {
+    if (item.adminOnly) return isAdmin;
+    return hasPermission(item.permKey);
+  });
 
   const isActive = (path: string, end?: boolean) =>
     end ? location.pathname === path : location.pathname.startsWith(path);
@@ -49,7 +64,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             <img src={logo} alt="RaidFi" className="w-8 h-8" />
             <div>
               <p className="font-semibold text-foreground text-sm">Admin Panel</p>
-              <p className="text-xs text-muted-foreground">RaidFi</p>
+              <p className="text-xs text-muted-foreground">
+                {isAdmin ? "Admin" : "Moderator"}
+              </p>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground">
@@ -85,6 +102,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground"><Menu className="w-5 h-5" /></button>
           <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
+            {isModerator && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 font-medium">MOD</span>
+            )}
             <span className="text-xs text-muted-foreground">{userEmail}</span>
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
               {userEmail?.charAt(0).toUpperCase()}
