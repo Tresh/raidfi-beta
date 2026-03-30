@@ -211,7 +211,7 @@ const AnalyticsPage = () => {
 
   const overviewCards = [
     { label: "Total Users", value: s.totalUsers, icon: Users, color: "text-primary" },
-    { label: "Waitlist Signups", value: s.totalWaitlist, icon: UserCheck, color: "text-green-400" },
+    { label: "Waitlist Signups", value: s.totalWaitlist, icon: UserCheck, color: "text-primary" },
     { label: "Validations", value: s.totalValidations, icon: Target, color: "text-amber-400" },
     { label: "Total XP Distributed", value: s.totalXPDistributed.toLocaleString(), icon: Zap, color: "text-purple-400" },
     { label: "Avg XP / User", value: s.avgXPPerUser, icon: TrendingUp, color: "text-blue-400" },
