@@ -441,7 +441,7 @@ const AnalyticsPage = () => {
                         <span className="text-muted-foreground">{d.date}</span>
                         <div className="flex items-center gap-2">
                           <div
-                            className="h-2 bg-green-500 rounded-full"
+                            className="h-2 bg-primary rounded-full"
                             style={{ width: `${Math.max(20, (d.count / Math.max(...recentGrowth.waitlist.map((x) => x.count))) * 120)}px` }}
                           />
                           <span className="text-foreground font-medium w-8 text-right">{d.count}</span>
