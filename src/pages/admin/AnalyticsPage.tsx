@@ -428,7 +428,7 @@ const AnalyticsPage = () => {
             <Card className="bg-card border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-green-400" /> Waitlist Signups (30d)
+                  <ArrowUpRight className="w-4 h-4 text-primary" /> Waitlist Signups (30d)
                 </CardTitle>
               </CardHeader>
               <CardContent>
