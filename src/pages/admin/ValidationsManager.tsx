@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Search, Eye, X, Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const BATCH_SIZE = 30;
 
@@ -60,6 +61,8 @@ const ValidationsManager = () => {
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<any | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const fetchData = async (offset = 0, append = false) => {
     if (offset === 0) setLoading(true);
@@ -72,11 +75,8 @@ const ValidationsManager = () => {
       .range(offset, offset + BATCH_SIZE - 1);
 
     const fetched = data || [];
-    if (append) {
-      setRows((prev) => [...prev, ...fetched]);
-    } else {
-      setRows(fetched);
-    }
+    if (append) setRows((prev) => [...prev, ...fetched]);
+    else setRows(fetched);
     setTotalCount(count || 0);
     setHasMore(fetched.length === BATCH_SIZE);
     setLoading(false);
@@ -87,16 +87,18 @@ const ValidationsManager = () => {
 
   const handleLoadMore = () => fetchData(rows.length, true);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("validation_submissions").delete().eq("id", id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("validation_submissions").delete().eq("id", deleteTarget.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setRows((prev) => prev.filter((r) => r.id !== id));
+      setRows((prev) => prev.filter((r) => r.id !== deleteTarget.id));
       setTotalCount((c) => c - 1);
-      if (selected?.id === id) setSelected(null);
+      if (selected?.id === deleteTarget.id) setSelected(null);
       toast({ title: "Deleted", description: "Entry removed." });
     }
+    setDeleteTarget(null);
   };
 
   const handleExportCSV = () => {
@@ -124,9 +126,7 @@ const ValidationsManager = () => {
     if (!responses || Object.keys(responses).length === 0) {
       return <p className="text-sm text-muted-foreground">No form responses recorded.</p>;
     }
-
     const labels = row.role === "project" ? PROJECT_LABELS : INDIVIDUAL_LABELS;
-
     return (
       <div className="space-y-3">
         {Object.entries(responses).map(([key, value]) => {
@@ -159,12 +159,7 @@ const ValidationsManager = () => {
       <div className="bg-card border border-border rounded-xl p-1 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10"
-          />
+          <Input placeholder="Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10" />
         </div>
       </div>
 
@@ -192,28 +187,16 @@ const ValidationsManager = () => {
                     <td className="p-4 text-foreground">{r.name}</td>
                     <td className="p-4 text-foreground">{r.email}</td>
                     <td className="p-4 hidden md:table-cell">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        r.role === "project" ? "bg-purple-500/10 text-purple-400" : "bg-primary/10 text-primary"
-                      }`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${r.role === "project" ? "bg-purple-500/10 text-purple-400" : "bg-primary/10 text-primary"}`}>
                         {r.role === "project" ? "Project" : "Individual"}
                       </span>
                     </td>
-                    <td className="p-4 hidden lg:table-cell">
-                      <span className="text-primary font-medium">{r.points_earned}</span>
-                    </td>
-                    <td className="p-4 text-muted-foreground hidden lg:table-cell">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </td>
+                    <td className="p-4 hidden lg:table-cell"><span className="text-primary font-medium">{r.points_earned}</span></td>
+                    <td className="p-4 text-muted-foreground hidden lg:table-cell">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td className="p-4 text-right space-x-1">
-                      <Button variant="ghost" size="icon" onClick={() => setSelected(r)}>
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(r.id)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => setSelected(r)}><Eye className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"
+                        onClick={() => { setDeleteTarget({ id: r.id, name: r.name }); setConfirmOpen(true); }}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
@@ -224,12 +207,10 @@ const ValidationsManager = () => {
           </table>
         </div>
 
-        {/* Load more */}
         {hasMore && !search && !loading && (
           <div className="p-4 text-center border-t border-border/30">
             <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loadingMore}>
-              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Load more
+              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Load more
             </Button>
           </div>
         )}
@@ -242,47 +223,37 @@ const ValidationsManager = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">{selected.name}</h2>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  selected.role === "project" ? "bg-purple-500/10 text-purple-400" : "bg-primary/10 text-primary"
-                }`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${selected.role === "project" ? "bg-purple-500/10 text-purple-400" : "bg-primary/10 text-primary"}`}>
                   {selected.role === "project" ? "Project / Founder" : "Community / Individual"}
                 </span>
               </div>
-              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
             </div>
-
             <div className="space-y-3 text-sm mb-4">
-              <div>
-                <p className="text-muted-foreground text-xs">Email</p>
-                <p className="text-foreground">{selected.email}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs">Points Earned</p>
-                <p className="text-foreground">{selected.points_earned}</p>
-              </div>
+              <div><p className="text-muted-foreground text-xs">Email</p><p className="text-foreground">{selected.email}</p></div>
+              <div><p className="text-muted-foreground text-xs">Points Earned</p><p className="text-foreground">{selected.points_earned}</p></div>
               {selected.twitter_handle && (
-                <div>
-                  <p className="text-muted-foreground text-xs">X Handle</p>
-                  <p className="text-foreground">@{selected.twitter_handle}</p>
-                </div>
+                <div><p className="text-muted-foreground text-xs">X Handle</p><p className="text-foreground">@{selected.twitter_handle}</p></div>
               )}
-              <div>
-                <p className="text-muted-foreground text-xs">Submitted</p>
-                <p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p>
-              </div>
+              <div><p className="text-muted-foreground text-xs">Submitted</p><p className="text-foreground">{new Date(selected.created_at).toLocaleString()}</p></div>
             </div>
-
             <div className="border-t border-border/50 pt-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">
-                {selected.role === "project" ? "Project Questions" : "Individual Questions"}
-              </h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">{selected.role === "project" ? "Project Questions" : "Individual Questions"}</h3>
               {renderFormResponses(selected)}
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete Validation"
+        description={`Permanently delete the validation entry for ${deleteTarget?.name || "this user"}? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

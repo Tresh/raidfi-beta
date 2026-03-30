@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 interface ContributeTask {
   id: string;
@@ -29,13 +30,12 @@ const ContributeTasksManager = () => {
   const [tasks, setTasks] = useState<ContributeTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
   const fetchTasks = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("contribute_tasks" as any)
-      .select("*")
-      .order("sort_order", { ascending: true });
+    const { data } = await supabase.from("contribute_tasks" as any).select("*").order("sort_order", { ascending: true });
     if (data) setTasks(data as any);
     setLoading(false);
   };
@@ -44,49 +44,29 @@ const ContributeTasksManager = () => {
 
   const handleUpdate = async (task: ContributeTask) => {
     setSaving(task.id);
-    const { error } = await supabase
-      .from("contribute_tasks" as any)
-      .update({
-        label: task.label,
-        description: task.description,
-        points: task.points,
-        task_type: task.task_type,
-        url: task.url,
-        sort_order: task.sort_order,
-        is_active: task.is_active,
-      } as any)
-      .eq("id", task.id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Saved" });
-    }
+    const { error } = await supabase.from("contribute_tasks" as any).update({
+      label: task.label, description: task.description, points: task.points,
+      task_type: task.task_type, url: task.url, sort_order: task.sort_order, is_active: task.is_active,
+    } as any).eq("id", task.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else toast({ title: "Saved" });
     setSaving(null);
   };
 
   const handleAdd = async () => {
     const { error } = await supabase.from("contribute_tasks" as any).insert({
-      label: "New Task",
-      description: "",
-      points: 10,
-      task_type: "link",
-      url: "",
-      sort_order: tasks.length + 1,
+      label: "New Task", description: "", points: 10, task_type: "link", url: "", sort_order: tasks.length + 1,
     } as any);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      fetchTasks();
-    }
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else fetchTasks();
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("contribute_tasks" as any).delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setTasks(prev => prev.filter(t => t.id !== id));
-    }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("contribute_tasks" as any).delete().eq("id", deleteTarget.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else setTasks(prev => prev.filter(t => t.id !== deleteTarget.id));
+    setDeleteTarget(null);
   };
 
   const updateField = (id: string, field: keyof ContributeTask, value: any) => {
@@ -121,7 +101,6 @@ const ContributeTasksManager = () => {
                   <Input value={task.description || ""} onChange={(e) => updateField(task.id, "description", e.target.value)} className="h-9 text-sm" />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Points</label>
@@ -143,7 +122,6 @@ const ContributeTasksManager = () => {
                   <Input type="number" value={task.sort_order} onChange={(e) => updateField(task.id, "sort_order", parseInt(e.target.value) || 0)} className="h-9 text-sm" />
                 </div>
               </div>
-
               <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center gap-2">
                   <Switch checked={task.is_active} onCheckedChange={(v) => updateField(task.id, "is_active", v)} />
@@ -151,10 +129,10 @@ const ContributeTasksManager = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="outline" onClick={() => handleUpdate(task)} disabled={saving === task.id}>
-                    {saving === task.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
-                    Save
+                    {saving === task.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />} Save
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(task.id)} className="text-destructive hover:text-destructive">
+                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive"
+                    onClick={() => { setDeleteTarget({ id: task.id, label: task.label }); setConfirmOpen(true); }}>
                     <Trash2 className="w-3 h-3" />
                   </Button>
                 </div>
@@ -163,6 +141,16 @@ const ContributeTasksManager = () => {
           </Card>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete Task"
+        description={`Permanently delete the task "${deleteTarget?.label || ""}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

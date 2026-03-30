@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Search, Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const BATCH_SIZE = 30;
 
@@ -15,6 +16,8 @@ const WaitlistManager = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; email: string } | null>(null);
 
   const fetchData = async (offset = 0, append = false) => {
     if (offset === 0) setLoading(true);
@@ -39,15 +42,17 @@ const WaitlistManager = () => {
 
   const handleLoadMore = () => fetchData(rows.length, true);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("waitlist_submissions").delete().eq("id", id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("waitlist_submissions").delete().eq("id", deleteTarget.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setRows((prev) => prev.filter((r) => r.id !== id));
+      setRows((prev) => prev.filter((r) => r.id !== deleteTarget.id));
       setTotalCount((c) => c - 1);
       toast({ title: "Deleted", description: "Entry removed." });
     }
+    setDeleteTarget(null);
   };
 
   const handleExportCSV = () => {
@@ -64,9 +69,7 @@ const WaitlistManager = () => {
     a.click();
   };
 
-  const filtered = rows.filter((r) =>
-    r.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = rows.filter((r) => r.email.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div>
@@ -83,12 +86,7 @@ const WaitlistManager = () => {
       <div className="bg-card border border-border rounded-xl p-1 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10"
-          />
+          <Input placeholder="Search by email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-transparent border-0 focus-visible:ring-0 h-10" />
         </div>
       </div>
 
@@ -112,19 +110,11 @@ const WaitlistManager = () => {
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-foreground">{r.email}</td>
-                    <td className="p-4">
-                      <span className="text-primary font-medium">{r.points}</span>
-                    </td>
-                    <td className="p-4 text-muted-foreground hidden md:table-cell">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </td>
+                    <td className="p-4"><span className="text-primary font-medium">{r.points}</span></td>
+                    <td className="p-4 text-muted-foreground hidden md:table-cell">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td className="p-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(r.id)}
-                      >
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"
+                        onClick={() => { setDeleteTarget({ id: r.id, email: r.email }); setConfirmOpen(true); }}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
@@ -138,12 +128,21 @@ const WaitlistManager = () => {
         {hasMore && !search && !loading && (
           <div className="p-4 text-center border-t border-border/30">
             <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loadingMore}>
-              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Load more
+              {loadingMore && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Load more
             </Button>
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete Waitlist Entry"
+        description={`Permanently delete the waitlist entry for ${deleteTarget?.email || "this user"}? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

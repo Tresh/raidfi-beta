@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Plus, Trash2, Save, Eye, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 interface Task {
   id: string;
@@ -52,6 +53,8 @@ const TasksManager = () => {
   const [submissions, setSubmissions] = useState<TaskSubmission[]>([]);
   const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
   const [loadingSubs, setLoadingSubs] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -64,51 +67,31 @@ const TasksManager = () => {
 
   const handleUpdate = async (task: Task) => {
     setSaving(task.id);
-    const { error } = await supabase
-      .from("waitlist_tasks")
-      .update({
-        label: task.label,
-        url: task.url,
-        sort_order: task.sort_order,
-        is_active: task.is_active,
-        task_type: task.task_type,
-        requires_input: task.requires_input,
-        input_label: task.input_label,
-        input_placeholder: task.input_placeholder,
-        verification_type: task.verification_type,
-      } as any)
-      .eq("id", task.id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Saved" });
-    }
+    const { error } = await supabase.from("waitlist_tasks").update({
+      label: task.label, url: task.url, sort_order: task.sort_order, is_active: task.is_active,
+      task_type: task.task_type, requires_input: task.requires_input, input_label: task.input_label,
+      input_placeholder: task.input_placeholder, verification_type: task.verification_type,
+    } as any).eq("id", task.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else toast({ title: "Saved" });
     setSaving(null);
   };
 
   const handleAdd = async () => {
     const { error } = await supabase.from("waitlist_tasks").insert({
-      task_type: "custom",
-      label: "New Task",
-      url: "https://example.com",
-      sort_order: tasks.length + 1,
-      requires_input: false,
-      verification_type: "manual",
+      task_type: "custom", label: "New Task", url: "https://example.com",
+      sort_order: tasks.length + 1, requires_input: false, verification_type: "manual",
     } as any);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      fetchTasks();
-    }
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else fetchTasks();
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("waitlist_tasks").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setTasks(prev => prev.filter(t => t.id !== id));
-    }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("waitlist_tasks").delete().eq("id", deleteTarget.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else setTasks(prev => prev.filter(t => t.id !== deleteTarget.id));
+    setDeleteTarget(null);
   };
 
   const updateField = (id: string, field: keyof Task, value: any) => {
@@ -118,12 +101,7 @@ const TasksManager = () => {
   const viewSubmissions = async (taskId: string) => {
     setViewingTaskId(taskId);
     setLoadingSubs(true);
-    const { data } = await supabase
-      .from("waitlist_task_submissions" as any)
-      .select("*")
-      .eq("task_id", taskId)
-      .order("created_at", { ascending: false })
-      .limit(50);
+    const { data } = await supabase.from("waitlist_task_submissions" as any).select("*").eq("task_id", taskId).order("created_at", { ascending: false }).limit(50);
     if (data) setSubmissions(data as any);
     setLoadingSubs(false);
   };
@@ -156,7 +134,6 @@ const TasksManager = () => {
                   <Input value={task.url} onChange={(e) => updateField(task.id, "url", e.target.value)} className="h-9 text-sm" />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Type</label>
@@ -183,13 +160,10 @@ const TasksManager = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Input settings */}
               <div className="flex items-center gap-3">
                 <Switch checked={task.requires_input} onCheckedChange={(v) => updateField(task.id, "requires_input", v)} />
                 <span className="text-xs text-muted-foreground">Requires Input</span>
               </div>
-
               {task.requires_input && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -202,16 +176,15 @@ const TasksManager = () => {
                   </div>
                 </div>
               )}
-
               <div className="flex items-center gap-2 pt-1">
                 <Button size="sm" variant="outline" onClick={() => handleUpdate(task)} disabled={saving === task.id}>
-                  {saving === task.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
-                  Save
+                  {saving === task.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />} Save
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => viewSubmissions(task.id)}>
                   <Eye className="w-3 h-3 mr-1" /> Submissions
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => handleDelete(task.id)} className="text-destructive hover:text-destructive">
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive"
+                  onClick={() => { setDeleteTarget({ id: task.id, label: task.label }); setConfirmOpen(true); }}>
                   <Trash2 className="w-3 h-3" />
                 </Button>
               </div>
@@ -259,6 +232,16 @@ const TasksManager = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete Task"
+        description={`Permanently delete the task "${deleteTarget?.label || ""}"? All associated submissions will remain but the task will be removed.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };
