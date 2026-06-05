@@ -280,7 +280,7 @@ const Feed = () => {
                             <span className="text-[13px] font-semibold text-foreground truncate block">{displayName}</span>
                           )}
                           <div className="text-[11px] text-muted-foreground truncate">
-                            {handle ? `@${handle}` : mask(c.user_email)}
+                            {handle ? `@${handle}` : ""}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
