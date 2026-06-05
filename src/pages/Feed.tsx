@@ -229,6 +229,7 @@ const Feed = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Live Feed — RaidFi", "description": "Live community contributions on RaidFi — see the latest posts and raids in real time.", "url": "https://raidfi.site/feed" }) }} />
       <main className="flex-1 pt-24 pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
           <div className="text-center mb-8">
