@@ -1,0 +1,14 @@
+# RaidFi
+
+> The Reputation & Social Intelligence Layer for Web3 — making contribution measurable, reputation portable, and social performance analyzable.
+
+RaidFi is building credibility infrastructure for Web3 communities: contribution tracking, reputation scoring, and social analytics for projects and contributors.
+
+## Pages
+
+- [Home](/): Overview of RaidFi's vision, product, and value proposition.
+- [Whitepaper](/whitepaper): Full technical and strategic whitepaper.
+- [Waitlist](/waitlist): Request early access to RaidFi.
+- [Contribute](/contributions): Contributor hub — XP, tasks, referrals.
+- [Live Feed](/feed): Live community contributions feed.
+- [Contact](/contact): Get in touch with the RaidFi team.
