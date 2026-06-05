@@ -52,11 +52,7 @@ const Contact = () => {
     setLoading(true);
     try {
       const { name, email, subject, message } = parsed.data;
-      const { data: existing } = await supabase
-        .from("contact_submissions")
-        .select("id")
-        .eq("email", email)
-        .maybeSingle();
+      const { data: existing } = await supabase.rpc("contact_email_exists" as any, { _email: email } as any);
       if (existing) {
         toast({ title: "Already submitted", description: "We'll get back to you soon!", variant: "destructive" });
         setLoading(false);
