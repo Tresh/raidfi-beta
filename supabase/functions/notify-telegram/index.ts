@@ -9,19 +9,63 @@ const corsHeaders = {
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const maskEmail = (e: string) =>
+  e.replace(/(.{3}).*(@.*)/, "$1***$2");
+
+const truncate = (s: string, n: number) =>
+  s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+interface TgButton { text: string; url: string; }
+
+async function sendTelegram(
+  chatId: string,
+  text: string,
+  buttons: TgButton[],
+) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
+  if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY) {
+    throw new Error("Telegram not configured");
+  }
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    text,
+    parse_mode: "HTML",
+    disable_web_page_preview: true,
+  };
+  if (buttons.length) {
+    body.reply_markup = {
+      inline_keyboard: buttons.map((b) => [{ text: b.text, url: b.url }]),
+    };
+  }
+  const r = await fetch(`${GATEWAY_URL}/sendMessage`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "X-Connection-Api-Key": TELEGRAM_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(`Telegram send failed [${r.status}]: ${JSON.stringify(data)}`);
+  return data;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { kind, text, link, buttonText } = await req.json();
-    if (!text) {
-      return new Response(JSON.stringify({ error: "Missing text" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const payload = await req.json();
+    const { kind, contribution_id, task_id, origin, text: rawText } = payload;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -50,46 +94,171 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
-    if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY) {
-      return new Response(JSON.stringify({ error: "Telegram not configured" }), {
-        status: 500,
+    const baseOrigin = origin || "https://raidfi.app";
+
+    // ---- TEST / RAW ----
+    if (kind === "test" || (!contribution_id && !task_id && rawText)) {
+      const result = await sendTelegram(settings.telegram_chat_id, rawText || "Test", []);
+      return new Response(JSON.stringify({ ok: true, result: result.result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const body: Record<string, unknown> = {
-      chat_id: settings.telegram_chat_id,
-      text,
-      parse_mode: "HTML",
-      disable_web_page_preview: false,
-    };
-    if (link) {
-      body.reply_markup = {
-        inline_keyboard: [[{ text: buttonText || "Open", url: link }]],
-      };
-    }
+    // ---- FEED ----
+    if (kind === "feed" && contribution_id) {
+      // Brief retry to allow fetch-post-text to populate post_text
+      let contrib: any = null;
+      for (let i = 0; i < 4; i++) {
+        const { data } = await supabase
+          .from("contributions")
+          .select("id,user_email,user_id,post_url,content_type,post_text,post_author,manual_score,ai_score,status")
+          .eq("id", contribution_id)
+          .maybeSingle();
+        contrib = data;
+        if (contrib?.post_text) break;
+        await new Promise((r) => setTimeout(r, 800));
+      }
+      if (!contrib) {
+        return new Response(JSON.stringify({ ok: false, error: "contribution not found" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    const r = await fetch(`${GATEWAY_URL}/sendMessage`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": TELEGRAM_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    const data = await r.json();
-    if (!r.ok) {
-      console.error("Telegram send failed", r.status, data);
-      return new Response(JSON.stringify({ error: data }), {
-        status: r.status,
+      const [{ data: profile }, { data: ct }] = await Promise.all([
+        supabase.from("profiles").select("name,referral_code").eq("user_id", contrib.user_id).maybeSingle(),
+        supabase.from("content_types").select("label").eq("value", contrib.content_type).maybeSingle(),
+      ]);
+
+      const handleOrName = contrib.post_author
+        ? `@${escapeHtml(contrib.post_author.replace(/^@/, ""))}`
+        : profile?.name
+          ? escapeHtml(profile.name)
+          : escapeHtml(maskEmail(contrib.user_email));
+
+      const typeLabel = ct?.label || (contrib.content_type?.[0]?.toUpperCase() + contrib.content_type?.slice(1)) || "Post";
+
+      const snippet = contrib.post_text
+        ? `"${escapeHtml(truncate(contrib.post_text.replace(/\s+/g, " ").trim(), 220))}"`
+        : "<i>Content unavailable — open the post to view.</i>";
+
+      const status = contrib.status === "approved"
+        ? `✅ Approved${contrib.manual_score ?? contrib.ai_score ? ` (+${contrib.manual_score ?? contrib.ai_score} XP)` : ""}`
+        : `⏳ Awaiting Score`;
+
+      const lines = [
+        "📝 <b>New Contribution</b>",
+        "",
+        "👤 <b>Contributor</b>",
+        handleOrName,
+        "",
+        "🏷️ <b>Type</b>",
+        escapeHtml(typeLabel),
+        "",
+        "📄 <b>Content</b>",
+        snippet,
+        "",
+        "⏳ <b>Status</b>",
+        status,
+        "",
+        "💬 <i>Join the conversation and support fellow contributors.</i>",
+      ];
+
+      const buttons: TgButton[] = [
+        { text: "🔗 View Post", url: contrib.post_url },
+      ];
+      if (profile?.referral_code) {
+        buttons.push({ text: "👤 View Contributor", url: `${baseOrigin}/u/${profile.referral_code}` });
+      }
+
+      const result = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
+      return new Response(JSON.stringify({ ok: true, result: result.result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ ok: true, result: data.result }), {
+    // ---- TASK ----
+    if (kind === "task" && task_id) {
+      const { data: task } = await supabase
+        .from("contribute_tasks")
+        .select("id,label,description,points,url,action_types,is_pinned,created_at")
+        .eq("id", task_id)
+        .maybeSingle();
+      if (!task) {
+        return new Response(JSON.stringify({ ok: false, error: "task not found" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Map action_type values to labels
+      let actionLabels: string[] = task.action_types || [];
+      if (actionLabels.length) {
+        const { data: ats } = await supabase
+          .from("task_action_types")
+          .select("value,label")
+          .in("value", actionLabels);
+        if (ats) {
+          const map = new Map(ats.map((a: any) => [a.value, a.label]));
+          actionLabels = actionLabels.map((v) => map.get(v) || v);
+        }
+      }
+
+      const isPinned = !!task.is_pinned;
+
+      const header = isPinned
+        ? ["📌 <b>Priority Task</b>", "", "🎯 <b>Featured Opportunity</b>"]
+        : ["🎯 <b>New Task Available</b>"];
+
+      const lines: string[] = [
+        ...header,
+        "",
+        "📝 <b>Task</b>",
+        escapeHtml(task.label || "Untitled"),
+      ];
+
+      if (task.description) {
+        lines.push("", "📋 <b>Details</b>", escapeHtml(task.description));
+      }
+
+      if (actionLabels.length) {
+        lines.push("", "⚡ <b>Actions Required</b>", ...actionLabels.map((a) => `• ${escapeHtml(a)}`));
+      }
+
+      lines.push("", "🏆 <b>Reward</b>", `+${task.points} XP`);
+
+      if (!isPinned) {
+        // Optional deadline-ish note (today + 2 days as a soft hint) — only when not pinned
+        const d = new Date();
+        d.setDate(d.getDate() + 2);
+        lines.push("", "⏰ <b>Posted</b>", formatDate(new Date(task.created_at || Date.now())));
+      }
+
+      lines.push(
+        "",
+        isPinned
+          ? "🔥 <i>This task is currently prioritized and may have a higher impact on your contributor profile.</i>"
+          : "🚀 <i>Complete this task and grow your contributor reputation on RaidFi.</i>",
+      );
+
+      const buttons: TgButton[] = [
+        { text: "🔗 Do Task", url: `${baseOrigin}/contributions` },
+      ];
+
+      const result = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
+      return new Response(JSON.stringify({ ok: true, result: result.result }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ---- FALLBACK: raw text ----
+    if (rawText) {
+      const result = await sendTelegram(settings.telegram_chat_id, rawText, []);
+      return new Response(JSON.stringify({ ok: true, result: result.result }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Missing payload" }), {
+      status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
