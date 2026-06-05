@@ -81,6 +81,7 @@ const Whitepaper = () => {
           <p className="text-center text-muted-foreground py-20">Whitepaper not available.</p>
         ) : (
           <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Article", "headline": "RaidFi Whitepaper", "author": { "@type": "Organization", "name": "RaidFi" }, "publisher": { "@type": "Organization", "name": "RaidFi" }, "description": "RaidFi whitepaper: the architecture, mechanics, and vision behind the Web3 reputation and social intelligence layer.", "url": "https://raidfi.site/whitepaper" }) }} />
             <article className="prose prose-invert max-w-none whitepaper-content">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
