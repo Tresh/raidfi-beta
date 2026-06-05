@@ -22,6 +22,7 @@ interface ContributeTask {
   submission_label: string | null;
   submission_placeholder: string | null;
   action_types: string[];
+  telegram_notified?: boolean;
   created_at?: string;
 }
 
