@@ -117,27 +117,6 @@ const TypeBadge = ({ type }: { type: string }) => (
   </span>
 );
 
-const PostImage = ({ src, href }: { src: string; href: string }) => {
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  if (failed) return null;
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="block mt-2">
-      <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted/40" style={{ aspectRatio: "16 / 10" }}>
-        {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" />}
-        <img
-          src={src}
-          alt="Post media"
-          loading="lazy"
-          onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
-        />
-      </div>
-    </a>
-  );
-};
-
 const Feed = () => {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +251,14 @@ const Feed = () => {
                         )}
 
                         {c.post_image_url && (
-                          <PostImage src={c.post_image_url} href={c.post_url} />
+                          <a href={c.post_url} target="_blank" rel="noopener noreferrer" className="block mt-2">
+                            <img
+                              src={c.post_image_url}
+                              alt="Post media"
+                              loading="lazy"
+                              className="w-full rounded-lg border border-border max-h-80 object-cover"
+                            />
+                          </a>
                         )}
                       </div>
 
