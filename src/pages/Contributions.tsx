@@ -33,6 +33,12 @@ interface ContributeTask {
   points: number;
   task_type: string;
   url: string | null;
+  is_pinned?: boolean;
+  requires_link_submission?: boolean;
+  submission_label?: string | null;
+  submission_placeholder?: string | null;
+  action_types?: string[];
+  created_at?: string;
 }
 
 interface LeaderboardEntry {
@@ -59,11 +65,15 @@ const Contributions = () => {
 
   // Post submission
   const [postUrl, setPostUrl] = useState("");
+  const [contentType, setContentType] = useState("post");
+  const [contentTypes, setContentTypes] = useState<{ value: string; label: string; default_points?: number }[]>([]);
+  const [scoringDelay, setScoringDelay] = useState(24);
   const [submittingPost, setSubmittingPost] = useState(false);
 
   // Contribute tasks
   const [contributeTasks, setContributeTasks] = useState<ContributeTask[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set());
+  const [taskLinks, setTaskLinks] = useState<Record<string, string>>({});
 
   // Validation form inline
   const [showValidationForm, setShowValidationForm] = useState(false);
@@ -152,17 +162,34 @@ const Contributions = () => {
     check();
   }, [session]);
 
-  // Fetch contribute tasks
+  // Fetch contribute tasks (pinned first, then newest first)
   useEffect(() => {
     const fetch = async () => {
       const { data } = await supabase
         .from("contribute_tasks" as any)
         .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (data) setContributeTasks(data as any);
+        .eq("is_active", true);
+      if (data) {
+        const sorted = ((data as any[]) || []).sort((a, b) => {
+          if (!!a.is_pinned !== !!b.is_pinned) return a.is_pinned ? -1 : 1;
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+        setContributeTasks(sorted as any);
+      }
     };
     fetch();
+  }, []);
+
+  // Fetch content types + settings
+  useEffect(() => {
+    (async () => {
+      const [{ data: types }, { data: s }] = await Promise.all([
+        supabase.from("content_types" as any).select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("admin_settings" as any).select("scoring_delay_hours").eq("id", "global").maybeSingle(),
+      ]);
+      setContentTypes((types as any) || []);
+      if ((s as any)?.scoring_delay_hours) setScoringDelay((s as any).scoring_delay_hours);
+    })();
   }, []);
 
   // Fetch completed tasks
@@ -343,20 +370,33 @@ const Contributions = () => {
     setSubmittingPost(true);
     try {
       const contributionId = crypto.randomUUID();
+      const ct = contentTypes.find(t => t.value === contentType);
+      const points = ct?.default_points ?? 10;
       const { error } = await supabase.from("contributions").insert({
         id: contributionId,
         user_email: session.user.email!,
         user_id: session.user.id,
         post_url: postUrl.trim(),
-        points_earned: 10,
+        content_type: contentType,
+        points_earned: points,
         status: "pending",
-      });
+      } as any);
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "⏳ Post Submitted", description: "Pending admin approval." });
+        toast({ title: "⏳ Submitted", description: `Scored within ${scoringDelay}h.` });
+        supabase.functions.invoke("fetch-post-text", {
+          body: { contribution_id: contributionId, post_url: postUrl.trim() },
+        }).catch(console.error);
         supabase.functions.invoke("notify-admin-contribution", {
           body: { post_url: postUrl.trim(), user_email: session.user.email, contribution_id: contributionId },
+        }).catch(console.error);
+        supabase.functions.invoke("notify-telegram", {
+          body: {
+            kind: "feed",
+            text: `📝 <b>New ${contentType}</b> from ${session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2")}\n<i>Awaiting score</i>`,
+            link: postUrl.trim(),
+          },
         }).catch(console.error);
         setPostUrl("");
       }
@@ -381,9 +421,28 @@ const Contributions = () => {
     if (!session?.user) return;
     if (completedTaskIds.has(task.id)) return;
 
-    // Special: validation form task - show inline
     if (task.task_type === "form") {
       setShowValidationForm(true);
+      return;
+    }
+
+    // Link submission required
+    if (task.requires_link_submission) {
+      const link = (taskLinks[task.id] || "").trim();
+      if (!link) {
+        toast({ title: "Link required", description: task.submission_label || "Please paste a link.", variant: "destructive" });
+        return;
+      }
+      const { error } = await supabase
+        .from("contribute_task_completions" as any)
+        .insert({ user_id: session.user.id, task_id: task.id, submission_link: link } as any);
+      if (!error) {
+        setCompletedTaskIds(prev => new Set([...prev, task.id]));
+        toast({ title: `+${task.points} XP`, description: task.label });
+        calculatePoints();
+      } else {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      }
       return;
     }
 
@@ -600,14 +659,18 @@ const Contributions = () => {
                         <Send className="w-4 h-4 text-primary" />
                         <h3 className="text-sm font-semibold text-foreground">Submit a Post</h3>
                       </div>
-                      <form onSubmit={handleSubmitPost} className="flex gap-2">
+                      <form onSubmit={handleSubmitPost} className="flex gap-2 flex-wrap">
+                        <select value={contentType} onChange={(e) => setContentType(e.target.value)}
+                          className="h-9 text-sm rounded-md border border-input bg-background px-2 text-foreground">
+                          {contentTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                        </select>
                         <Input type="url" placeholder="https://x.com/user/status/..." value={postUrl}
-                          onChange={(e) => setPostUrl(e.target.value)} required className="h-9 text-sm flex-1" />
+                          onChange={(e) => setPostUrl(e.target.value)} required className="h-9 text-sm flex-1 min-w-[180px]" />
                         <Button type="submit" size="sm" className="h-9 px-4" disabled={submittingPost}>
                           {submittingPost ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                         </Button>
                       </form>
-                      <p className="text-[11px] text-muted-foreground mt-2">Posts require admin approval before earning XP.</p>
+                      <p className="text-[11px] text-muted-foreground mt-2">Posts are scored within {scoringDelay}h.</p>
                     </CardContent>
                   </Card>
 
@@ -622,21 +685,44 @@ const Contributions = () => {
                         {contributeTasks.map(task => {
                           const done = isTaskDone(task);
                           return (
-                            <Card key={task.id} className={done ? "opacity-60" : ""}>
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="text-sm font-medium text-foreground">{task.label}</p>
+                            <Card key={task.id} className={`${done ? "opacity-60" : ""} ${task.is_pinned ? "border-primary/40" : ""}`}>
+                              <CardContent className="p-4 space-y-2">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      {task.is_pinned && <span className="text-[10px] text-primary font-semibold uppercase">★ Pinned</span>}
+                                      <p className="text-sm font-medium text-foreground">{task.label}</p>
+                                    </div>
                                     {task.description && <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>}
+                                    {task.action_types && task.action_types.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mt-1.5">
+                                        {task.action_types.map(at => (
+                                          <span key={at} className="px-1.5 py-0.5 rounded text-[10px] uppercase bg-muted text-muted-foreground">{at}</span>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-3 shrink-0">
                                     <span className="text-xs font-semibold text-primary">+{task.points} XP</span>
-                                    <Button size="sm" variant={done ? "ghost" : "outline"} disabled={done}
-                                      onClick={() => handleCompleteTask(task)} className="h-8 text-xs">
-                                      {done ? <><Check className="w-3 h-3 mr-1" /> Done</> : "Complete"}
-                                    </Button>
+                                    {!task.requires_link_submission && (
+                                      <Button size="sm" variant={done ? "ghost" : "outline"} disabled={done}
+                                        onClick={() => handleCompleteTask(task)} className="h-8 text-xs">
+                                        {done ? <><Check className="w-3 h-3 mr-1" /> Done</> : task.url ? "Open" : "Complete"}
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
+                                {task.requires_link_submission && !done && (
+                                  <div className="flex gap-2">
+                                    <Input value={taskLinks[task.id] || ""}
+                                      onChange={(e) => setTaskLinks(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                      placeholder={task.submission_placeholder || "Paste your link..."} className="h-8 text-xs flex-1" />
+                                    <Button size="sm" onClick={() => handleCompleteTask(task)} className="h-8 text-xs">Submit</Button>
+                                  </div>
+                                )}
+                                {task.requires_link_submission && done && (
+                                  <p className="text-[11px] text-primary flex items-center gap-1"><Check className="w-3 h-3" /> Submitted</p>
+                                )}
                               </CardContent>
                             </Card>
                           );

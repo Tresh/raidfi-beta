@@ -2,16 +2,15 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Send, ExternalLink, Heart, Trophy, Filter } from "lucide-react";
+import { Loader2, Send, ExternalLink, Trophy, Clock, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
-
 const extractTweetId = (url: string): string | null => {
-  const match = url.match(TWEET_URL_REGEX);
-  return match ? match[2] : null;
+  const m = url.match(TWEET_URL_REGEX);
+  return m ? m[2] : null;
 };
 
 interface Contribution {
@@ -19,48 +18,38 @@ interface Contribution {
   user_email: string;
   post_url: string;
   points_earned: number;
-  engagement_count: number;
   created_at: string;
-  ai_score?: number;
-  ai_feedback?: string;
-  status?: string;
+  status: string;
+  content_type: string;
+  manual_score: number | null;
+  ai_score?: number | null;
+  ai_feedback?: string | null;
 }
 
-interface LeaderboardEntry {
-  user_email: string;
-  total_points: number;
-}
+interface LeaderboardEntry { user_email: string; total_points: number; }
 
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     setLoading(true);
     const renderTweet = () => {
       if (!containerRef.current) return;
-      containerRef.current.innerHTML = '';
+      containerRef.current.innerHTML = "";
       const twttr = (window as any).twttr;
       if (twttr?.widgets?.createTweet) {
-        twttr.widgets.createTweet(tweetId, containerRef.current, { theme: 'dark', dnt: true })
-          .then(() => setLoading(false))
-          .catch(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
+        twttr.widgets.createTweet(tweetId, containerRef.current, { theme: "dark", dnt: true })
+          .then(() => setLoading(false)).catch(() => setLoading(false));
+      } else setLoading(false);
     };
-
     if (!(window as any).twttr) {
-      const script = document.createElement("script");
-      script.src = "https://platform.twitter.com/widgets.js";
-      script.async = true;
-      script.onload = () => { (window as any).twttr?.ready?.(renderTweet); };
-      document.head.appendChild(script);
-    } else {
-      (window as any).twttr.ready?.(renderTweet) || renderTweet();
-    }
+      const s = document.createElement("script");
+      s.src = "https://platform.twitter.com/widgets.js";
+      s.async = true;
+      s.onload = () => (window as any).twttr?.ready?.(renderTweet);
+      document.head.appendChild(s);
+    } else (window as any).twttr.ready?.(renderTweet) || renderTweet();
   }, [tweetId]);
-
   return (
     <div className="min-h-[200px]">
       <div ref={containerRef} />
@@ -74,11 +63,27 @@ const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) 
   );
 };
 
+const StatusBadge = ({ status, score }: { status: string; score: number | null }) => {
+  if (status === "approved") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary font-medium">
+        ✓ {score != null ? score : "Approved"}
+        {score != null && score > 10 && <Star className="w-2.5 h-2.5 fill-current" />}
+      </span>
+    );
+  }
+  if (status === "rejected") return <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/20 text-destructive">Rejected</span>;
+  return <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 font-medium">⏳ Awaiting score</span>;
+};
+
 const Contribute = () => {
   const { toast } = useToast();
   const { session } = useAuth();
 
   const [postUrl, setPostUrl] = useState("");
+  const [contentType, setContentType] = useState("post");
+  const [contentTypes, setContentTypes] = useState<{ value: string; label: string; default_points?: number }[]>([]);
+  const [scoringDelay, setScoringDelay] = useState(24);
   const [submittingPost, setSubmittingPost] = useState(false);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(true);
@@ -93,18 +98,30 @@ const Contribute = () => {
   const [hasMoreLeaderboard, setHasMoreLeaderboard] = useState(true);
   const LEADERBOARD_PAGE_SIZE = 20;
 
+  useEffect(() => {
+    (async () => {
+      const [{ data: types }, { data: settings }] = await Promise.all([
+        supabase.from("content_types" as any).select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("admin_settings" as any).select("scoring_delay_hours").eq("id", "global").maybeSingle(),
+      ]);
+      setContentTypes((types as any) || []);
+      if ((settings as any)?.scoring_delay_hours) setScoringDelay((settings as any).scoring_delay_hours);
+    })();
+  }, []);
+
   const fetchContributions = useCallback(async (pageNum: number, append = false) => {
     const from = pageNum * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     const { data, error } = await supabase
       .from("contributions")
-      .select("*")
-      .eq("status", "approved")
+      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback")
+      .eq("published_to_feed", true)
+      .neq("status", "rejected")
       .order("created_at", { ascending: false })
       .range(from, to);
     if (error) { console.error(error); return; }
     if (data) {
-      setContributions(prev => append ? [...prev, ...data] : data);
+      setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
       setHasMore(data.length === PAGE_SIZE);
     }
     setLoadingFeed(false);
@@ -124,14 +141,15 @@ const Contribute = () => {
     const { data } = await query;
     if (data) {
       const map: Record<string, number> = {};
-      data.forEach(c => { map[c.user_email] = (map[c.user_email] || 0) + c.points_earned; });
+      data.forEach((c: any) => { map[c.user_email] = (map[c.user_email] || 0) + c.points_earned; });
       const sorted = Object.entries(map).map(([user_email, total_points]) => ({ user_email, total_points })).sort((a, b) => b.total_points - a.total_points);
       const from = pageNum * LEADERBOARD_PAGE_SIZE;
       const paged = sorted.slice(from, from + LEADERBOARD_PAGE_SIZE);
-      setLeaderboard(append ? prev => [...prev, ...paged] : paged);
+      setLeaderboard(append ? [...leaderboard, ...paged] : paged);
       setHasMoreLeaderboard(from + LEADERBOARD_PAGE_SIZE < sorted.length);
     }
     setLoadingLeaderboard(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => { fetchContributions(0); }, [fetchContributions]);
@@ -139,11 +157,10 @@ const Contribute = () => {
 
   useEffect(() => {
     if (!session?.user?.email) return;
-    const fetchPoints = async () => {
-      const { data } = await supabase.from("contributions").select("points_earned").eq("user_email", session.user.email!);
-      if (data) setUserPoints(data.reduce((sum, c) => sum + c.points_earned, 0));
-    };
-    fetchPoints();
+    (async () => {
+      const { data } = await supabase.from("contributions").select("points_earned").eq("user_email", session.user.email!).eq("status", "approved");
+      if (data) setUserPoints(data.reduce((sum: number, c: any) => sum + c.points_earned, 0));
+    })();
   }, [session, contributions]);
 
   const handleSubmitPost = async (e: React.FormEvent) => {
@@ -156,22 +173,39 @@ const Contribute = () => {
     setSubmittingPost(true);
     try {
       const contributionId = crypto.randomUUID();
+      const ct = contentTypes.find(t => t.value === contentType);
+      const points = ct?.default_points ?? 10;
       const { error } = await supabase.from("contributions").insert({
         id: contributionId,
         user_email: session.user.email!,
         user_id: session.user.id,
         post_url: postUrl.trim(),
-        points_earned: 10,
+        content_type: contentType,
+        points_earned: points,
         status: "pending",
-      });
+      } as any);
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "⏳ Post Submitted", description: "Pending admin approval." });
+        toast({ title: "⏳ Submitted", description: `Scored within ${scoringDelay}h.` });
+        // Fetch text in background
+        supabase.functions.invoke("fetch-post-text", {
+          body: { contribution_id: contributionId, post_url: postUrl.trim() },
+        }).catch(console.error);
+        // Notify admins
         supabase.functions.invoke("notify-admin-contribution", {
           body: { post_url: postUrl.trim(), user_email: session.user.email, contribution_id: contributionId },
         }).catch(console.error);
+        // Notify telegram (will be skipped if auto-publish is off and not yet published)
+        supabase.functions.invoke("notify-telegram", {
+          body: {
+            kind: "feed",
+            text: `📝 <b>New ${contentType}</b> from ${session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2")}\n<i>Awaiting score</i>`,
+            link: postUrl.trim(),
+          },
+        }).catch(console.error);
         setPostUrl("");
+        fetchContributions(0);
       }
     } catch (err) {
       toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
@@ -179,46 +213,34 @@ const Contribute = () => {
     setSubmittingPost(false);
   };
 
-  const handleEngage = async (contribution: Contribution) => {
-    if (session?.user) {
-      await supabase.from("contribution_engagements").insert({
-        contribution_id: contribution.id,
-        user_email: session.user.email!,
-        user_id: session.user.id,
-      });
-      await supabase.from("contributions").update({ engagement_count: contribution.engagement_count + 1 }).eq("id", contribution.id);
-      fetchContributions(0);
-    }
-    window.open(contribution.post_url, "_blank", "noopener,noreferrer");
-  };
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">Contribute</h1>
-        <p className="text-sm text-muted-foreground">Share your RaidFi posts from X. Earn points.</p>
+        <p className="text-sm text-muted-foreground">Share your RaidFi content from X. Earn points.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
-        {/* Feed */}
         <div className="space-y-4">
           {/* Submit */}
           <Card>
-            <CardContent className="p-4">
-              <form onSubmit={handleSubmitPost} className="flex gap-3">
-                <Input
-                  type="url"
-                  placeholder="https://x.com/user/status/..."
-                  value={postUrl}
-                  onChange={(e) => setPostUrl(e.target.value)}
-                  required
-                  className="h-10 text-sm flex-1"
-                />
-                <Button type="submit" className="h-10 px-4 text-sm shrink-0" disabled={submittingPost}>
-                  {submittingPost ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </Button>
+            <CardContent className="p-4 space-y-3">
+              <form onSubmit={handleSubmitPost} className="space-y-2">
+                <div className="flex gap-2 flex-wrap">
+                  <select value={contentType} onChange={(e) => setContentType(e.target.value)}
+                    className="h-10 text-sm rounded-md border border-input bg-background px-3 text-foreground">
+                    {contentTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                  <Input type="url" placeholder="https://x.com/user/status/..." value={postUrl}
+                    onChange={(e) => setPostUrl(e.target.value)} required className="h-10 text-sm flex-1 min-w-[200px]" />
+                  <Button type="submit" className="h-10 px-4 text-sm" disabled={submittingPost}>
+                    {submittingPost ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </Button>
+                </div>
               </form>
-              <p className="text-[11px] text-muted-foreground mt-2">Posts require admin approval before appearing.</p>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <Clock className="w-3 h-3" /> Posts are scored within {scoringDelay} hours.
+              </p>
             </CardContent>
           </Card>
 
@@ -231,12 +253,19 @@ const Contribute = () => {
             <>
               {contributions.map((c) => {
                 const tweetId = extractTweetId(c.post_url);
+                const score = c.manual_score ?? c.ai_score ?? null;
                 return (
                   <Card key={c.id} className="overflow-hidden">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-muted-foreground">{c.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}</span>
-                        <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
+                      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">{c.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase">{c.content_type}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={c.status} score={score} />
+                          <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
+                        </div>
                       </div>
                       {tweetId ? <TweetEmbed tweetId={tweetId} postUrl={c.post_url} /> : (
                         <a href={c.post_url} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-lg bg-muted/50 hover:bg-muted text-sm text-primary break-all">{c.post_url}</a>
@@ -247,10 +276,6 @@ const Contribute = () => {
                         </div>
                       )}
                       <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                        <button onClick={() => handleEngage(c)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-                          <Heart className="w-3.5 h-3.5" /><span>Engage</span>
-                        </button>
-                        <span className="text-xs text-muted-foreground">{c.engagement_count} engagement{c.engagement_count !== 1 ? "s" : ""}</span>
                         <a href={c.post_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto">
                           <ExternalLink className="w-3.5 h-3.5" /><span>Open</span>
                         </a>
@@ -279,7 +304,6 @@ const Contribute = () => {
             </CardContent>
           </Card>
 
-          {/* Leaderboard */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">

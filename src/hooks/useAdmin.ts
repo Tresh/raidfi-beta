@@ -13,6 +13,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "contacts", label: "Contacts" },
   { key: "whitepaper", label: "Whitepaper" },
   { key: "contributions", label: "Contributions" },
+  { key: "settings", label: "Settings" },
 ] as const;
 
 export type PermissionKey = typeof ADMIN_PERMISSIONS[number]["key"];
@@ -36,7 +37,6 @@ export function useAdmin() {
 
       const uid = session.user.id;
 
-      // Check admin first
       const { data: adminRole } = await supabase.rpc("has_role", {
         _user_id: uid,
         _role: "admin",
@@ -47,20 +47,17 @@ export function useAdmin() {
         setUserEmail(session.user.email ?? null);
         setIsAdmin(true);
         setIsModerator(false);
-        // Admins have all permissions
         setPermissions(ADMIN_PERMISSIONS.map(p => p.key));
         setLoading(false);
         return;
       }
 
-      // Check moderator
       const { data: modRole } = await supabase.rpc("has_role", {
         _user_id: uid,
         _role: "moderator",
       });
 
       if (modRole) {
-        // Fetch their specific permissions
         const { data: perms } = await supabase
           .from("moderator_permissions" as any)
           .select("permission")
@@ -77,7 +74,6 @@ export function useAdmin() {
         return;
       }
 
-      // Neither admin nor moderator
       await supabase.auth.signOut();
       navigate("/admin/login");
     };
@@ -87,6 +83,8 @@ export function useAdmin() {
 
   const hasPermission = (key: string): boolean => {
     if (isAdmin) return true;
+    // Settings is admin-only
+    if (key === "settings") return false;
     return permissions.includes(key);
   };
 
