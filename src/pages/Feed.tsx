@@ -30,15 +30,18 @@ const decodeEntities = (s: string) =>
     .replace(/&gt;/g, ">");
 
 // Split oEmbed-style text into body + trailing "— Name (@handle) Date"
-const splitPostMeta = (raw: string): { body: string; meta: string | null } => {
+const splitPostMeta = (raw: string): { body: string; meta: string | null; author: string | null; handle: string | null } => {
   const text = decodeEntities(raw).trim();
-  // Match the LAST occurrence of em-dash followed by name (@handle) date
-  const re = /\s*[—–-]\s*([^\n]+?\(@[^)]+\)[^\n]*)$/;
+  const re = /\s*[—–-]\s*([^\n]+?)\s*\(@([^)]+)\)\s*([^\n]*)$/;
   const m = text.match(re);
   if (m && m.index !== undefined) {
-    return { body: text.slice(0, m.index).trim(), meta: m[1].trim() };
+    const author = m[1].trim();
+    const handle = m[2].trim();
+    const date = (m[3] || "").trim();
+    const meta = `${author} (@${handle})${date ? " " + date : ""}`;
+    return { body: text.slice(0, m.index).trim(), meta, author, handle };
   }
-  return { body: text, meta: null };
+  return { body: text, meta: null, author: null, handle: null };
 };
 
 interface Contribution {
