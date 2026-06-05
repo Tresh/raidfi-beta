@@ -100,14 +100,10 @@ const FeedImage = ({ postUrl }: { postUrl: string }) => {
 
   return (
     <a href={postUrl} target="_blank" rel="noopener noreferrer" className="block mt-2 relative">
-      {(!src || !loaded) && (
-        <div className="w-full aspect-[16/10] rounded-lg border border-border bg-muted animate-pulse" />
-      )}
       {src && (
         <img
           src={src}
           alt="Post media"
-          loading="lazy"
           onLoad={() => {
             setLoaded(true);
             setDone(true);
@@ -116,8 +112,11 @@ const FeedImage = ({ postUrl }: { postUrl: string }) => {
             setErrored(true);
             setDone(true);
           }}
-          className={`w-full rounded-lg border border-border max-h-80 object-cover ${loaded ? "" : "hidden"}`}
+          className={`w-full rounded-lg border border-border max-h-80 object-cover transition-opacity ${loaded ? "opacity-100 relative" : "opacity-0 absolute inset-0 pointer-events-none"}`}
         />
+      )}
+      {(!src || !loaded) && (
+        <div className="w-full aspect-[16/10] rounded-lg border border-border bg-muted animate-pulse" />
       )}
     </a>
   );
