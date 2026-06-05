@@ -22,6 +22,7 @@ interface ContributeTask {
   submission_label: string | null;
   submission_placeholder: string | null;
   action_types: string[];
+  telegram_notified?: boolean;
   created_at?: string;
 }
 
@@ -60,6 +61,7 @@ const ContributeTasksManager = () => {
 
   const handleUpdate = async (task: ContributeTask) => {
     setSaving(task.id);
+    const shouldNotify = task.is_active && !task.telegram_notified;
     const { error } = await supabase.from("contribute_tasks" as any).update({
       label: task.label, description: task.description, points: task.points,
       task_type: task.task_type, url: task.url, sort_order: task.sort_order,
@@ -67,28 +69,38 @@ const ContributeTasksManager = () => {
       requires_link_submission: task.requires_link_submission,
       submission_label: task.submission_label, submission_placeholder: task.submission_placeholder,
       action_types: task.action_types,
+      ...(shouldNotify ? { telegram_notified: true } : {}),
     } as any).eq("id", task.id);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else toast({ title: "Saved" });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Saved" });
+      if (shouldNotify) {
+        const actions = (task.action_types || []).length
+          ? `\n<b>Actions:</b> ${task.action_types.join(", ")}` : "";
+        const desc = task.description ? `\n\n${task.description}` : "";
+        const url = task.url ? `\n\n🔗 ${task.url}` : "";
+        const text = `🆕 <b>New Contributor Task</b>\n\n<b>${task.label}</b>${desc}${actions}\n\n+${task.points} XP${url}`;
+        supabase.functions.invoke("notify-telegram", {
+          body: {
+            kind: "task",
+            text,
+            link: `${window.location.origin}/contributions`,
+            buttonText: "Do task",
+          },
+        }).catch(console.error);
+        setTasks(prev => prev.map(t => t.id === task.id ? { ...t, telegram_notified: true } : t));
+      }
+    }
     setSaving(null);
   };
 
   const handleAdd = async () => {
-    const { data, error } = await supabase.from("contribute_tasks" as any).insert({
+    const { error } = await supabase.from("contribute_tasks" as any).insert({
       label: "New Task", description: "", points: 10, task_type: "link", url: "",
       sort_order: tasks.length + 1, action_types: [],
-    } as any).select().single();
+    } as any);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    // Notify telegram of new task
-    if (data) {
-      supabase.functions.invoke("notify-telegram", {
-        body: {
-          kind: "task",
-          text: `🆕 <b>New task:</b> ${(data as any).label}\n+${(data as any).points} XP`,
-          link: (data as any).url || undefined,
-        },
-      }).catch(console.error);
-    }
     fetchAll();
   };
 

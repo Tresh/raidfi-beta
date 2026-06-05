@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { kind, text, link } = await req.json();
+    const { kind, text, link, buttonText } = await req.json();
     if (!text) {
       return new Response(JSON.stringify({ error: "Missing text" }), {
         status: 400,
@@ -67,7 +67,7 @@ serve(async (req) => {
     };
     if (link) {
       body.reply_markup = {
-        inline_keyboard: [[{ text: "Open", url: link }]],
+        inline_keyboard: [[{ text: buttonText || "Open", url: link }]],
       };
     }
 

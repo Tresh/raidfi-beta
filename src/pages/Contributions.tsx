@@ -44,7 +44,9 @@ interface ContributeTask {
 interface LeaderboardEntry {
   display_name: string;
   email: string;
-  total_points: number;
+  total_points: number; // period_xp (what we show as primary)
+  total_xp?: number;
+  overall_rank?: number;
 }
 
 const Contributions = () => {
@@ -241,7 +243,9 @@ const Contributions = () => {
     const sorted: LeaderboardEntry[] = ((data || []) as any[]).map((row) => ({
       email: row.email,
       display_name: row.display_name,
-      total_points: row.total_xp,
+      total_points: row.period_xp ?? row.total_xp ?? 0,
+      total_xp: row.total_xp,
+      overall_rank: row.overall_rank,
     }));
 
     setAllLeaderboard(sorted);
@@ -391,11 +395,16 @@ const Contributions = () => {
         supabase.functions.invoke("notify-admin-contribution", {
           body: { post_url: postUrl.trim(), user_email: session.user.email, contribution_id: contributionId },
         }).catch(console.error);
+        const ctLabel = contentTypes.find(t => t.value === contentType)?.label || contentType;
+        const masked = session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2");
+        const profileUrl = profile?.referral_code ? `${window.location.origin}/u/${profile.referral_code}` : null;
+        const userLine = profileUrl ? `<a href="${profileUrl}">${masked}</a>` : masked;
         supabase.functions.invoke("notify-telegram", {
           body: {
             kind: "feed",
-            text: `📝 <b>New ${contentType}</b> from ${session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2")}\n<i>Awaiting score</i>`,
+            text: `📝 <b>New ${ctLabel}</b>\n\n<b>By:</b> ${userLine}\n<b>Status:</b> Awaiting score (within ${scoringDelay}h)\n\n🔗 ${postUrl.trim()}`,
             link: postUrl.trim(),
+            buttonText: "View post",
           },
         }).catch(console.error);
         setPostUrl("");
@@ -648,6 +657,9 @@ const Contributions = () => {
                             {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           </Button>
                         </div>
+                        <p className="text-[11px] text-muted-foreground mt-2">
+                          Share this link — you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist through it.
+                        </p>
                       </CardContent>
                     </Card>
                   )}
@@ -807,20 +819,28 @@ const Contributions = () => {
                             <div className="divide-y divide-border">
                               {leaderboard.map((entry, i) => {
                                 const isUser = entry.email === session?.user?.email;
+                                const showTotal = leaderboardFilter !== "all" && entry.total_xp != null;
                                 return (
                                   <div key={entry.email} className={`flex items-center justify-between px-4 py-3 ${isUser ? "bg-primary/5" : ""}`}>
-                                    <div className="flex items-center gap-3">
-                                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                    <div className="flex items-center gap-3 min-w-0">
+                                      <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${
                                         i === 0 ? "bg-yellow-500/20 text-yellow-500" :
                                         i === 1 ? "bg-gray-400/20 text-gray-400" :
                                         i === 2 ? "bg-orange-500/20 text-orange-500" :
                                         "bg-muted text-muted-foreground"
                                       }`}>{i + 1}</span>
-                                      <span className={`text-sm ${isUser ? "text-primary font-medium" : "text-foreground"}`}>
-                                        {entry.display_name} {isUser && "(You)"}
-                                      </span>
+                                      <div className="min-w-0">
+                                        <p className={`text-sm truncate ${isUser ? "text-primary font-medium" : "text-foreground"}`}>
+                                          {entry.display_name} {isUser && "(You)"}
+                                        </p>
+                                        {showTotal && (
+                                          <p className="text-[10px] text-muted-foreground">
+                                            Total: {entry.total_xp} XP · Overall #{entry.overall_rank}
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
-                                    <span className="text-sm font-semibold text-primary">{entry.total_points} XP</span>
+                                    <span className="text-sm font-semibold text-primary shrink-0">{entry.total_points} XP</span>
                                   </div>
                                 );
                               })}
