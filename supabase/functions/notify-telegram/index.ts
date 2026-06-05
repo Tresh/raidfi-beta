@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { kind, text, link } = await req.json();
+    const { kind, text, link, buttonText } = await req.json();
     if (!text) {
       return new Response(JSON.stringify({ error: "Missing text" }), {
         status: 400,
