@@ -659,14 +659,18 @@ const Contributions = () => {
                         <Send className="w-4 h-4 text-primary" />
                         <h3 className="text-sm font-semibold text-foreground">Submit a Post</h3>
                       </div>
-                      <form onSubmit={handleSubmitPost} className="flex gap-2">
+                      <form onSubmit={handleSubmitPost} className="flex gap-2 flex-wrap">
+                        <select value={contentType} onChange={(e) => setContentType(e.target.value)}
+                          className="h-9 text-sm rounded-md border border-input bg-background px-2 text-foreground">
+                          {contentTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                        </select>
                         <Input type="url" placeholder="https://x.com/user/status/..." value={postUrl}
-                          onChange={(e) => setPostUrl(e.target.value)} required className="h-9 text-sm flex-1" />
+                          onChange={(e) => setPostUrl(e.target.value)} required className="h-9 text-sm flex-1 min-w-[180px]" />
                         <Button type="submit" size="sm" className="h-9 px-4" disabled={submittingPost}>
                           {submittingPost ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                         </Button>
                       </form>
-                      <p className="text-[11px] text-muted-foreground mt-2">Posts require admin approval before earning XP.</p>
+                      <p className="text-[11px] text-muted-foreground mt-2">Posts are scored within {scoringDelay}h.</p>
                     </CardContent>
                   </Card>
 
@@ -681,21 +685,44 @@ const Contributions = () => {
                         {contributeTasks.map(task => {
                           const done = isTaskDone(task);
                           return (
-                            <Card key={task.id} className={done ? "opacity-60" : ""}>
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="text-sm font-medium text-foreground">{task.label}</p>
+                            <Card key={task.id} className={`${done ? "opacity-60" : ""} ${task.is_pinned ? "border-primary/40" : ""}`}>
+                              <CardContent className="p-4 space-y-2">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      {task.is_pinned && <span className="text-[10px] text-primary font-semibold uppercase">★ Pinned</span>}
+                                      <p className="text-sm font-medium text-foreground">{task.label}</p>
+                                    </div>
                                     {task.description && <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>}
+                                    {task.action_types && task.action_types.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mt-1.5">
+                                        {task.action_types.map(at => (
+                                          <span key={at} className="px-1.5 py-0.5 rounded text-[10px] uppercase bg-muted text-muted-foreground">{at}</span>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-3 shrink-0">
                                     <span className="text-xs font-semibold text-primary">+{task.points} XP</span>
-                                    <Button size="sm" variant={done ? "ghost" : "outline"} disabled={done}
-                                      onClick={() => handleCompleteTask(task)} className="h-8 text-xs">
-                                      {done ? <><Check className="w-3 h-3 mr-1" /> Done</> : "Complete"}
-                                    </Button>
+                                    {!task.requires_link_submission && (
+                                      <Button size="sm" variant={done ? "ghost" : "outline"} disabled={done}
+                                        onClick={() => handleCompleteTask(task)} className="h-8 text-xs">
+                                        {done ? <><Check className="w-3 h-3 mr-1" /> Done</> : task.url ? "Open" : "Complete"}
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
+                                {task.requires_link_submission && !done && (
+                                  <div className="flex gap-2">
+                                    <Input value={taskLinks[task.id] || ""}
+                                      onChange={(e) => setTaskLinks(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                      placeholder={task.submission_placeholder || "Paste your link..."} className="h-8 text-xs flex-1" />
+                                    <Button size="sm" onClick={() => handleCompleteTask(task)} className="h-8 text-xs">Submit</Button>
+                                  </div>
+                                )}
+                                {task.requires_link_submission && done && (
+                                  <p className="text-[11px] text-primary flex items-center gap-1"><Check className="w-3 h-3" /> Submitted</p>
+                                )}
                               </CardContent>
                             </Card>
                           );
