@@ -7,8 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ValidationForm from "@/components/validation/ValidationForm";
+import { useSEO } from "@/hooks/useSEO";
 
 const WaitlistConfirmed = () => {
+  useSEO({
+    title: "Waitlist Confirmed — RaidFi",
+    description: "Your RaidFi waitlist spot is confirmed. Complete validation to unlock early access.",
+    path: "/waitlist/confirmed",
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);

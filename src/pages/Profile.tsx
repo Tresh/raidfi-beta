@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Trophy, ExternalLink, ArrowLeft, Sparkles, FileText, Clock, Hash } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 interface Contribution {
   id: string;
@@ -38,6 +39,15 @@ const Profile = () => {
   const [rank, setRank] = useState<number | null>(null);
   const [stats, setStats] = useState({ approved: 0, total: 0, topScore: 0 });
   const [notFound, setNotFound] = useState(false);
+
+  const profileName = profile?.name || code || "Contributor";
+  useSEO({
+    title: `${profileName} — RaidFi Contributor`,
+    description: `View ${profileName}'s RaidFi contributions, XP, rank, and reputation in the Web3 social intelligence layer.`,
+    path: code ? `/u/${code}` : "/u",
+    ogType: "profile",
+  });
+
 
   useEffect(() => {
     if (!code) return;
