@@ -292,9 +292,7 @@ const Feed = () => {
                           </a>
                         )}
 
-                        {c.post_image_url && (
-                          <FeedImage src={c.post_image_url} href={c.post_url} />
-                        )}
+                        {extractTweetId(c.post_url) && <FeedImage postUrl={c.post_url} />}
                       </div>
 
                       {/* Footer */}
