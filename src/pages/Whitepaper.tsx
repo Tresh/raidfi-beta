@@ -74,7 +74,7 @@ const Whitepaper = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-6 pt-28 pb-16 max-w-4xl">
+      <main className="container mx-auto px-6 pt-28 pb-16 max-w-4xl">
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
         ) : !whitepaper ? (
@@ -109,7 +109,7 @@ const Whitepaper = () => {
             </div>
           </>
         )}
-      </div>
+      </main>
       <Footer />
     </div>
   );

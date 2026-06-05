@@ -39,7 +39,7 @@ const Solution = () => {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="bg-background p-8 flex flex-col relative group"
               >
-                <span className="text-[10px] font-mono text-muted-foreground/40 mb-6 tracking-wider">
+                <span className="text-[10px] font-mono text-muted-foreground/70 mb-6 tracking-wider">
                   STEP {String(index + 1).padStart(2, '0')}
                 </span>
                 <h3 className="text-base font-semibold text-foreground mb-3 group-hover:text-primary transition-colors">
@@ -50,7 +50,7 @@ const Solution = () => {
                 </p>
                 {index < 3 && (
                   <div className="hidden md:flex absolute top-1/2 -right-2 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30" />
+                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60" />
                   </div>
                 )}
               </motion.div>

@@ -66,7 +66,7 @@ const Problem = () => {
                   className="group p-6 rounded-xl border border-border bg-card hover:border-primary/20 transition-all duration-300"
                 >
                   <div className="flex items-start gap-5">
-                    <span className="text-xs font-mono text-muted-foreground/50 mt-1 shrink-0">
+                    <span className="text-xs font-mono text-muted-foreground/70 mt-1 shrink-0">
                       {problem.number}
                     </span>
                     <div>
