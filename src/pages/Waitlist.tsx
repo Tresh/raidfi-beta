@@ -62,7 +62,14 @@ const taskIcons: Record<string, React.ReactNode> = {
   x_comment: <MessageCircle className="w-5 h-5" />,
 };
 
+import { useSEO } from "@/hooks/useSEO";
+
 const Waitlist = () => {
+  useSEO({
+    title: "Join the Waitlist — RaidFi",
+    description: "Request early access to RaidFi — the reputation and social intelligence layer for Web3.",
+    path: "/waitlist",
+  });
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");

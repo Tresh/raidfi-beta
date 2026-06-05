@@ -13,7 +13,14 @@ interface WhitepaperData {
 }
 
 
+import { useSEO } from "@/hooks/useSEO";
+
 const Whitepaper = () => {
+  useSEO({
+    title: "Whitepaper — RaidFi",
+    description: "RaidFi whitepaper: the architecture, mechanics, and vision behind the Web3 reputation and social intelligence layer.",
+    path: "/whitepaper",
+  });
   const [whitepaper, setWhitepaper] = useState<WhitepaperData | null>(null);
   const [loading, setLoading] = useState(true);
 

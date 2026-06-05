@@ -178,7 +178,14 @@ const TypeBadge = ({ type }: { type: string }) => (
   </span>
 );
 
+import { useSEO } from "@/hooks/useSEO";
+
 const Feed = () => {
+  useSEO({
+    title: "Live Feed — RaidFi",
+    description: "Live community contributions on RaidFi — see the latest posts and raids in real time.",
+    path: "/feed",
+  });
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);

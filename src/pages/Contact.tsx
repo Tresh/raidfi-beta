@@ -19,7 +19,14 @@ const contactSchema = z.object({
 
 const SENT_KEY = "raidfi_contact_sent";
 
+import { useSEO } from "@/hooks/useSEO";
+
 const Contact = () => {
+  useSEO({
+    title: "Contact — RaidFi",
+    description: "Get in touch with the RaidFi team — partnerships, support, and inquiries.",
+    path: "/contact",
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });

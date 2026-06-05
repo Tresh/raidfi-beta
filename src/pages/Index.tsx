@@ -10,7 +10,14 @@ import NetworkEffects from "@/components/NetworkEffects";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 
+import { useSEO } from "@/hooks/useSEO";
+
 const Index = () => {
+  useSEO({
+    title: "RaidFi — Web3 Reputation & Social Intelligence Layer",
+    description: "Make contribution measurable, reputation portable, and social performance analyzable. The credibility layer for Web3.",
+    path: "/",
+  });
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
