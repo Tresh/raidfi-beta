@@ -1,0 +1,1 @@
+ALTER TABLE public.contributions DROP COLUMN IF EXISTS post_image_url;
