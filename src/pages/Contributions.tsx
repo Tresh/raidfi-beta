@@ -192,12 +192,12 @@ const Contributions = () => {
   // Fetch content types + settings
   useEffect(() => {
     (async () => {
-      const [{ data: types }, { data: s }] = await Promise.all([
+      const [{ data: types }, { data: delayHours }] = await Promise.all([
         supabase.from("content_types" as any).select("*").eq("is_active", true).order("sort_order"),
-        supabase.from("admin_settings" as any).select("scoring_delay_hours").eq("id", "global").maybeSingle(),
+        supabase.rpc("get_scoring_delay_hours" as any),
       ]);
       setContentTypes((types as any) || []);
-      if ((s as any)?.scoring_delay_hours) setScoringDelay((s as any).scoring_delay_hours);
+      if (typeof delayHours === "number") setScoringDelay(delayHours);
     })();
   }, []);
 
