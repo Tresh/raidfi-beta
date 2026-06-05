@@ -30,15 +30,18 @@ const decodeEntities = (s: string) =>
     .replace(/&gt;/g, ">");
 
 // Split oEmbed-style text into body + trailing "— Name (@handle) Date"
-const splitPostMeta = (raw: string): { body: string; meta: string | null } => {
+const splitPostMeta = (raw: string): { body: string; meta: string | null; author: string | null; handle: string | null } => {
   const text = decodeEntities(raw).trim();
-  // Match the LAST occurrence of em-dash followed by name (@handle) date
-  const re = /\s*[—–-]\s*([^\n]+?\(@[^)]+\)[^\n]*)$/;
+  const re = /\s*[—–-]\s*([^\n]+?)\s*\(@([^)]+)\)\s*([^\n]*)$/;
   const m = text.match(re);
   if (m && m.index !== undefined) {
-    return { body: text.slice(0, m.index).trim(), meta: m[1].trim() };
+    const author = m[1].trim();
+    const handle = m[2].trim();
+    const date = (m[3] || "").trim();
+    const meta = `${author} (@${handle})${date ? " " + date : ""}`;
+    return { body: text.slice(0, m.index).trim(), meta, author, handle };
   }
-  return { body: text, meta: null };
+  return { body: text, meta: null, author: null, handle: null };
 };
 
 interface Contribution {
@@ -191,13 +194,14 @@ const Feed = () => {
                 const prof = refMap[c.user_email] || {};
                 const code = prof.code;
                 const hasSavedText = !!c.post_text && c.post_text.trim().length > 0;
-                const { body, meta } = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null };
-                const displayName = c.post_author || prof.name || mask(c.user_email);
-                const handle = extractHandleFromUrl(c.post_url);
+                const parsed = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null, author: null as string | null, handle: null as string | null };
+                const { body, meta } = parsed;
+                const displayName = parsed.author || c.post_author || prof.name || mask(c.user_email);
+                const handle = parsed.handle || extractHandleFromUrl(c.post_url);
                 const initial = (displayName || "?").replace(/^@/, "").trim().charAt(0).toUpperCase();
 
                 return (
-                  <Card key={c.id} className="overflow-hidden hover:bg-accent/20 transition-colors">
+                  <Card key={c.id} className="overflow-hidden">
                     <CardContent className="p-4">
                       {/* Header: avatar + name/handle on left, tags stacked on right */}
                       <div className="flex items-start gap-3">
