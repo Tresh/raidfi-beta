@@ -657,6 +657,9 @@ const Contributions = () => {
                             {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           </Button>
                         </div>
+                        <p className="text-[11px] text-muted-foreground mt-2">
+                          Share this link — you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist through it.
+                        </p>
                       </CardContent>
                     </Card>
                   )}
