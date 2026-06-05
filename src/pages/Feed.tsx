@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
-
 const extractTweetId = (url: string): string | null => {
-  const match = url.match(TWEET_URL_REGEX);
-  return match ? match[2] : null;
+  const m = url.match(TWEET_URL_REGEX);
+  return m ? m[2] : null;
 };
 
 interface Contribution {
@@ -18,38 +18,37 @@ interface Contribution {
   user_email: string;
   post_url: string;
   points_earned: number;
-  engagement_count: number;
   created_at: string;
-  ai_feedback?: string;
+  status: string;
+  content_type: string;
+  manual_score: number | null;
+  ai_score: number | null;
+  ai_feedback?: string | null;
+  post_text?: string | null;
 }
 
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     setLoading(true);
     const renderTweet = () => {
       if (!containerRef.current) return;
-      containerRef.current.innerHTML = '';
+      containerRef.current.innerHTML = "";
       const twttr = (window as any).twttr;
       if (twttr?.widgets?.createTweet) {
-        twttr.widgets.createTweet(tweetId, containerRef.current, { theme: 'dark', dnt: true })
+        twttr.widgets.createTweet(tweetId, containerRef.current, { theme: "dark", dnt: true })
           .then(() => setLoading(false)).catch(() => setLoading(false));
-      } else { setLoading(false); }
+      } else setLoading(false);
     };
-
     if (!(window as any).twttr) {
-      const script = document.createElement("script");
-      script.src = "https://platform.twitter.com/widgets.js";
-      script.async = true;
-      script.onload = () => { (window as any).twttr?.ready?.(renderTweet); };
-      document.head.appendChild(script);
-    } else {
-      (window as any).twttr.ready?.(renderTweet) || renderTweet();
-    }
+      const s = document.createElement("script");
+      s.src = "https://platform.twitter.com/widgets.js";
+      s.async = true;
+      s.onload = () => (window as any).twttr?.ready?.(renderTweet);
+      document.head.appendChild(s);
+    } else (window as any).twttr.ready?.(renderTweet) || renderTweet();
   }, [tweetId]);
-
   return (
     <div className="min-h-[200px]">
       <div ref={containerRef} />
@@ -63,11 +62,28 @@ const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) 
   );
 };
 
+const StatusBadge = ({ status, score }: { status: string; score: number | null }) => {
+  if (status === "approved") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary font-medium">
+        ✓ Approved{score != null ? ` · ${score}` : ""}
+        {score != null && score > 10 && <Star className="w-2.5 h-2.5 fill-current" />}
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 font-medium">
+      ⏳ Awaiting score
+    </span>
+  );
+};
+
 const Feed = () => {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+  const [refMap, setRefMap] = useState<Record<string, string>>({});
   const PAGE_SIZE = 20;
 
   const fetchContributions = useCallback(async (pageNum: number, append = false) => {
@@ -75,18 +91,36 @@ const Feed = () => {
     const to = from + PAGE_SIZE - 1;
     const { data } = await supabase
       .from("contributions")
-      .select("*")
-      .eq("status", "approved")
+      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text")
+      .eq("published_to_feed", true)
+      .neq("status", "rejected")
       .order("created_at", { ascending: false })
       .range(from, to);
     if (data) {
-      setContributions(prev => append ? [...prev, ...data] : data);
+      setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
       setHasMore(data.length === PAGE_SIZE);
+      // Fetch referral codes for these emails to build profile links
+      const emails = Array.from(new Set((data as any[]).map(d => d.user_email)));
+      if (emails.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("email, referral_code")
+          .in("email", emails);
+        if (profs) {
+          setRefMap(prev => {
+            const next = { ...prev };
+            (profs as any[]).forEach(p => { if (p.referral_code) next[p.email] = p.referral_code; });
+            return next;
+          });
+        }
+      }
     }
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchContributions(0); }, [fetchContributions]);
+
+  const mask = (e: string) => e.replace(/(.{3}).*(@.*)/, "$1***$2");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -108,12 +142,24 @@ const Feed = () => {
             <div className="space-y-4">
               {contributions.map((c) => {
                 const tweetId = extractTweetId(c.post_url);
+                const score = c.manual_score ?? c.ai_score;
+                const code = refMap[c.user_email];
                 return (
                   <Card key={c.id} className="overflow-hidden">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-muted-foreground">{c.user_email.replace(/(.{3}).*(@.*)/, "$1***$2")}</span>
-                        <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
+                      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          {code ? (
+                            <Link to={`/u/${code}`} className="text-xs text-foreground hover:text-primary font-medium">{mask(c.user_email)}</Link>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">{mask(c.user_email)}</span>
+                          )}
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase">{c.content_type}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={c.status} score={score} />
+                          <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
+                        </div>
                       </div>
                       {tweetId ? <TweetEmbed tweetId={tweetId} postUrl={c.post_url} /> : (
                         <a href={c.post_url} target="_blank" rel="noopener noreferrer"
@@ -125,7 +171,6 @@ const Feed = () => {
                         </div>
                       )}
                       <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                        <span className="text-xs text-muted-foreground">{c.engagement_count} engagement{c.engagement_count !== 1 ? "s" : ""}</span>
                         <a href={c.post_url} target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto">
                           <ExternalLink className="w-3.5 h-3.5" /><span>Open</span>
