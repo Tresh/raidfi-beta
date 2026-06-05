@@ -25,6 +25,7 @@ interface Contribution {
   ai_score: number | null;
   ai_feedback?: string | null;
   post_text?: string | null;
+  post_author?: string | null;
 }
 
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
@@ -91,7 +92,7 @@ const Feed = () => {
     const to = from + PAGE_SIZE - 1;
     const { data } = await supabase
       .from("contributions")
-      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text")
+      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author")
       .eq("published_to_feed", true)
       .neq("status", "rejected")
       .order("created_at", { ascending: false })
@@ -144,6 +145,7 @@ const Feed = () => {
                 const tweetId = extractTweetId(c.post_url);
                 const score = c.manual_score ?? c.ai_score;
                 const code = refMap[c.user_email];
+                const hasSavedText = !!c.post_text && c.post_text.trim().length > 0;
                 return (
                   <Card key={c.id} className="overflow-hidden">
                     <CardContent className="p-4">
@@ -161,7 +163,32 @@ const Feed = () => {
                           <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      {tweetId ? <TweetEmbed tweetId={tweetId} postUrl={c.post_url} /> : (
+                      {hasSavedText ? (
+                        <div className="rounded-xl border border-border bg-card p-4">
+                          {(c as any).post_author && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold">
+                                {(c as any).post_author.replace(/^@/, "").slice(0, 1).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col leading-tight">
+                                <span className="text-sm font-medium text-foreground">{(c as any).post_author}</span>
+                                <span className="text-[11px] text-muted-foreground">on X</span>
+                              </div>
+                            </div>
+                          )}
+                          <p className="text-sm text-foreground whitespace-pre-wrap break-words">{c.post_text}</p>
+                          <a
+                            href={c.post_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:underline"
+                          >
+                            View on X <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      ) : tweetId ? (
+                        <TweetEmbed tweetId={tweetId} postUrl={c.post_url} />
+                      ) : (
                         <a href={c.post_url} target="_blank" rel="noopener noreferrer"
                           className="block p-4 rounded-lg bg-muted/50 hover:bg-muted text-sm text-primary break-all">{c.post_url}</a>
                       )}

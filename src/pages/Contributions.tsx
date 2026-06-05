@@ -395,17 +395,8 @@ const Contributions = () => {
         supabase.functions.invoke("notify-admin-contribution", {
           body: { post_url: postUrl.trim(), user_email: session.user.email, contribution_id: contributionId },
         }).catch(console.error);
-        const ctLabel = contentTypes.find(t => t.value === contentType)?.label || contentType;
-        const masked = session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2");
-        const profileUrl = profile?.referral_code ? `${window.location.origin}/u/${profile.referral_code}` : null;
-        const userLine = profileUrl ? `<a href="${profileUrl}">${masked}</a>` : masked;
         supabase.functions.invoke("notify-telegram", {
-          body: {
-            kind: "feed",
-            text: `📝 <b>New ${ctLabel}</b>\n\n<b>By:</b> ${userLine}\n<b>Status:</b> Awaiting score (within ${scoringDelay}h)\n\n🔗 ${postUrl.trim()}`,
-            link: postUrl.trim(),
-            buttonText: "View post",
-          },
+          body: { kind: "feed", contribution_id: contributionId, origin: window.location.origin },
         }).catch(console.error);
         setPostUrl("");
       }
