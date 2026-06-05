@@ -7,7 +7,7 @@ interface SEOOptions {
   ogType?: "website" | "article" | "profile";
 }
 
-const BASE_URL = "https://www.raidfi.site";
+const BASE_URL = "https://raidfi.site";
 
 export const useSEO = ({ title, description, path, ogType = "website" }: SEOOptions) => {
   useEffect(() => {
