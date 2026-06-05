@@ -196,13 +196,9 @@ const Contribute = () => {
         supabase.functions.invoke("notify-admin-contribution", {
           body: { post_url: postUrl.trim(), user_email: session.user.email, contribution_id: contributionId },
         }).catch(console.error);
-        // Notify telegram (will be skipped if auto-publish is off and not yet published)
+        // Notify telegram (will be skipped if disabled). Function fetches contribution + post text itself.
         supabase.functions.invoke("notify-telegram", {
-          body: {
-            kind: "feed",
-            text: `📝 <b>New ${contentType}</b> from ${session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2")}\n<i>Awaiting score</i>`,
-            link: postUrl.trim(),
-          },
+          body: { kind: "feed", contribution_id: contributionId, origin: window.location.origin },
         }).catch(console.error);
         setPostUrl("");
         fetchContributions(0);
