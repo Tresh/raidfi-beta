@@ -247,12 +247,11 @@ const Feed = () => {
               {contributions.map((c) => {
                 const tweetId = extractTweetId(c.post_url);
                 const score = c.manual_score ?? c.ai_score;
-                const prof = refMap[c.user_email] || {};
-                const code = prof.code;
+                const code = c.referral_code;
                 const hasSavedText = !!c.post_text && c.post_text.trim().length > 0;
                 const parsed = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null, author: null as string | null, handle: null as string | null };
                 const { body, meta } = parsed;
-                const displayName = parsed.author || c.post_author || prof.name || mask(c.user_email);
+                const displayName = parsed.author || c.post_author || c.author_name || "Anonymous";
                 const handle = parsed.handle || extractHandleFromUrl(c.post_url);
                 const initial = (displayName || "?").replace(/^@/, "").trim().charAt(0).toUpperCase();
 
