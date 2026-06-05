@@ -129,11 +129,7 @@ serve(async (req) => {
     }
 
     if (post_text || post_author) {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      );
-      await supabase
+      await adminClient
         .from("contributions")
         .update({
           post_text,
