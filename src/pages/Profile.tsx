@@ -40,6 +40,15 @@ const Profile = () => {
   const [stats, setStats] = useState({ approved: 0, total: 0, topScore: 0 });
   const [notFound, setNotFound] = useState(false);
 
+  const profileName = profile?.name || code || "Contributor";
+  useSEO({
+    title: `${profileName} — RaidFi Contributor`,
+    description: `View ${profileName}'s RaidFi contributions, XP, rank, and reputation in the Web3 social intelligence layer.`,
+    path: code ? `/u/${code}` : "/u",
+    ogType: "profile",
+  });
+
+
   useEffect(() => {
     if (!code) return;
     (async () => {
