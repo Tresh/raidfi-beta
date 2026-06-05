@@ -35,7 +35,7 @@ const Footer = () => {
           </div>
 
           <div className="mt-12 pt-8 border-t border-border text-center">
-            <p className="text-xs text-muted-foreground/50">
+            <p className="text-xs text-muted-foreground">
               © 2026 RaidFi. All rights reserved.
             </p>
           </div>
