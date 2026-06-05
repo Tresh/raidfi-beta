@@ -238,6 +238,7 @@ export type Database = {
           points_earned: number
           post_author: string | null
           post_fetched_at: string | null
+          post_image_url: string | null
           post_text: string | null
           post_url: string
           published_to_feed: boolean
@@ -257,6 +258,7 @@ export type Database = {
           points_earned?: number
           post_author?: string | null
           post_fetched_at?: string | null
+          post_image_url?: string | null
           post_text?: string | null
           post_url: string
           published_to_feed?: boolean
@@ -276,6 +278,7 @@ export type Database = {
           points_earned?: number
           post_author?: string | null
           post_fetched_at?: string | null
+          post_image_url?: string | null
           post_text?: string | null
           post_url?: string
           published_to_feed?: boolean
