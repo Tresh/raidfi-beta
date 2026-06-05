@@ -25,6 +25,7 @@ interface Contribution {
   ai_score: number | null;
   ai_feedback?: string | null;
   post_text?: string | null;
+  post_author?: string | null;
 }
 
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
