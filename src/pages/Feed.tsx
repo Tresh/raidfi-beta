@@ -117,6 +117,27 @@ const TypeBadge = ({ type }: { type: string }) => (
   </span>
 );
 
+const PostImage = ({ src, href }: { src: string; href: string }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="block mt-2">
+      <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted/40" style={{ aspectRatio: "16 / 10" }}>
+        {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" />}
+        <img
+          src={src}
+          alt="Post media"
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+        />
+      </div>
+    </a>
+  );
+};
+
 const Feed = () => {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
