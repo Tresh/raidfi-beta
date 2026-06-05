@@ -194,13 +194,14 @@ const Feed = () => {
                 const prof = refMap[c.user_email] || {};
                 const code = prof.code;
                 const hasSavedText = !!c.post_text && c.post_text.trim().length > 0;
-                const { body, meta } = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null };
-                const displayName = c.post_author || prof.name || mask(c.user_email);
-                const handle = extractHandleFromUrl(c.post_url);
+                const parsed = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null, author: null as string | null, handle: null as string | null };
+                const { body, meta } = parsed;
+                const displayName = parsed.author || c.post_author || prof.name || mask(c.user_email);
+                const handle = parsed.handle || extractHandleFromUrl(c.post_url);
                 const initial = (displayName || "?").replace(/^@/, "").trim().charAt(0).toUpperCase();
 
                 return (
-                  <Card key={c.id} className="overflow-hidden hover:bg-accent/20 transition-colors">
+                  <Card key={c.id} className="overflow-hidden">
                     <CardContent className="p-4">
                       {/* Header: avatar + name/handle on left, tags stacked on right */}
                       <div className="flex items-start gap-3">
