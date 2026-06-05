@@ -203,91 +203,84 @@ const Feed = () => {
 
                 return (
                   <Card key={c.id} className="overflow-hidden">
-                    <CardContent className="p-4">
-                      {/* Header: avatar + name/handle on left, tags stacked on right */}
-                      <div className="flex items-start gap-3">
+                    <CardContent className="p-3 sm:p-4">
+                      {/* Header section: avatar + name/handle + tags */}
+                      <div className="flex items-center gap-2.5">
                         {code ? (
                           <Link to={`/u/${code}`} className="shrink-0">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-base font-semibold ring-1 ring-border">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-sm font-semibold ring-1 ring-border">
                               {initial}
                             </div>
                           </Link>
                         ) : (
-                          <div className="shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-base font-semibold ring-1 ring-border">
+                          <div className="shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-sm font-semibold ring-1 ring-border">
                             {initial}
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              {code ? (
-                                <Link to={`/u/${code}`} className="text-sm font-semibold text-foreground hover:underline truncate block">
-                                  {displayName}
-                                </Link>
-                              ) : (
-                                <span className="text-sm font-semibold text-foreground truncate block">{displayName}</span>
-                              )}
-                              <div className="text-xs text-muted-foreground truncate">
-                                {handle ? `@${handle}` : mask(c.user_email)}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-1 shrink-0">
-                              <TypeBadge type={c.content_type} />
-                              <StatusBadge status={c.status} score={score} />
-                            </div>
+                        <div className="flex-1 min-w-0 leading-tight">
+                          {code ? (
+                            <Link to={`/u/${code}`} className="text-[13px] font-semibold text-foreground hover:underline truncate block">
+                              {displayName}
+                            </Link>
+                          ) : (
+                            <span className="text-[13px] font-semibold text-foreground truncate block">{displayName}</span>
+                          )}
+                          <div className="text-[11px] text-muted-foreground truncate">
+                            {handle ? `@${handle}` : mask(c.user_email)}
                           </div>
-
-                          {/* Content */}
-                          <div className="mt-3">
-                            {hasSavedText ? (
-                              <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap break-words">
-                                {body}
-                              </p>
-                            ) : tweetId ? (
-                              <TweetEmbed tweetId={tweetId} postUrl={c.post_url} />
-                            ) : (
-                              <a href={c.post_url} target="_blank" rel="noopener noreferrer"
-                                className="block p-3 rounded-lg bg-muted/50 hover:bg-muted text-sm text-primary break-all">
-                                {c.post_url}
-                              </a>
-                            )}
-                          </div>
-
-                          {/* Metadata footer */}
-                          {hasSavedText && (
-                            <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                              <div className="flex items-center gap-1.5 min-w-0 truncate">
-                                <Clock className="w-3 h-3 shrink-0" />
-                                <span className="truncate">
-                                  {meta ? meta : `${formatRelative(c.created_at)} on X`}
-                                </span>
-                              </div>
-                              <a href={c.post_url} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 hover:text-primary shrink-0">
-                                Open <ExternalLink className="w-3 h-3" />
-                              </a>
-                            </div>
-                          )}
-                          {!hasSavedText && (
-                            <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground">
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-3 h-3" />
-                                <span>{formatRelative(c.created_at)}</span>
-                              </div>
-                              <a href={c.post_url} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 hover:text-primary">
-                                Open <ExternalLink className="w-3 h-3" />
-                              </a>
-                            </div>
-                          )}
-
-                          {c.ai_feedback && (
-                            <div className="mt-2 px-3 py-2 rounded-md bg-muted/40 text-[11px] text-muted-foreground">
-                              <span className="font-medium text-foreground">AI Review:</span> {c.ai_feedback}
-                            </div>
-                          )}
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <TypeBadge type={c.content_type} />
+                          <StatusBadge status={c.status} score={score} />
                         </div>
                       </div>
+
+                      {/* Content — starts from the left edge */}
+                      <div className="mt-2.5">
+                        {hasSavedText ? (
+                          <p className="text-[13.5px] leading-snug text-foreground whitespace-pre-wrap break-words">
+                            {body}
+                          </p>
+                        ) : tweetId ? (
+                          <TweetEmbed tweetId={tweetId} postUrl={c.post_url} />
+                        ) : (
+                          <a href={c.post_url} target="_blank" rel="noopener noreferrer"
+                            className="block p-2 rounded-md bg-muted/50 hover:bg-muted text-xs text-primary break-all">
+                            {c.post_url}
+                          </a>
+                        )}
+
+                        {c.post_image_url && (
+                          <a href={c.post_url} target="_blank" rel="noopener noreferrer" className="block mt-2">
+                            <img
+                              src={c.post_image_url}
+                              alt="Post media"
+                              loading="lazy"
+                              className="w-full rounded-lg border border-border max-h-80 object-cover"
+                            />
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="mt-2 pt-1.5 flex items-center justify-between text-[10.5px] text-muted-foreground">
+                        <div className="flex items-center gap-1 min-w-0 truncate">
+                          <Clock className="w-3 h-3 shrink-0" />
+                          <span className="truncate">
+                            {hasSavedText && meta ? meta : formatRelative(c.created_at)}
+                          </span>
+                        </div>
+                        <a href={c.post_url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 hover:text-primary shrink-0">
+                          Open <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+
+                      {c.ai_feedback && (
+                        <div className="mt-1.5 px-2 py-1.5 rounded-md bg-muted/40 text-[10.5px] text-muted-foreground">
+                          <span className="font-medium text-foreground">AI:</span> {c.ai_feedback}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );
