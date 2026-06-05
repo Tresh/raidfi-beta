@@ -199,8 +199,8 @@ const Feed = () => {
     const from = pageNum * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     const { data } = await supabase
-      .from("contributions")
-      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author")
+      .from("contributions_feed" as any)
+      .select("id,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author,user_id,referral_code,author_name")
       .eq("published_to_feed", true)
       .neq("status", "rejected")
       .order("created_at", { ascending: false })
@@ -208,27 +208,12 @@ const Feed = () => {
     if (data) {
       setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
       setHasMore(data.length === PAGE_SIZE);
-      const emails = Array.from(new Set((data as any[]).map(d => d.user_email)));
-      if (emails.length > 0) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("email, referral_code, name")
-          .in("email", emails);
-        if (profs) {
-          setRefMap(prev => {
-            const next = { ...prev };
-            (profs as any[]).forEach(p => { next[p.email] = { code: p.referral_code, name: p.name }; });
-            return next;
-          });
-        }
-      }
     }
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchContributions(0); }, [fetchContributions]);
 
-  const mask = (e: string) => e.replace(/(.{3}).*(@.*)/, "$1***$2");
   const formatRelative = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
     const m = Math.floor(diff / 60000);
