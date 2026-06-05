@@ -370,20 +370,33 @@ const Contributions = () => {
     setSubmittingPost(true);
     try {
       const contributionId = crypto.randomUUID();
+      const ct = contentTypes.find(t => t.value === contentType);
+      const points = ct?.default_points ?? 10;
       const { error } = await supabase.from("contributions").insert({
         id: contributionId,
         user_email: session.user.email!,
         user_id: session.user.id,
         post_url: postUrl.trim(),
-        points_earned: 10,
+        content_type: contentType,
+        points_earned: points,
         status: "pending",
-      });
+      } as any);
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "⏳ Post Submitted", description: "Pending admin approval." });
+        toast({ title: "⏳ Submitted", description: `Scored within ${scoringDelay}h.` });
+        supabase.functions.invoke("fetch-post-text", {
+          body: { contribution_id: contributionId, post_url: postUrl.trim() },
+        }).catch(console.error);
         supabase.functions.invoke("notify-admin-contribution", {
           body: { post_url: postUrl.trim(), user_email: session.user.email, contribution_id: contributionId },
+        }).catch(console.error);
+        supabase.functions.invoke("notify-telegram", {
+          body: {
+            kind: "feed",
+            text: `📝 <b>New ${contentType}</b> from ${session.user.email?.replace(/(.{3}).*(@.*)/, "$1***$2")}\n<i>Awaiting score</i>`,
+            link: postUrl.trim(),
+          },
         }).catch(console.error);
         setPostUrl("");
       }
@@ -408,9 +421,28 @@ const Contributions = () => {
     if (!session?.user) return;
     if (completedTaskIds.has(task.id)) return;
 
-    // Special: validation form task - show inline
     if (task.task_type === "form") {
       setShowValidationForm(true);
+      return;
+    }
+
+    // Link submission required
+    if (task.requires_link_submission) {
+      const link = (taskLinks[task.id] || "").trim();
+      if (!link) {
+        toast({ title: "Link required", description: task.submission_label || "Please paste a link.", variant: "destructive" });
+        return;
+      }
+      const { error } = await supabase
+        .from("contribute_task_completions" as any)
+        .insert({ user_id: session.user.id, task_id: task.id, submission_link: link } as any);
+      if (!error) {
+        setCompletedTaskIds(prev => new Set([...prev, task.id]));
+        toast({ title: `+${task.points} XP`, description: task.label });
+        calculatePoints();
+      } else {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      }
       return;
     }
 
