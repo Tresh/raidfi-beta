@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          auto_publish_contributions: boolean
+          id: string
+          scoring_delay_hours: number
+          telegram_chat_id: string | null
+          telegram_enabled: boolean
+          telegram_notify_feed: boolean
+          telegram_notify_tasks: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_publish_contributions?: boolean
+          id?: string
+          scoring_delay_hours?: number
+          telegram_chat_id?: string | null
+          telegram_enabled?: boolean
+          telegram_notify_feed?: boolean
+          telegram_notify_tasks?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_publish_contributions?: boolean
+          id?: string
+          scoring_delay_hours?: number
+          telegram_chat_id?: string | null
+          telegram_enabled?: boolean
+          telegram_notify_feed?: boolean
+          telegram_notify_tasks?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -44,22 +77,55 @@ export type Database = {
         }
         Relationships: []
       }
+      content_types: {
+        Row: {
+          created_at: string
+          default_points: number
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          default_points?: number
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          value: string
+        }
+        Update: {
+          created_at?: string
+          default_points?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          value?: string
+        }
+        Relationships: []
+      }
       contribute_task_completions: {
         Row: {
           completed_at: string | null
           id: string
+          submission_link: string | null
           task_id: string
           user_id: string
         }
         Insert: {
           completed_at?: string | null
           id?: string
+          submission_link?: string | null
           task_id: string
           user_id: string
         }
         Update: {
           completed_at?: string | null
           id?: string
+          submission_link?: string | null
           task_id?: string
           user_id?: string
         }
@@ -75,35 +141,50 @@ export type Database = {
       }
       contribute_tasks: {
         Row: {
+          action_types: string[]
           created_at: string | null
           description: string | null
           id: string
           is_active: boolean | null
+          is_pinned: boolean
           label: string
           points: number
+          requires_link_submission: boolean
           sort_order: number | null
+          submission_label: string | null
+          submission_placeholder: string | null
           task_type: string
           url: string | null
         }
         Insert: {
+          action_types?: string[]
           created_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_pinned?: boolean
           label: string
           points?: number
+          requires_link_submission?: boolean
           sort_order?: number | null
+          submission_label?: string | null
+          submission_placeholder?: string | null
           task_type?: string
           url?: string | null
         }
         Update: {
+          action_types?: string[]
           created_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_pinned?: boolean
           label?: string
           points?: number
+          requires_link_submission?: boolean
           sort_order?: number | null
+          submission_label?: string | null
+          submission_placeholder?: string | null
           task_type?: string
           url?: string | null
         }
@@ -143,37 +224,58 @@ export type Database = {
       }
       contributions: {
         Row: {
+          admin_notes: string | null
           ai_feedback: string | null
           ai_score: number | null
+          content_type: string
           created_at: string
           engagement_count: number
           id: string
+          manual_score: number | null
           points_earned: number
+          post_author: string | null
+          post_fetched_at: string | null
+          post_text: string | null
           post_url: string
+          published_to_feed: boolean
           status: string
           user_email: string
           user_id: string | null
         }
         Insert: {
+          admin_notes?: string | null
           ai_feedback?: string | null
           ai_score?: number | null
+          content_type?: string
           created_at?: string
           engagement_count?: number
           id?: string
+          manual_score?: number | null
           points_earned?: number
+          post_author?: string | null
+          post_fetched_at?: string | null
+          post_text?: string | null
           post_url: string
+          published_to_feed?: boolean
           status?: string
           user_email: string
           user_id?: string | null
         }
         Update: {
+          admin_notes?: string | null
           ai_feedback?: string | null
           ai_score?: number | null
+          content_type?: string
           created_at?: string
           engagement_count?: number
           id?: string
+          manual_score?: number | null
           points_earned?: number
+          post_author?: string | null
+          post_fetched_at?: string | null
+          post_text?: string | null
           post_url?: string
+          published_to_feed?: boolean
           status?: string
           user_email?: string
           user_id?: string | null
@@ -231,6 +333,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_tags: {
+        Row: {
+          created_at: string
+          id: string
+          tag: string
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tag: string
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tag?: string
+          user_email?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -267,6 +390,33 @@ export type Database = {
           user_id?: string
           waitlist_completed?: boolean | null
           x_shared?: boolean | null
+        }
+        Relationships: []
+      }
+      task_action_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          value?: string
         }
         Relationships: []
       }
