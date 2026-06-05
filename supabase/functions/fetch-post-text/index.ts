@@ -7,7 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Strip HTML tags and decode common entities
 function htmlToText(html: string): string {
   return html
     .replace(/<br\s*\/?\s*>/gi, "\n")
@@ -23,10 +22,20 @@ function htmlToText(html: string): string {
     .trim();
 }
 
+// Twitter syndication token algorithm
+function syndicationToken(id: string): string {
+  // ((Number(id) / 1e15) * Math.PI).toString(36).replace(/(0+|\.)/g, '')
+  const n = (Number(id) / 1e15) * Math.PI;
+  return n.toString(36).replace(/(0+|\.)/g, "");
+}
+
+function extractTweetId(url: string): string | null {
+  const m = url.match(/^https?:\/\/(?:x|twitter)\.com\/\w+\/status\/(\d+)/i);
+  return m ? m[1] : null;
+}
+
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { contribution_id, post_url } = await req.json();
@@ -37,35 +46,70 @@ serve(async (req) => {
       });
     }
 
-    // Try oEmbed
-    const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(post_url)}&omit_script=true&dnt=true`;
     let post_text: string | null = null;
     let post_author: string | null = null;
-    try {
-      const r = await fetch(oembedUrl, { headers: { "User-Agent": "RaidFiBot/1.0" } });
-      if (r.ok) {
-        const data = await r.json();
-        if (data?.html) post_text = htmlToText(data.html);
-        if (data?.author_name) post_author = data.author_name;
+    let post_image_url: string | null = null;
+
+    // 1. Try syndication endpoint (richer: text + media)
+    const tid = extractTweetId(post_url);
+    if (tid) {
+      try {
+        const tok = syndicationToken(tid);
+        const sUrl = `https://cdn.syndication.twimg.com/tweet-result?id=${tid}&token=${tok}&lang=en`;
+        const sr = await fetch(sUrl, { headers: { "User-Agent": "Mozilla/5.0 RaidFiBot/1.0" } });
+        if (sr.ok) {
+          const sd = await sr.json();
+          if (sd?.text) post_text = sd.text;
+          if (sd?.user?.name && sd?.user?.screen_name) {
+            post_author = `${sd.user.name} (@${sd.user.screen_name})`;
+          }
+          // Find first image from mediaDetails or photos
+          const media = sd?.mediaDetails || sd?.photos || [];
+          if (Array.isArray(media) && media.length > 0) {
+            const first = media.find((m: any) => m?.media_url_https || m?.url);
+            if (first) post_image_url = first.media_url_https || first.url;
+          }
+        }
+      } catch (e) {
+        console.warn("syndication failed", e);
       }
-    } catch (e) {
-      console.warn("oEmbed failed", e);
     }
 
-    if (post_text) {
+    // 2. Fallback to oEmbed if syndication gave nothing
+    if (!post_text) {
+      try {
+        const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(post_url)}&omit_script=true&dnt=true`;
+        const r = await fetch(oembedUrl, { headers: { "User-Agent": "RaidFiBot/1.0" } });
+        if (r.ok) {
+          const data = await r.json();
+          if (data?.html) post_text = htmlToText(data.html);
+          if (data?.author_name && !post_author) post_author = data.author_name;
+        }
+      } catch (e) {
+        console.warn("oEmbed failed", e);
+      }
+    }
+
+    if (post_text || post_image_url) {
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       );
       await supabase
         .from("contributions")
-        .update({ post_text, post_author, post_fetched_at: new Date().toISOString() })
+        .update({
+          post_text,
+          post_author,
+          post_image_url,
+          post_fetched_at: new Date().toISOString(),
+        })
         .eq("id", contribution_id);
     }
 
-    return new Response(JSON.stringify({ ok: true, post_text, post_author }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ ok: true, post_text, post_author, post_image_url }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (e) {
     console.error("fetch-post-text error", e);
     return new Response(
