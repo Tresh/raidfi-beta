@@ -130,7 +130,7 @@ const Feed = () => {
     const to = from + PAGE_SIZE - 1;
     const { data } = await supabase
       .from("contributions")
-      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author")
+      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author,post_image_url")
       .eq("published_to_feed", true)
       .neq("status", "rejected")
       .order("created_at", { ascending: false })
