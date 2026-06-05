@@ -44,7 +44,9 @@ interface ContributeTask {
 interface LeaderboardEntry {
   display_name: string;
   email: string;
-  total_points: number;
+  total_points: number; // period_xp (what we show as primary)
+  total_xp?: number;
+  overall_rank?: number;
 }
 
 const Contributions = () => {
