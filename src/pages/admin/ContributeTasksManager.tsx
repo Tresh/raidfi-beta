@@ -76,18 +76,8 @@ const ContributeTasksManager = () => {
     } else {
       toast({ title: "Saved" });
       if (shouldNotify) {
-        const actions = (task.action_types || []).length
-          ? `\n<b>Actions:</b> ${task.action_types.join(", ")}` : "";
-        const desc = task.description ? `\n\n${task.description}` : "";
-        const url = task.url ? `\n\n🔗 ${task.url}` : "";
-        const text = `🆕 <b>New Contributor Task</b>\n\n<b>${task.label}</b>${desc}${actions}\n\n+${task.points} XP${url}`;
         supabase.functions.invoke("notify-telegram", {
-          body: {
-            kind: "task",
-            text,
-            link: `${window.location.origin}/contributions`,
-            buttonText: "Do task",
-          },
+          body: { kind: "task", task_id: task.id, origin: window.location.origin },
         }).catch(console.error);
         setTasks(prev => prev.map(t => t.id === task.id ? { ...t, telegram_notified: true } : t));
       }
