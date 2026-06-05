@@ -13,7 +13,7 @@ const NotFound = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="flex-1 flex items-center justify-center">
+      <main className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <h1 className="mb-4 text-4xl font-bold text-foreground">404</h1>
           <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
@@ -21,7 +21,7 @@ const NotFound = () => {
             Return to Home
           </a>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );
