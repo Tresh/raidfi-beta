@@ -67,7 +67,7 @@ serve(async (req) => {
     };
     if (link) {
       body.reply_markup = {
-        inline_keyboard: [[{ text: "Open", url: link }]],
+        inline_keyboard: [[{ text: buttonText || "Open", url: link }]],
       };
     }
 
