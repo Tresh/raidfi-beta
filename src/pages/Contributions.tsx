@@ -33,6 +33,12 @@ interface ContributeTask {
   points: number;
   task_type: string;
   url: string | null;
+  is_pinned?: boolean;
+  requires_link_submission?: boolean;
+  submission_label?: string | null;
+  submission_placeholder?: string | null;
+  action_types?: string[];
+  created_at?: string;
 }
 
 interface LeaderboardEntry {
@@ -59,11 +65,15 @@ const Contributions = () => {
 
   // Post submission
   const [postUrl, setPostUrl] = useState("");
+  const [contentType, setContentType] = useState("post");
+  const [contentTypes, setContentTypes] = useState<{ value: string; label: string; default_points?: number }[]>([]);
+  const [scoringDelay, setScoringDelay] = useState(24);
   const [submittingPost, setSubmittingPost] = useState(false);
 
   // Contribute tasks
   const [contributeTasks, setContributeTasks] = useState<ContributeTask[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set());
+  const [taskLinks, setTaskLinks] = useState<Record<string, string>>({});
 
   // Validation form inline
   const [showValidationForm, setShowValidationForm] = useState(false);
@@ -152,17 +162,34 @@ const Contributions = () => {
     check();
   }, [session]);
 
-  // Fetch contribute tasks
+  // Fetch contribute tasks (pinned first, then newest first)
   useEffect(() => {
     const fetch = async () => {
       const { data } = await supabase
         .from("contribute_tasks" as any)
         .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (data) setContributeTasks(data as any);
+        .eq("is_active", true);
+      if (data) {
+        const sorted = ((data as any[]) || []).sort((a, b) => {
+          if (!!a.is_pinned !== !!b.is_pinned) return a.is_pinned ? -1 : 1;
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+        setContributeTasks(sorted as any);
+      }
     };
     fetch();
+  }, []);
+
+  // Fetch content types + settings
+  useEffect(() => {
+    (async () => {
+      const [{ data: types }, { data: s }] = await Promise.all([
+        supabase.from("content_types" as any).select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("admin_settings" as any).select("scoring_delay_hours").eq("id", "global").maybeSingle(),
+      ]);
+      setContentTypes((types as any) || []);
+      if ((s as any)?.scoring_delay_hours) setScoringDelay((s as any).scoring_delay_hours);
+    })();
   }, []);
 
   // Fetch completed tasks
