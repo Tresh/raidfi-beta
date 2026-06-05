@@ -57,6 +57,7 @@ interface Contribution {
   ai_feedback?: string | null;
   post_text?: string | null;
   post_author?: string | null;
+  post_image_url?: string | null;
 }
 
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
