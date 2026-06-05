@@ -100,12 +100,12 @@ const Contribute = () => {
 
   useEffect(() => {
     (async () => {
-      const [{ data: types }, { data: settings }] = await Promise.all([
+      const [{ data: types }, { data: delayHours }] = await Promise.all([
         supabase.from("content_types" as any).select("*").eq("is_active", true).order("sort_order"),
-        supabase.from("admin_settings" as any).select("scoring_delay_hours").eq("id", "global").maybeSingle(),
+        supabase.rpc("get_scoring_delay_hours" as any),
       ]);
       setContentTypes((types as any) || []);
-      if ((settings as any)?.scoring_delay_hours) setScoringDelay((settings as any).scoring_delay_hours);
+      if (typeof delayHours === "number") setScoringDelay(delayHours);
     })();
   }, []);
 
