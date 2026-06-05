@@ -57,24 +57,47 @@ interface Contribution {
   ai_feedback?: string | null;
   post_text?: string | null;
   post_author?: string | null;
-  post_image_url?: string | null;
 }
 
-const FeedImage = ({ src, href }: { src: string; href: string }) => {
+const FeedImage = ({ postUrl }: { postUrl: string }) => {
+  const [src, setSrc] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [done, setDone] = useState(false); // finished resolving
   const [errored, setErrored] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase.functions.invoke("fetch-post-image", { body: { post_url: postUrl } });
+        if (cancelled) return;
+        if (data?.post_image_url) setSrc(data.post_image_url);
+        else setDone(true);
+      } catch {
+        if (!cancelled) setDone(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [postUrl]);
+
+  if (done && !src) return null;
   if (errored) return null;
+
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="block mt-2 relative">
-      {!loaded && <div className="w-full aspect-[16/10] rounded-lg border border-border bg-muted animate-pulse" />}
-      <img
-        src={src}
-        alt="Post media"
-        loading="lazy"
-        onLoad={() => setLoaded(true)}
-        onError={() => setErrored(true)}
-        className={`w-full rounded-lg border border-border max-h-80 object-cover ${loaded ? "" : "hidden"}`}
-      />
+    <a href={postUrl} target="_blank" rel="noopener noreferrer" className="block mt-2 relative">
+      {(!src || !loaded) && (
+        <div className="w-full aspect-[16/10] rounded-lg border border-border bg-muted animate-pulse" />
+      )}
+      {src && (
+        <img
+          src={src}
+          alt="Post media"
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => setErrored(true)}
+          className={`w-full rounded-lg border border-border max-h-80 object-cover ${loaded ? "" : "hidden"}`}
+        />
+      )}
     </a>
   );
 };
