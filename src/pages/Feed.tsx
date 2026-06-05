@@ -60,6 +60,25 @@ interface Contribution {
   post_image_url?: string | null;
 }
 
+const FeedImage = ({ src, href }: { src: string; href: string }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+  if (errored) return null;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="block mt-2 relative">
+      {!loaded && <div className="w-full aspect-[16/10] rounded-lg border border-border bg-muted animate-pulse" />}
+      <img
+        src={src}
+        alt="Post media"
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setErrored(true)}
+        className={`w-full rounded-lg border border-border max-h-80 object-cover ${loaded ? "" : "hidden"}`}
+      />
+    </a>
+  );
+};
+
 const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
