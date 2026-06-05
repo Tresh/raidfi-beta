@@ -270,14 +270,7 @@ const Feed = () => {
                         )}
 
                         {c.post_image_url && (
-                          <a href={c.post_url} target="_blank" rel="noopener noreferrer" className="block mt-2">
-                            <img
-                              src={c.post_image_url}
-                              alt="Post media"
-                              loading="lazy"
-                              className="w-full rounded-lg border border-border max-h-80 object-cover"
-                            />
-                          </a>
+                          <FeedImage src={c.post_image_url} href={c.post_url} />
                         )}
                       </div>
 
