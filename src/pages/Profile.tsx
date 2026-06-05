@@ -44,7 +44,7 @@ const Profile = () => {
     (async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("email, name, total_points")
+        .select("email, name, total_points, user_id")
         .eq("referral_code", code)
         .maybeSingle();
       if (!p) { setNotFound(true); setLoading(false); return; }
