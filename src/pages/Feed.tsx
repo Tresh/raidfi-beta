@@ -46,7 +46,6 @@ const splitPostMeta = (raw: string): { body: string; meta: string | null; author
 
 interface Contribution {
   id: string;
-  user_email: string;
   post_url: string;
   points_earned: number;
   created_at: string;
@@ -57,6 +56,9 @@ interface Contribution {
   ai_feedback?: string | null;
   post_text?: string | null;
   post_author?: string | null;
+  user_id?: string | null;
+  referral_code?: string | null;
+  author_name?: string | null;
 }
 
 const FeedImage = ({ postUrl }: { postUrl: string }) => {
