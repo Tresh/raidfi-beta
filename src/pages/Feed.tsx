@@ -67,17 +67,30 @@ const FeedImage = ({ postUrl }: { postUrl: string }) => {
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setDone(true);
+    }, 6000);
+
     (async () => {
       try {
         const { data } = await supabase.functions.invoke("fetch-post-image", { body: { post_url: postUrl } });
         if (cancelled) return;
-        if (data?.post_image_url) setSrc(data.post_image_url);
-        else setDone(true);
+        if (data?.post_image_url) {
+          setSrc(data.post_image_url);
+        } else {
+          setDone(true);
+        }
       } catch {
         if (!cancelled) setDone(true);
+      } finally {
+        window.clearTimeout(timeout);
       }
     })();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
   }, [postUrl]);
 
   if (done && !src) return null;
@@ -93,8 +106,14 @@ const FeedImage = ({ postUrl }: { postUrl: string }) => {
           src={src}
           alt="Post media"
           loading="lazy"
-          onLoad={() => setLoaded(true)}
-          onError={() => setErrored(true)}
+          onLoad={() => {
+            setLoaded(true);
+            setDone(true);
+          }}
+          onError={() => {
+            setErrored(true);
+            setDone(true);
+          }}
           className={`w-full rounded-lg border border-border max-h-80 object-cover ${loaded ? "" : "hidden"}`}
         />
       )}
