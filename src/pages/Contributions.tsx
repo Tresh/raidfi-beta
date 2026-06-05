@@ -49,7 +49,14 @@ interface LeaderboardEntry {
   overall_rank?: number;
 }
 
+import { useSEO } from "@/hooks/useSEO";
+
 const Contributions = () => {
+  useSEO({
+    title: "Contribute — RaidFi",
+    description: "Track your XP, complete tasks, refer friends, and grow your RaidFi reputation.",
+    path: "/contributions",
+  });
   const { toast } = useToast();
 
   // Auth
