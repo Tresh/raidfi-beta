@@ -8,8 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSEO } from "@/hooks/useSEO";
 
 const Login = () => {
+  useSEO({
+    title: "Login — RaidFi",
+    description: "Sign in to RaidFi to access your contributor dashboard, XP, and referrals.",
+    path: "/login",
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");

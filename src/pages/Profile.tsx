@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Trophy, ExternalLink, ArrowLeft, Sparkles, FileText, Clock, Hash } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 interface Contribution {
   id: string;
