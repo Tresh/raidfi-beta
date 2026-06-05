@@ -7,3 +7,5 @@ project_id = "auwshrplreosybqgeoop"
     verify_jwt = false
   [functions.notify-admin-contribution]
     verify_jwt = false
+  [functions.fetch-post-image]
+    verify_jwt = false

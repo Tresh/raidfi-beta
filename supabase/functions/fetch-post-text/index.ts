@@ -90,7 +90,7 @@ serve(async (req) => {
       }
     }
 
-    if (post_text || post_image_url) {
+    if (post_text || post_author) {
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -100,7 +100,6 @@ serve(async (req) => {
         .update({
           post_text,
           post_author,
-          post_image_url,
           post_fetched_at: new Date().toISOString(),
         })
         .eq("id", contribution_id);
