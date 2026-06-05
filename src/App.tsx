@@ -10,6 +10,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Contributions from "./pages/Contributions";
 import Feed from "./pages/Feed";
+import Profile from "./pages/Profile";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import WaitlistManager from "./pages/admin/WaitlistManager";
@@ -21,6 +22,7 @@ import TasksManager from "./pages/admin/TasksManager";
 import ContributeTasksManager from "./pages/admin/ContributeTasksManager";
 import PointsManager from "./pages/admin/PointsManager";
 import UsersManager from "./pages/admin/UsersManager";
+import SettingsManager from "./pages/admin/SettingsManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import Whitepaper from "./pages/Whitepaper";
@@ -43,6 +45,7 @@ const App = () => (
           <Route path="/whitepaper" element={<Whitepaper />} />
           <Route path="/contributions" element={<Contributions />} />
           <Route path="/feed" element={<Feed />} />
+          <Route path="/u/:code" element={<Profile />} />
           {/* Legacy redirects */}
           <Route path="/dashboard" element={<Navigate to="/contributions" replace />} />
           <Route path="/dashboard/*" element={<Navigate to="/contributions" replace />} />
@@ -59,6 +62,7 @@ const App = () => (
           <Route path="/admin/points" element={<AdminLayout requiredPermission="points"><PointsManager /></AdminLayout>} />
           <Route path="/admin/users" element={<AdminLayout requiredPermission="users"><UsersManager /></AdminLayout>} />
           <Route path="/admin/analytics" element={<AdminLayout requiredPermission="dashboard"><AnalyticsPage /></AdminLayout>} />
+          <Route path="/admin/settings" element={<AdminLayout requiredPermission="settings"><SettingsManager /></AdminLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

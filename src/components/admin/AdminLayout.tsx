@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation, Navigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins, ShieldCheck, BarChart3,
+  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins, ShieldCheck, BarChart3, Settings as SettingsIcon,
 } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Loader2 } from "lucide-react";
@@ -20,6 +20,7 @@ const allNavItems = [
   { label: "Whitepaper", to: "/admin/whitepaper", permKey: "whitepaper", icon: ClipboardList },
   { label: "Contributions", to: "/admin/contributions", permKey: "contributions", icon: Users },
   { label: "Analytics", to: "/admin/analytics", permKey: "dashboard", icon: BarChart3 },
+  { label: "Settings", to: "/admin/settings", permKey: "settings", icon: SettingsIcon, adminOnly: true },
 ];
 
 const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; requiredPermission?: string }) => {
