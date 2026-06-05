@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Save, Plus, Eye, History, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DOMPurify from "dompurify";
 
 interface WhitepaperRow {
   id: string;
