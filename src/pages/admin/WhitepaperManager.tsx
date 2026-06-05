@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Save, Plus, Eye, History, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DOMPurify from "dompurify";
 
 interface WhitepaperRow {
   id: string;
@@ -222,7 +223,7 @@ const WhitepaperManager = () => {
             </div>
             {preview ? (
               <div className="prose prose-invert max-w-none p-4 border border-border rounded-lg min-h-[500px] overflow-auto">
-                <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content.replace(/\n/g, '<br/>')) }} />
               </div>
             ) : (
               <textarea

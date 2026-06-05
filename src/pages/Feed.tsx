@@ -46,7 +46,6 @@ const splitPostMeta = (raw: string): { body: string; meta: string | null; author
 
 interface Contribution {
   id: string;
-  user_email: string;
   post_url: string;
   points_earned: number;
   created_at: string;
@@ -57,6 +56,9 @@ interface Contribution {
   ai_feedback?: string | null;
   post_text?: string | null;
   post_author?: string | null;
+  user_id?: string | null;
+  referral_code?: string | null;
+  author_name?: string | null;
 }
 
 const FeedImage = ({ postUrl }: { postUrl: string }) => {
@@ -197,8 +199,8 @@ const Feed = () => {
     const from = pageNum * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     const { data } = await supabase
-      .from("contributions")
-      .select("id,user_email,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author")
+      .from("contributions_feed" as any)
+      .select("id,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author,user_id,referral_code,author_name")
       .eq("published_to_feed", true)
       .neq("status", "rejected")
       .order("created_at", { ascending: false })
@@ -206,27 +208,12 @@ const Feed = () => {
     if (data) {
       setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
       setHasMore(data.length === PAGE_SIZE);
-      const emails = Array.from(new Set((data as any[]).map(d => d.user_email)));
-      if (emails.length > 0) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("email, referral_code, name")
-          .in("email", emails);
-        if (profs) {
-          setRefMap(prev => {
-            const next = { ...prev };
-            (profs as any[]).forEach(p => { next[p.email] = { code: p.referral_code, name: p.name }; });
-            return next;
-          });
-        }
-      }
     }
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchContributions(0); }, [fetchContributions]);
 
-  const mask = (e: string) => e.replace(/(.{3}).*(@.*)/, "$1***$2");
   const formatRelative = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
     const m = Math.floor(diff / 60000);
@@ -260,12 +247,11 @@ const Feed = () => {
               {contributions.map((c) => {
                 const tweetId = extractTweetId(c.post_url);
                 const score = c.manual_score ?? c.ai_score;
-                const prof = refMap[c.user_email] || {};
-                const code = prof.code;
+                const code = c.referral_code;
                 const hasSavedText = !!c.post_text && c.post_text.trim().length > 0;
                 const parsed = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null, author: null as string | null, handle: null as string | null };
                 const { body, meta } = parsed;
-                const displayName = parsed.author || c.post_author || prof.name || mask(c.user_email);
+                const displayName = parsed.author || c.post_author || c.author_name || "Anonymous";
                 const handle = parsed.handle || extractHandleFromUrl(c.post_url);
                 const initial = (displayName || "?").replace(/^@/, "").trim().charAt(0).toUpperCase();
 
@@ -294,7 +280,7 @@ const Feed = () => {
                             <span className="text-[13px] font-semibold text-foreground truncate block">{displayName}</span>
                           )}
                           <div className="text-[11px] text-muted-foreground truncate">
-                            {handle ? `@${handle}` : mask(c.user_email)}
+                            {handle ? `@${handle}` : ""}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">

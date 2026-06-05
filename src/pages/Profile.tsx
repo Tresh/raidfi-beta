@@ -44,7 +44,7 @@ const Profile = () => {
     (async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("email, name, total_points")
+        .select("email, name, total_points, user_id")
         .eq("referral_code", code)
         .maybeSingle();
       if (!p) { setNotFound(true); setLoading(false); return; }
@@ -52,15 +52,15 @@ const Profile = () => {
 
       const [{ data: c }, { data: t }, { count: higher }, { data: allContrib }] = await Promise.all([
         supabase
-          .from("contributions")
+          .from("contributions_feed" as any)
           .select("id,post_url,status,content_type,points_earned,manual_score,ai_score,post_text,post_author,created_at")
-          .eq("user_email", p.email)
+          .eq("user_id", (p as any).user_id ?? "00000000-0000-0000-0000-000000000000")
           .eq("status", "approved")
           .order("created_at", { ascending: false })
           .limit(50),
-        supabase.from("profile_tags" as any).select("tag").eq("user_email", p.email),
+        supabase.rpc("get_profile_tags" as any, { _referral_code: code } as any),
         supabase.from("profiles").select("*", { count: "exact", head: true }).gt("total_points", p.total_points),
-        supabase.from("contributions").select("status,manual_score,ai_score").eq("user_email", p.email),
+        supabase.from("contributions_feed" as any).select("status,manual_score,ai_score").eq("user_id", (p as any).user_id ?? "00000000-0000-0000-0000-000000000000"),
       ]);
 
       setContributions((c as any) || []);

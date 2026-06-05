@@ -223,6 +223,13 @@ export type Database = {
             referencedRelation: "contributions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contribution_engagements_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions_feed"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contributions: {
@@ -721,10 +728,58 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      contributions_feed: {
+        Row: {
+          ai_feedback: string | null
+          ai_score: number | null
+          author_name: string | null
+          content_type: string | null
+          created_at: string | null
+          engagement_count: number | null
+          id: string | null
+          manual_score: number | null
+          points_earned: number | null
+          post_author: string | null
+          post_text: string | null
+          post_url: string | null
+          published_to_feed: boolean | null
+          referral_code: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      leaderboard_public: {
+        Row: {
+          contribution_xp: number | null
+          display_name: string | null
+          total_xp: number | null
+          updated_at: string | null
+          validation_xp: number | null
+          waitlist_xp: number | null
+        }
+        Insert: {
+          contribution_xp?: number | null
+          display_name?: string | null
+          total_xp?: number | null
+          updated_at?: string | null
+          validation_xp?: number | null
+          waitlist_xp?: number | null
+        }
+        Update: {
+          contribution_xp?: number | null
+          display_name?: string | null
+          total_xp?: number | null
+          updated_at?: string | null
+          validation_xp?: number | null
+          waitlist_xp?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
+      contact_email_exists: { Args: { _email: string }; Returns: boolean }
       generate_referral_code: { Args: never; Returns: string }
       get_leaderboard: {
         Args: { _period?: string }
@@ -736,6 +791,13 @@ export type Database = {
           total_xp: number
         }[]
       }
+      get_profile_tags: {
+        Args: { _referral_code: string }
+        Returns: {
+          tag: string
+        }[]
+      }
+      get_scoring_delay_hours: { Args: never; Returns: number }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
@@ -747,6 +809,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_waitlist_x_shared: { Args: { _id: string }; Returns: undefined }
       process_referral: { Args: { referrer_code: string }; Returns: undefined }
       recalculate_all_leaderboard_scores: { Args: never; Returns: undefined }
       recalculate_leaderboard_score: {
@@ -754,6 +817,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_whitepaper_live: { Args: never; Returns: undefined }
+      update_waitlist_task_email: {
+        Args: { _new_email: string; _old_email: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "moderator"
