@@ -250,7 +250,7 @@ const handleXShare = () => {
     }
     setSubmittingShare(true);
     try {
-      await supabase.from("waitlist_submissions").update({ x_shared: true } as any).eq("id", submissionId);
+      await supabase.rpc("mark_waitlist_x_shared" as any, { _id: submissionId } as any);
       // Store the share post as a task submission
       await supabase.from("waitlist_task_submissions" as any).insert({
         submission_email: email.trim().toLowerCase(),
