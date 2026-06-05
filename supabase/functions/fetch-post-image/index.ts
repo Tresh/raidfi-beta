@@ -11,7 +11,7 @@ function syndicationToken(id: string): string {
 }
 
 function extractTweetId(url: string): string | null {
-  const m = url.match(/^https?:\/\/(?:x|twitter)\.com\/\w+\/status\/(\d+)/i);
+  const m = url.match(/^https?:\/\/(?:x|twitter)\.com\/(?:\w+|i)\/status\/(\d+)/i);
   return m ? m[1] : null;
 }
 
