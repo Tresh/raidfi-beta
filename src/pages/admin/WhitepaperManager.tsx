@@ -223,7 +223,7 @@ const WhitepaperManager = () => {
             </div>
             {preview ? (
               <div className="prose prose-invert max-w-none p-4 border border-border rounded-lg min-h-[500px] overflow-auto">
-                <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content.replace(/\n/g, '<br/>')) }} />
               </div>
             ) : (
               <textarea
