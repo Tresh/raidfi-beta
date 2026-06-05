@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, ExternalLink, Star } from "lucide-react";
+import { Loader2, ExternalLink, Star, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,6 +11,34 @@ const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
 const extractTweetId = (url: string): string | null => {
   const m = url.match(TWEET_URL_REGEX);
   return m ? m[2] : null;
+};
+const extractHandleFromUrl = (url: string): string | null => {
+  const m = url.match(/^https?:\/\/(?:x|twitter)\.com\/([^/]+)\/status\//i);
+  return m ? m[1] : null;
+};
+
+// Decode HTML entities the edge fn may have missed (e.g. &mdash;)
+const decodeEntities = (s: string) =>
+  s
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    .replace(/&hellip;/g, "…")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+
+// Split oEmbed-style text into body + trailing "— Name (@handle) Date"
+const splitPostMeta = (raw: string): { body: string; meta: string | null } => {
+  const text = decodeEntities(raw).trim();
+  // Match the LAST occurrence of em-dash followed by name (@handle) date
+  const re = /\s*[—–-]\s*([^\n]+?\(@[^)]+\)[^\n]*)$/;
+  const m = text.match(re);
+  if (m && m.index !== undefined) {
+    return { body: text.slice(0, m.index).trim(), meta: m[1].trim() };
+  }
+  return { body: text, meta: null };
 };
 
 interface Contribution {
@@ -51,11 +79,11 @@ const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) 
     } else (window as any).twttr.ready?.(renderTweet) || renderTweet();
   }, [tweetId]);
   return (
-    <div className="min-h-[200px]">
+    <div className="min-h-[120px]">
       <div ref={containerRef} />
       {loading && (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        <div className="flex items-center justify-center py-6">
+          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
           <a href={postUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs text-muted-foreground hover:text-primary">Open post</a>
         </div>
       )}
@@ -73,18 +101,24 @@ const StatusBadge = ({ status, score }: { status: string; score: number | null }
     );
   }
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 font-medium">
-      ⏳ Awaiting score
+    <span className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 font-medium">
+      ⏳ Awaiting
     </span>
   );
 };
+
+const TypeBadge = ({ type }: { type: string }) => (
+  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wider font-medium">
+    {type}
+  </span>
+);
 
 const Feed = () => {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [refMap, setRefMap] = useState<Record<string, string>>({});
+  const [refMap, setRefMap] = useState<Record<string, { code?: string; name?: string }>>({});
   const PAGE_SIZE = 20;
 
   const fetchContributions = useCallback(async (pageNum: number, append = false) => {
@@ -100,17 +134,16 @@ const Feed = () => {
     if (data) {
       setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
       setHasMore(data.length === PAGE_SIZE);
-      // Fetch referral codes for these emails to build profile links
       const emails = Array.from(new Set((data as any[]).map(d => d.user_email)));
       if (emails.length > 0) {
         const { data: profs } = await supabase
           .from("profiles")
-          .select("email, referral_code")
+          .select("email, referral_code, name")
           .in("email", emails);
         if (profs) {
           setRefMap(prev => {
             const next = { ...prev };
-            (profs as any[]).forEach(p => { if (p.referral_code) next[p.email] = p.referral_code; });
+            (profs as any[]).forEach(p => { next[p.email] = { code: p.referral_code, name: p.name }; });
             return next;
           });
         }
@@ -122,6 +155,17 @@ const Feed = () => {
   useEffect(() => { fetchContributions(0); }, [fetchContributions]);
 
   const mask = (e: string) => e.replace(/(.{3}).*(@.*)/, "$1***$2");
+  const formatRelative = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h`;
+    const d = Math.floor(h / 24);
+    if (d < 7) return `${d}d`;
+    return new Date(iso).toLocaleDateString();
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -140,68 +184,104 @@ const Feed = () => {
           ) : contributions.length === 0 ? (
             <Card className="border-dashed"><CardContent className="py-12 text-center"><p className="text-muted-foreground">No posts yet.</p></CardContent></Card>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {contributions.map((c) => {
                 const tweetId = extractTweetId(c.post_url);
                 const score = c.manual_score ?? c.ai_score;
-                const code = refMap[c.user_email];
+                const prof = refMap[c.user_email] || {};
+                const code = prof.code;
                 const hasSavedText = !!c.post_text && c.post_text.trim().length > 0;
+                const { body, meta } = hasSavedText ? splitPostMeta(c.post_text!) : { body: "", meta: null as string | null };
+                const displayName = c.post_author || prof.name || mask(c.user_email);
+                const handle = extractHandleFromUrl(c.post_url);
+                const initial = (displayName || "?").replace(/^@/, "").trim().charAt(0).toUpperCase();
+
                 return (
-                  <Card key={c.id} className="overflow-hidden">
+                  <Card key={c.id} className="overflow-hidden hover:bg-accent/20 transition-colors">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
-                          {code ? (
-                            <Link to={`/u/${code}`} className="text-xs text-foreground hover:text-primary font-medium">{mask(c.user_email)}</Link>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">{mask(c.user_email)}</span>
-                          )}
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase">{c.content_type}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={c.status} score={score} />
-                          <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                      {hasSavedText ? (
-                        <div className="rounded-xl border border-border bg-card p-4">
-                          {(c as any).post_author && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold">
-                                {(c as any).post_author.replace(/^@/, "").slice(0, 1).toUpperCase()}
-                              </div>
-                              <div className="flex flex-col leading-tight">
-                                <span className="text-sm font-medium text-foreground">{(c as any).post_author}</span>
-                                <span className="text-[11px] text-muted-foreground">on X</span>
+                      {/* Header: avatar + name/handle on left, tags stacked on right */}
+                      <div className="flex items-start gap-3">
+                        {code ? (
+                          <Link to={`/u/${code}`} className="shrink-0">
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-base font-semibold ring-1 ring-border">
+                              {initial}
+                            </div>
+                          </Link>
+                        ) : (
+                          <div className="shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-base font-semibold ring-1 ring-border">
+                            {initial}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              {code ? (
+                                <Link to={`/u/${code}`} className="text-sm font-semibold text-foreground hover:underline truncate block">
+                                  {displayName}
+                                </Link>
+                              ) : (
+                                <span className="text-sm font-semibold text-foreground truncate block">{displayName}</span>
+                              )}
+                              <div className="text-xs text-muted-foreground truncate">
+                                {handle ? `@${handle}` : mask(c.user_email)}
                               </div>
                             </div>
+                            <div className="flex flex-col items-end gap-1 shrink-0">
+                              <TypeBadge type={c.content_type} />
+                              <StatusBadge status={c.status} score={score} />
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="mt-3">
+                            {hasSavedText ? (
+                              <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap break-words">
+                                {body}
+                              </p>
+                            ) : tweetId ? (
+                              <TweetEmbed tweetId={tweetId} postUrl={c.post_url} />
+                            ) : (
+                              <a href={c.post_url} target="_blank" rel="noopener noreferrer"
+                                className="block p-3 rounded-lg bg-muted/50 hover:bg-muted text-sm text-primary break-all">
+                                {c.post_url}
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Metadata footer */}
+                          {hasSavedText && (
+                            <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                              <div className="flex items-center gap-1.5 min-w-0 truncate">
+                                <Clock className="w-3 h-3 shrink-0" />
+                                <span className="truncate">
+                                  {meta ? meta : `${formatRelative(c.created_at)} on X`}
+                                </span>
+                              </div>
+                              <a href={c.post_url} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 hover:text-primary shrink-0">
+                                Open <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
                           )}
-                          <p className="text-sm text-foreground whitespace-pre-wrap break-words">{c.post_text}</p>
-                          <a
-                            href={c.post_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:underline"
-                          >
-                            View on X <ExternalLink className="w-3 h-3" />
-                          </a>
+                          {!hasSavedText && (
+                            <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground">
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatRelative(c.created_at)}</span>
+                              </div>
+                              <a href={c.post_url} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 hover:text-primary">
+                                Open <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          )}
+
+                          {c.ai_feedback && (
+                            <div className="mt-2 px-3 py-2 rounded-md bg-muted/40 text-[11px] text-muted-foreground">
+                              <span className="font-medium text-foreground">AI Review:</span> {c.ai_feedback}
+                            </div>
+                          )}
                         </div>
-                      ) : tweetId ? (
-                        <TweetEmbed tweetId={tweetId} postUrl={c.post_url} />
-                      ) : (
-                        <a href={c.post_url} target="_blank" rel="noopener noreferrer"
-                          className="block p-4 rounded-lg bg-muted/50 hover:bg-muted text-sm text-primary break-all">{c.post_url}</a>
-                      )}
-                      {c.ai_feedback && (
-                        <div className="mt-2 px-3 py-2 rounded-md bg-muted/50 text-xs text-muted-foreground">
-                          <span className="font-medium text-foreground">AI Review:</span> {c.ai_feedback}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                        <a href={c.post_url} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto">
-                          <ExternalLink className="w-3.5 h-3.5" /><span>Open</span>
-                        </a>
                       </div>
                     </CardContent>
                   </Card>
