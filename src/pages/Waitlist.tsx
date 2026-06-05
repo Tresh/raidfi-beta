@@ -203,9 +203,10 @@ const handleTaskClick = (task: WaitlistTask) => {
       } as any);
       if (error) throw error;
 
-      await supabase.from("waitlist_task_submissions" as any)
-        .update({ submission_email: email.trim().toLowerCase() } as any)
-        .eq("submission_email", "pre-signup");
+      await supabase.rpc("update_waitlist_task_email" as any, {
+        _old_email: "pre-signup",
+        _new_email: email.trim().toLowerCase(),
+      } as any);
 
       if (refCode) {
         try { await supabase.rpc("process_referral", { referrer_code: refCode }); } catch (e) { console.error(e); }
