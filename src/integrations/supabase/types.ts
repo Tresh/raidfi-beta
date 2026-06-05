@@ -154,6 +154,7 @@ export type Database = {
           submission_label: string | null
           submission_placeholder: string | null
           task_type: string
+          telegram_notified: boolean
           url: string | null
         }
         Insert: {
@@ -170,6 +171,7 @@ export type Database = {
           submission_label?: string | null
           submission_placeholder?: string | null
           task_type?: string
+          telegram_notified?: boolean
           url?: string | null
         }
         Update: {
@@ -186,6 +188,7 @@ export type Database = {
           submission_label?: string | null
           submission_placeholder?: string | null
           task_type?: string
+          telegram_notified?: boolean
           url?: string | null
         }
         Relationships: []
@@ -728,6 +731,8 @@ export type Database = {
         Returns: {
           display_name: string
           email: string
+          overall_rank: number
+          period_xp: number
           total_xp: number
         }[]
       }
