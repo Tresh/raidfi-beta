@@ -816,20 +816,28 @@ const Contributions = () => {
                             <div className="divide-y divide-border">
                               {leaderboard.map((entry, i) => {
                                 const isUser = entry.email === session?.user?.email;
+                                const showTotal = leaderboardFilter !== "all" && entry.total_xp != null;
                                 return (
                                   <div key={entry.email} className={`flex items-center justify-between px-4 py-3 ${isUser ? "bg-primary/5" : ""}`}>
-                                    <div className="flex items-center gap-3">
-                                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                    <div className="flex items-center gap-3 min-w-0">
+                                      <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${
                                         i === 0 ? "bg-yellow-500/20 text-yellow-500" :
                                         i === 1 ? "bg-gray-400/20 text-gray-400" :
                                         i === 2 ? "bg-orange-500/20 text-orange-500" :
                                         "bg-muted text-muted-foreground"
                                       }`}>{i + 1}</span>
-                                      <span className={`text-sm ${isUser ? "text-primary font-medium" : "text-foreground"}`}>
-                                        {entry.display_name} {isUser && "(You)"}
-                                      </span>
+                                      <div className="min-w-0">
+                                        <p className={`text-sm truncate ${isUser ? "text-primary font-medium" : "text-foreground"}`}>
+                                          {entry.display_name} {isUser && "(You)"}
+                                        </p>
+                                        {showTotal && (
+                                          <p className="text-[10px] text-muted-foreground">
+                                            Total: {entry.total_xp} XP · Overall #{entry.overall_rank}
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
-                                    <span className="text-sm font-semibold text-primary">{entry.total_points} XP</span>
+                                    <span className="text-sm font-semibold text-primary shrink-0">{entry.total_points} XP</span>
                                   </div>
                                 );
                               })}
