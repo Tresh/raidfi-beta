@@ -243,7 +243,9 @@ const Contributions = () => {
     const sorted: LeaderboardEntry[] = ((data || []) as any[]).map((row) => ({
       email: row.email,
       display_name: row.display_name,
-      total_points: row.total_xp,
+      total_points: row.period_xp ?? row.total_xp ?? 0,
+      total_xp: row.total_xp,
+      overall_rank: row.overall_rank,
     }));
 
     setAllLeaderboard(sorted);
