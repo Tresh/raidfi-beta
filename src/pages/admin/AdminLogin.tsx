@@ -62,16 +62,16 @@ const AdminLogin = () => {
       });
       if (error) throw error;
 
-      // Check admin role
+      // Check admin or moderator role
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error("Session not found");
 
-      const { data: admin } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "admin",
-      });
+      const [{ data: admin }, { data: moderator }] = await Promise.all([
+        supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" }),
+        supabase.rpc("has_role", { _user_id: session.user.id, _role: "moderator" }),
+      ]);
 
-      if (!admin) {
+      if (!admin && !moderator) {
         await supabase.auth.signOut();
         throw new Error("You do not have admin access.");
       }
