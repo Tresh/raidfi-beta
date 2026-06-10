@@ -22,11 +22,11 @@ const AdminLogin = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data: admin } = await supabase.rpc("has_role", {
-          _user_id: session.user.id,
-          _role: "admin",
-        });
-        if (admin) navigate("/admin");
+        const [{ data: admin }, { data: moderator }] = await Promise.all([
+          supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" }),
+          supabase.rpc("has_role", { _user_id: session.user.id, _role: "moderator" }),
+        ]);
+        if (admin || moderator) navigate("/admin");
       }
     };
     checkSession();
