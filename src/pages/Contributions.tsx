@@ -123,36 +123,56 @@ const Contributions = () => {
   useEffect(() => {
     if (!session?.user) { setProfile(null); return; }
     const fetchProfile = async () => {
+      const userEmail = session.user.email!.trim().toLowerCase();
+
       const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (data) {
-        if (!(data as any).referral_code) {
-          const { data: updated } = await supabase
-            .from("profiles")
-            .update({ referral_code: undefined } as any)
-            .eq("user_id", session.user.id)
-            .select()
-            .single();
-          setProfile(updated as any);
-        } else {
-          setProfile(data as any);
-        }
-      } else {
+      if (data && (data as any).referral_code) {
+        setProfile(data as any);
+        return;
+      }
+
+      // Try to reuse an existing referral_code from the waitlist signup so
+      // shared links keep working after the user logs into Contributions.
+      const { data: waitlistRow } = await supabase
+        .from("waitlist_submissions")
+        .select("referral_code")
+        .eq("email", userEmail)
+        .maybeSingle();
+      const existingCode = (waitlistRow as any)?.referral_code as string | undefined;
+
+      if (data && !(data as any).referral_code && existingCode) {
+        const { data: updated } = await supabase
+          .from("profiles")
+          .update({ referral_code: existingCode } as any)
+          .eq("user_id", session.user.id)
+          .select()
+          .single();
+        setProfile(updated as any);
+        return;
+      }
+
+      if (!data) {
+        const insertPayload: any = {
+          user_id: session.user.id,
+          email: userEmail,
+          waitlist_completed: true,
+        };
+        if (existingCode) insertPayload.referral_code = existingCode;
         const { data: newProfile } = await supabase
           .from("profiles")
-          .insert({
-            user_id: session.user.id,
-            email: session.user.email!,
-            waitlist_completed: true,
-          })
+          .insert(insertPayload)
           .select()
           .single();
         if (newProfile) setProfile(newProfile as any);
+        return;
       }
+
+      setProfile(data as any);
     };
     fetchProfile();
   }, [session]);

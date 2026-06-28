@@ -231,15 +231,17 @@ const handleXShare = () => {
   const siteUrl = window.location.origin;
   const referralLink = `${siteUrl}/waitlist?ref=${referralCode}`;
   const tweetText = `I just joined the @RaidFi_App waitlist. Don't miss this → ${referralLink}`;
-  const xUrl = `https://x.com{encodeURIComponent(tweetText)}`;
+  const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+  // Advance the step BEFORE navigating away on mobile so the user
+  // returns to the share screen instead of a blank page.
+  setStep("share");
 
   if (isMobile) {
     window.location.href = xUrl;
   } else {
     window.open(xUrl, "_blank", "noopener,noreferrer");
   }
-  
-  setStep("share");
 };
 
   const handleSubmitSharePost = async () => {
