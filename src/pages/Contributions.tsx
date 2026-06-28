@@ -106,6 +106,37 @@ const Contributions = () => {
   // Referral copy
   const [copied, setCopied] = useState(false);
 
+  // Telegram link
+  const [tgLinked, setTgLinked] = useState<null | { telegram_username: string | null; first_name: string | null }>(null);
+  const [tgCode, setTgCode] = useState<string | null>(null);
+  const [tgLoading, setTgLoading] = useState(false);
+  const [tgCopied, setTgCopied] = useState(false);
+
+  const fetchTelegramLink = useCallback(async () => {
+    if (!session?.user) return;
+    setTgLoading(true);
+    try {
+      const { data } = await supabase.functions.invoke("telegram-link-code", { body: {} });
+      if ((data as any)?.linked) {
+        setTgLinked((data as any).link);
+        setTgCode(null);
+      } else if ((data as any)?.code) {
+        setTgLinked(null);
+        setTgCode((data as any).code);
+      }
+    } catch (e) { console.error(e); }
+    setTgLoading(false);
+  }, [session]);
+
+  useEffect(() => { fetchTelegramLink(); }, [fetchTelegramLink]);
+
+  const handleCopyTgCode = () => {
+    if (!tgCode) return;
+    navigator.clipboard.writeText(tgCode);
+    setTgCopied(true);
+    setTimeout(() => setTgCopied(false), 2000);
+  };
+
   // Auth listener
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
@@ -682,7 +713,42 @@ const Contributions = () => {
                     </Card>
                   )}
 
-                  {/* Post Submission */}
+                  {/* Telegram link */}
+                  <Card>
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Send className="w-4 h-4 text-primary" />
+                        <h3 className="text-sm font-semibold text-foreground">Connect Telegram</h3>
+                      </div>
+                      {tgLinked ? (
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm text-foreground">
+                              ✅ Linked{tgLinked.telegram_username ? ` as @${tgLinked.telegram_username}` : tgLinked.first_name ? ` as ${tgLinked.first_name}` : ""}.
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mt-1">
+                              Open <a className="text-primary underline" href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">@raidficontributionbot</a> to use /tasks, /submit, /mypoints and more.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex gap-2">
+                            <Input readOnly value={tgLoading ? "Generating…" : (tgCode || "")} className="h-9 text-xs flex-1 bg-muted font-mono tracking-widest" />
+                            <Button size="sm" variant="outline" onClick={handleCopyTgCode} className="h-9 px-3" disabled={!tgCode}>
+                              {tgCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                            </Button>
+                            <Button size="sm" className="h-9 px-3" asChild>
+                              <a href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">Open Bot</a>
+                            </Button>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-2">
+                            DM <a className="text-primary underline" href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">@raidficontributionbot</a> and send <code className="text-foreground">/link {tgCode || "CODE"}</code> to link your account. Code expires in 15 minutes.
+                          </p>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
                   <Card>
                     <CardContent className="p-5">
                       <div className="flex items-center gap-2 mb-3">
