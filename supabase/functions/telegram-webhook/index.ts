@@ -1,0 +1,400 @@
+// Telegram bot webhook: account linking + slash commands.
+// Public endpoint (verify_jwt = false). Verifies X-Telegram-Bot-Api-Secret-Token.
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
+const SITE_ORIGIN = Deno.env.get("SITE_ORIGIN") || "https://raidfi.site";
+
+const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/i;
+
+function escapeHtml(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+async function deriveSecret(apiKey: string) {
+  const data = new TextEncoder().encode(`telegram-webhook:${apiKey}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function safeEqual(a: string | null, b: string) {
+  if (!a || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+interface Btn { text: string; url?: string; callback_data?: string; }
+
+async function tg(method: string, body: Record<string, unknown>) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
+  if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY) throw new Error("Telegram not configured");
+  const r = await fetch(`${GATEWAY_URL}/${method}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "X-Connection-Api-Key": TELEGRAM_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json();
+  if (!r.ok) console.error("tg error", method, r.status, JSON.stringify(data));
+  return { ok: r.ok, data };
+}
+
+async function reply(chatId: number, text: string, buttons: Btn[][] = [], replyTo?: number) {
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    text,
+    parse_mode: "HTML",
+    disable_web_page_preview: true,
+  };
+  if (replyTo) body.reply_to_message_id = replyTo;
+  if (buttons.length) body.reply_markup = { inline_keyboard: buttons };
+  return tg("sendMessage", body);
+}
+
+function isPrivate(chatType: string) { return chatType === "private"; }
+
+const HELP = `<b>RaidFi Bot — Commands</b>
+
+🔗 <b>/start</b> — get started & link your account
+🔑 <b>/link</b> &lt;code|email&gt; — link via one-time code from the site, or by email
+✅ <b>/verify</b> &lt;otp&gt; — finish email linking
+👤 <b>/whoami</b> — show your linked account
+🏆 <b>/mypoints</b> — your XP & rank
+📊 <b>/leaderboard</b> — top contributors
+📝 <b>/tasks</b> — open contribute tasks
+📤 <b>/submit</b> &lt;x-url&gt; — submit a contribution
+📜 <b>/whitepaper</b> — read the whitepaper
+🔔 <b>/subscribe</b> /<b>/unsubscribe</b> — task DM alerts
+❓ <b>/help</b> — this list`;
+
+const START_DM = `👋 <b>Welcome to RaidFi.</b>
+
+To use the bot you must be on the waitlist and link your account.
+
+<b>Two ways to link:</b>
+1️⃣ <b>From the site (recommended)</b> — open <a href="${SITE_ORIGIN}/contributions">Contributions</a>, copy your Telegram link code, then send:
+   <code>/link CODE</code>
+
+2️⃣ <b>By email OTP</b> — send:
+   <code>/link you@example.com</code>
+   You'll receive a 6-digit code by email; reply with:
+   <code>/verify 123456</code>
+
+Type /help to see all commands.`;
+
+async function handle(update: any, supabase: any) {
+  const message = update.message;
+  if (!message?.text) return;
+
+  const chatId: number = message.chat.id;
+  const chatType: string = message.chat.type;
+  const fromId: number = message.from?.id;
+  const fromUsername: string | undefined = message.from?.username;
+  const firstName: string | undefined = message.from?.first_name;
+  const text: string = message.text.trim();
+  const msgId: number = message.message_id;
+
+  // Parse command, strip bot suffix in groups
+  const m = text.match(/^\/(\w+)(?:@\w+)?(?:\s+(.+))?$/s);
+  if (!m) return;
+  const cmd = m[1].toLowerCase();
+  const arg = (m[2] || "").trim();
+
+  // Look up existing link by Telegram user id
+  const { data: link } = await supabase
+    .from("telegram_links")
+    .select("*")
+    .eq("telegram_user_id", fromId)
+    .maybeSingle();
+
+  const requireLink = async () => {
+    if (link) return true;
+    await reply(chatId,
+      `🔒 You need to link your RaidFi account first.\nSend <code>/start</code> in a DM with me to begin.`,
+      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/${(await tg("getMe", {})).data?.result?.username || "RaidFiBot"}` }]],
+      msgId,
+    );
+    return false;
+  };
+
+  switch (cmd) {
+    case "start":
+    case "help": {
+      await reply(chatId, isPrivate(chatType) ? START_DM : HELP, [], msgId);
+      return;
+    }
+
+    case "link": {
+      if (!arg) {
+        await reply(chatId, `Usage:\n<code>/link CODE</code>  (one-time code from the site)\n<code>/link you@example.com</code>  (email OTP)`, [], msgId);
+        return;
+      }
+
+      if (link) {
+        await reply(chatId, `✅ You're already linked to <b>${escapeHtml(link.email)}</b>.\nUse /whoami or /help.`, [], msgId);
+        return;
+      }
+
+      // Email path
+      if (arg.includes("@")) {
+        if (!isPrivate(chatType)) {
+          await reply(chatId, `For privacy, please link your email in a DM with me.`, [], msgId);
+          return;
+        }
+        const email = arg.toLowerCase();
+        const { data: exists } = await supabase.rpc("check_email_exists", { check_email: email });
+        if (!exists) {
+          await reply(chatId,
+            `❌ This email isn't on the RaidFi waitlist.\nJoin first:`,
+            [[{ text: "🚀 Join Waitlist", url: `${SITE_ORIGIN}/waitlist` }]],
+            msgId,
+          );
+          return;
+        }
+        const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+        if (error) {
+          await reply(chatId, `❌ Could not send OTP: ${escapeHtml(error.message)}`, [], msgId);
+          return;
+        }
+        // Stash pending email in link_codes table (code = "pending:<telegram_user_id>")
+        const pendingKey = `pending:${fromId}`;
+        await supabase.from("telegram_link_codes").upsert({
+          code: pendingKey,
+          email,
+          expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+          used: false,
+        });
+        await reply(chatId,
+          `📨 We sent a 6-digit code to <b>${escapeHtml(email)}</b>.\nReply with:\n<code>/verify 123456</code>`,
+          [], msgId);
+        return;
+      }
+
+      // Code path
+      const code = arg.toUpperCase().replace(/\s+/g, "");
+      const { data: row } = await supabase
+        .from("telegram_link_codes")
+        .select("*")
+        .eq("code", code)
+        .maybeSingle();
+      if (!row || row.used || new Date(row.expires_at).getTime() < Date.now()) {
+        await reply(chatId, `❌ Invalid or expired code. Generate a fresh one in <a href="${SITE_ORIGIN}/contributions">Contributions</a>.`, [], msgId);
+        return;
+      }
+      await supabase.from("telegram_links").upsert({
+        telegram_user_id: fromId,
+        telegram_chat_id: chatId,
+        telegram_username: fromUsername || null,
+        first_name: firstName || null,
+        email: row.email,
+        dm_subscribed: true,
+      }, { onConflict: "telegram_user_id" });
+      await supabase.from("telegram_link_codes").update({ used: true }).eq("code", code);
+      await reply(chatId, `✅ Linked to <b>${escapeHtml(row.email)}</b>!\nTry /mypoints or /tasks.`, [], msgId);
+      return;
+    }
+
+    case "verify": {
+      if (!isPrivate(chatType)) {
+        await reply(chatId, `Send /verify in a DM with me.`, [], msgId);
+        return;
+      }
+      if (!arg) { await reply(chatId, `Usage: <code>/verify 123456</code>`, [], msgId); return; }
+      const pendingKey = `pending:${fromId}`;
+      const { data: pending } = await supabase
+        .from("telegram_link_codes")
+        .select("*")
+        .eq("code", pendingKey)
+        .maybeSingle();
+      if (!pending || pending.used || new Date(pending.expires_at).getTime() < Date.now()) {
+        await reply(chatId, `❌ No pending link. Start with <code>/link you@example.com</code>`, [], msgId);
+        return;
+      }
+      const otp = arg.replace(/\D/g, "");
+      const { error } = await supabase.auth.verifyOtp({ email: pending.email, token: otp, type: "email" });
+      if (error) {
+        await reply(chatId, `❌ Invalid code: ${escapeHtml(error.message)}`, [], msgId);
+        return;
+      }
+      await supabase.from("telegram_links").upsert({
+        telegram_user_id: fromId,
+        telegram_chat_id: chatId,
+        telegram_username: fromUsername || null,
+        first_name: firstName || null,
+        email: pending.email,
+        dm_subscribed: true,
+      }, { onConflict: "telegram_user_id" });
+      await supabase.from("telegram_link_codes").update({ used: true }).eq("code", pendingKey);
+      await reply(chatId, `✅ Linked to <b>${escapeHtml(pending.email)}</b>!\nTry /mypoints or /tasks.`, [], msgId);
+      return;
+    }
+
+    case "whoami": {
+      if (!(await requireLink())) return;
+      await reply(chatId,
+        `👤 <b>${escapeHtml(link.email)}</b>\nTelegram: @${escapeHtml(fromUsername || "—")}\nTask DMs: ${link.dm_subscribed ? "on 🔔" : "off 🔕"}`,
+        [], msgId);
+      return;
+    }
+
+    case "subscribe":
+    case "unsubscribe": {
+      if (!(await requireLink())) return;
+      const sub = cmd === "subscribe";
+      await supabase.from("telegram_links").update({ dm_subscribed: sub }).eq("telegram_user_id", fromId);
+      await reply(chatId, sub ? `🔔 Task DM alerts: ON.` : `🔕 Task DM alerts: OFF.`, [], msgId);
+      return;
+    }
+
+    case "mypoints": {
+      if (!(await requireLink())) return;
+      const { data: score } = await supabase
+        .from("leaderboard_scores")
+        .select("total_xp")
+        .eq("email", link.email)
+        .maybeSingle();
+      const { data: lb } = await supabase.rpc("get_leaderboard", { _period: "all" });
+      const idx = (lb || []).findIndex((r: any) => r.email?.includes(link.email.split("@")[0].slice(0, 2)));
+      const myEntry = (lb || []).find((r: any) => r.email === link.email) || (lb || [])[idx];
+      const rank = myEntry?.overall_rank ?? "—";
+      const { count: contribCount } = await supabase
+        .from("contributions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_email", link.email)
+        .eq("status", "approved");
+      await reply(chatId,
+        `🏆 <b>Your RaidFi Stats</b>\n\n💎 XP: <b>${score?.total_xp ?? 0}</b>\n📈 Rank: <b>#${rank}</b>\n✅ Approved contributions: <b>${contribCount ?? 0}</b>`,
+        [[{ text: "📊 Open Dashboard", url: `${SITE_ORIGIN}/contributions` }]],
+        msgId);
+      return;
+    }
+
+    case "leaderboard": {
+      const { data: lb } = await supabase.rpc("get_leaderboard", { _period: "all" });
+      const top = (lb || []).slice(0, 10);
+      if (!top.length) { await reply(chatId, `No leaderboard data yet.`, [], msgId); return; }
+      const lines = top.map((r: any, i: number) => {
+        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
+        const name = escapeHtml(r.display_name || r.email);
+        return `${medal} <b>${name}</b> — ${r.total_xp} XP`;
+      });
+      await reply(chatId, `📊 <b>RaidFi Leaderboard — Top 10</b>\n\n${lines.join("\n")}`,
+        [[{ text: "🌐 Full Leaderboard", url: `${SITE_ORIGIN}/contributions` }]], msgId);
+      return;
+    }
+
+    case "tasks": {
+      const { data: tasks } = await supabase
+        .from("contribute_tasks")
+        .select("id,label,description,points,is_pinned")
+        .eq("is_active", true)
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (!tasks?.length) { await reply(chatId, `No open tasks right now. Check back soon.`, [], msgId); return; }
+      const lines = (tasks as any[]).map((t) =>
+        `${t.is_pinned ? "📌" : "•"} <b>${escapeHtml(t.label)}</b> — +${t.points} XP${t.description ? `\n   <i>${escapeHtml(t.description.slice(0, 120))}</i>` : ""}`
+      );
+      await reply(chatId,
+        `📝 <b>Open Contribute Tasks</b>\n\n${lines.join("\n\n")}`,
+        [[{ text: "✅ Do Tasks", url: `${SITE_ORIGIN}/contributions` }]], msgId);
+      return;
+    }
+
+    case "submit": {
+      if (!(await requireLink())) return;
+      const url = arg;
+      if (!TWEET_URL_REGEX.test(url)) {
+        await reply(chatId, `❌ Please send a valid X post URL.\nExample: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
+        return;
+      }
+      // Find user_id from profile
+      const { data: profile } = await supabase
+        .from("profiles").select("user_id").eq("email", link.email).maybeSingle();
+      const id = crypto.randomUUID();
+      const { error } = await supabase.from("contributions").insert({
+        id,
+        user_email: link.email,
+        user_id: profile?.user_id || null,
+        post_url: url,
+        content_type: "post",
+        points_earned: 10,
+        status: "pending",
+      });
+      if (error) {
+        await reply(chatId, `❌ Could not submit: ${escapeHtml(error.message)}`, [], msgId);
+        return;
+      }
+      // Best-effort kick off downstream
+      const fnUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
+      const fnHeaders = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      };
+      fetch(`${fnUrl}/fetch-post-text`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ contribution_id: id, post_url: url }) }).catch(() => {});
+      fetch(`${fnUrl}/notify-admin-contribution`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ post_url: url, user_email: link.email, contribution_id: id }) }).catch(() => {});
+      await reply(chatId, `⏳ <b>Submitted.</b>\nYou'll be scored once an admin reviews it.`, [[{ text: "🔗 View Post", url }]], msgId);
+      return;
+    }
+
+    case "whitepaper": {
+      const { data: wp } = await supabase.from("whitepaper_live").select("version,updated_at").eq("id", "live").maybeSingle();
+      await reply(chatId,
+        `📜 <b>RaidFi Whitepaper</b>${wp?.version ? `\nVersion: <b>${escapeHtml(String(wp.version))}</b>` : ""}`,
+        [[{ text: "📖 Read", url: `${SITE_ORIGIN}/whitepaper` }]], msgId);
+      return;
+    }
+
+    default:
+      // Ignore unknown commands silently in groups; reply in DM
+      if (isPrivate(chatType)) {
+        await reply(chatId, `Unknown command. Try /help.`, [], msgId);
+      }
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+
+  const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
+  if (!TELEGRAM_API_KEY) return new Response("Bot not configured", { status: 500 });
+
+  const expected = await deriveSecret(TELEGRAM_API_KEY);
+  const got = req.headers.get("X-Telegram-Bot-Api-Secret-Token");
+  if (!safeEqual(got, expected)) return new Response("Unauthorized", { status: 401 });
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
+  let update: any;
+  try { update = await req.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
+
+  // Idempotency
+  if (typeof update.update_id === "number") {
+    const message = update.message ?? update.edited_message;
+    await supabase.from("telegram_updates").upsert({
+      update_id: update.update_id,
+      chat_id: message?.chat?.id ?? null,
+      user_id: message?.from?.id ?? null,
+      text: message?.text ?? null,
+      raw_update: update,
+    }, { onConflict: "update_id" });
+  }
+
+  try {
+    await handle(update, supabase);
+  } catch (e) {
+    console.error("handle error", e);
+  }
+  // Always 200 so Telegram doesn't retry
+  return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+});

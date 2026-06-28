@@ -430,6 +430,87 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_link_codes: {
+        Row: {
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          used: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          email: string
+          expires_at: string
+          used?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
+      telegram_links: {
+        Row: {
+          dm_subscribed: boolean
+          email: string
+          first_name: string | null
+          linked_at: string
+          telegram_chat_id: number
+          telegram_user_id: number
+          telegram_username: string | null
+        }
+        Insert: {
+          dm_subscribed?: boolean
+          email: string
+          first_name?: string | null
+          linked_at?: string
+          telegram_chat_id: number
+          telegram_user_id: number
+          telegram_username?: string | null
+        }
+        Update: {
+          dm_subscribed?: boolean
+          email?: string
+          first_name?: string | null
+          linked_at?: string
+          telegram_chat_id?: number
+          telegram_user_id?: number
+          telegram_username?: string | null
+        }
+        Relationships: []
+      }
+      telegram_updates: {
+        Row: {
+          chat_id: number | null
+          created_at: string
+          raw_update: Json
+          text: string | null
+          update_id: number
+          user_id: number | null
+        }
+        Insert: {
+          chat_id?: number | null
+          created_at?: string
+          raw_update: Json
+          text?: string | null
+          update_id: number
+          user_id?: number | null
+        }
+        Update: {
+          chat_id?: number | null
+          created_at?: string
+          raw_update?: Json
+          text?: string | null
+          update_id?: number
+          user_id?: number | null
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           activity_type: string

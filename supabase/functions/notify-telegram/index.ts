@@ -274,8 +274,31 @@ serve(async (req) => {
         { text: "🔗 Do Task", url: `${baseOrigin}/contributions` },
       ];
 
-      const result = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
-      return new Response(JSON.stringify({ ok: true, result: result.result }), {
+      const groupResult = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
+
+      // Fan out DMs to every linked + subscribed Telegram user (best effort).
+      let dmSent = 0, dmFailed = 0;
+      try {
+        const { data: links } = await supabase
+          .from("telegram_links")
+          .select("telegram_chat_id")
+          .eq("dm_subscribed", true);
+        if (links?.length) {
+          await Promise.all(links.map(async (l: any) => {
+            try {
+              await sendTelegram(String(l.telegram_chat_id), lines.join("\n"), buttons);
+              dmSent++;
+            } catch (e) {
+              dmFailed++;
+              console.warn("DM fail", l.telegram_chat_id, e instanceof Error ? e.message : e);
+            }
+          }));
+        }
+      } catch (e) {
+        console.error("dm fanout error", e);
+      }
+
+      return new Response(JSON.stringify({ ok: true, group: groupResult.result, dmSent, dmFailed }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
