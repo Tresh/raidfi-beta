@@ -113,6 +113,17 @@ const Contributions = () => {
   const [tgLoading, setTgLoading] = useState(false);
   const [tgCopied, setTgCopied] = useState(false);
 
+  // How-it-works modal — auto-open first time
+  const [howOpen, setHowOpen] = useState(false);
+  useEffect(() => {
+    if (!session?.user) return;
+    const key = "raidfi_contrib_howto_seen";
+    if (!localStorage.getItem(key)) {
+      setHowOpen(true);
+      localStorage.setItem(key, "1");
+    }
+  }, [session]);
+
   const fetchTelegramLink = useCallback(async () => {
     if (!session?.user) return;
     setTgLoading(true);
