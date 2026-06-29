@@ -410,40 +410,22 @@ const handleXShare = () => {
                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
                   <CheckCircle2 className="w-10 h-10 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Submit Your Post</h2>
-                <p className="text-sm text-muted-foreground mb-6">Paste the link to your X post to complete verification.</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">You're in 🎉</h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Thanks for sharing on X — your spot is locked in. We'll email you when early access opens.
+                </p>
 
-                <div className="glass-card p-6 rounded-xl space-y-4 text-left">
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">Your X Post URL</label>
-                    <Input
-                      type="url"
-                      placeholder="https://x.com/you/status/..."
-                      value={sharePostUrl}
-                      onChange={(e) => setSharePostUrl(e.target.value)}
-                      className="h-11 text-sm"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleSubmitSharePost}
-                    className="w-full h-11 text-sm font-semibold"
-                    disabled={submittingShare || !sharePostUrl.trim()}
-                  >
-                    {submittingShare && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Submit & Complete
+                <div className="glass-card p-6 rounded-xl text-left">
+                  <h3 className="text-sm font-semibold text-foreground mb-2">Want to earn more XP?</h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Contributors get extra XP, climb the leaderboard, and unlock early perks by sharing, engaging, and completing simple tasks. Totally optional.
+                  </p>
+                  <Button asChild className="w-full h-11 text-sm font-semibold">
+                    <a href="/contributions">Become a Contributor <ArrowRight className="w-4 h-4 ml-2" /></a>
                   </Button>
-                </div>
-
-                <div className="mt-6">
-                  <p className="text-xs text-muted-foreground mb-3">Then head to contributions to start earning XP.</p>
-                  <Button variant="outline" size="lg" asChild className="h-12 px-8 text-base">
-                    <a href="/contributions">Go to Contributions</a>
+                  <Button variant="ghost" asChild className="w-full h-9 text-xs mt-2 text-muted-foreground">
+                    <a href="/">Maybe later</a>
                   </Button>
-                </div>
-
-                {/* OG preview */}
-                <div className="mt-8 rounded-xl overflow-hidden border border-border">
-                  <img src="/og-image.jpg" alt="RaidFi" className="w-full" />
                 </div>
               </motion.div>
             )}

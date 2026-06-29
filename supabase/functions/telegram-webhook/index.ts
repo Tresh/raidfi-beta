@@ -59,35 +59,52 @@ async function reply(chatId: number, text: string, buttons: Btn[][] = [], replyT
 }
 
 function isPrivate(chatType: string) { return chatType === "private"; }
+function isGroup(chatType: string) { return chatType === "group" || chatType === "supergroup"; }
 
-const HELP = `<b>RaidFi Bot — Commands</b>
+const HELP = `<b>🤖 RaidFi Bot — Commands</b>
 
-🔗 <b>/start</b> — get started & link your account
-🔑 <b>/link</b> &lt;code|email&gt; — link via one-time code from the site, or by email
-✅ <b>/verify</b> &lt;otp&gt; — finish email linking
-👤 <b>/whoami</b> — show your linked account
-🏆 <b>/mypoints</b> — your XP & rank
-📊 <b>/leaderboard</b> — top contributors
-📝 <b>/tasks</b> — open contribute tasks
-📤 <b>/submit</b> &lt;x-url&gt; — submit a contribution
-📜 <b>/whitepaper</b> — read the whitepaper
-🔔 <b>/subscribe</b> /<b>/unsubscribe</b> — task DM alerts
-❓ <b>/help</b> — this list`;
+<b>Getting started</b>
+• /start — welcome & how to link your account
+• /link &lt;code|email&gt; — link via a code from the site, or by email <i>(DM only)</i>
+• /verify &lt;otp&gt; — finish email linking <i>(DM only)</i>
+• /help — show this list
 
-const START_DM = `👋 <b>Welcome to RaidFi.</b>
+<b>Your account</b> <i>(DM only)</i>
+• /whoami — show your linked email & status
+• /mypoints — your XP, rank & approved contributions
+• /subscribe · /unsubscribe — toggle task DM alerts
 
-To use the bot you must be on the waitlist and link your account.
+<b>Contribute</b>
+• /tasks — open contribute tasks <i>(DM or group)</i>
+• /submit &lt;x-url&gt; — submit a contribution <i>(DM only)</i>
 
-<b>Two ways to link:</b>
-1️⃣ <b>From the site (recommended)</b> — open <a href="${SITE_ORIGIN}/contributions">Contributions</a>, copy your Telegram link code, then send:
-   <code>/link CODE</code>
+<b>Community</b>
+• /leaderboard — top contributors <i>(DM or group)</i>
+• /whitepaper — link to the whitepaper <i>(DM or group)</i>
 
-2️⃣ <b>By email OTP</b> — send:
-   <code>/link you@example.com</code>
-   You'll receive a 6-digit code by email; reply with:
-   <code>/verify 123456</code>
+<i>Note: group commands only work in the official RaidFi group. Personal commands (linking, submitting, points) only work in DM with me — for your privacy.</i>`;
 
-Type /help to see all commands.`;
+const START_DM = `👋 <b>Welcome to RaidFi — the reputation layer for Web3.</b>
+
+I'm your contribution companion. Through me you can submit posts, track your XP & rank, see open tasks, and get pinged when new tasks drop — all without leaving Telegram.
+
+<b>🔗 First, link your RaidFi account</b> (you must be on the waitlist):
+
+<b>Option 1 — Code from the site</b> <i>(recommended)</i>
+Open <a href="${SITE_ORIGIN}/contributions">RaidFi Contributions</a>, copy the Telegram code, then send:
+<code>/link YOURCODE</code>
+
+<b>Option 2 — Email OTP</b>
+Send: <code>/link you@example.com</code>
+Then reply with the 6-digit code you receive: <code>/verify 123456</code>
+
+Once linked, try /tasks, /mypoints or /leaderboard.
+Type /help anytime to see every command.`;
+
+const START_GROUP = `👋 Hey! I'm the <b>RaidFi bot</b>. I post new contribute tasks here and respond to /tasks, /leaderboard and /whitepaper.
+
+For personal stuff (linking your account, submitting posts, checking your XP), DM me: @raidficontributionbot
+Type /help for the full command list.`;
 
 async function handle(update: any, supabase: any) {
   const message = update.message;
@@ -107,6 +124,34 @@ async function handle(update: any, supabase: any) {
   const cmd = m[1].toLowerCase();
   const arg = (m[2] || "").trim();
 
+  // ---- Chat-type gating ----
+  // Commands allowed in groups (only in the OFFICIAL RaidFi group):
+  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper"]);
+  // Commands that ONLY work in DM (private chat):
+  const DM_ONLY = new Set(["link", "verify", "whoami", "mypoints", "submit", "subscribe", "unsubscribe"]);
+
+  if (isGroup(chatType)) {
+    // Fetch the configured official RaidFi group id
+    const { data: settings } = await supabase
+      .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
+    const officialId = settings?.telegram_chat_id ? String(settings.telegram_chat_id) : null;
+    if (!officialId || String(chatId) !== officialId) {
+      // Silently ignore in unauthorized groups
+      return;
+    }
+    if (DM_ONLY.has(cmd)) {
+      await reply(chatId,
+        `🤫 That's a personal command — please DM me instead.`,
+        [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
+        msgId);
+      return;
+    }
+    if (!GROUP_ALLOWED.has(cmd)) {
+      // Unknown / not-allowed in group — stay quiet
+      return;
+    }
+  }
+
   // Look up existing link by Telegram user id
   const { data: link } = await supabase
     .from("telegram_links")
@@ -118,16 +163,19 @@ async function handle(update: any, supabase: any) {
     if (link) return true;
     await reply(chatId,
       `🔒 You need to link your RaidFi account first.\nSend <code>/start</code> in a DM with me to begin.`,
-      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/${(await tg("getMe", {})).data?.result?.username || "RaidFiBot"}` }]],
+      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
       msgId,
     );
     return false;
   };
 
   switch (cmd) {
-    case "start":
+    case "start": {
+      await reply(chatId, isPrivate(chatType) ? START_DM : START_GROUP, [], msgId);
+      return;
+    }
     case "help": {
-      await reply(chatId, isPrivate(chatType) ? START_DM : HELP, [], msgId);
+      await reply(chatId, HELP, [], msgId);
       return;
     }
 

@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Loader2, Send, LogOut, Copy, Check, ExternalLink,
-  Mail, KeyRound, User, Link2, ClipboardList, History
+  Mail, KeyRound, User, Link2, ClipboardList, History, HelpCircle, Trophy, Sparkles, X
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -111,6 +112,17 @@ const Contributions = () => {
   const [tgCode, setTgCode] = useState<string | null>(null);
   const [tgLoading, setTgLoading] = useState(false);
   const [tgCopied, setTgCopied] = useState(false);
+
+  // How-it-works modal — auto-open first time
+  const [howOpen, setHowOpen] = useState(false);
+  useEffect(() => {
+    if (!session?.user) return;
+    const key = "raidfi_contrib_howto_seen";
+    if (!localStorage.getItem(key)) {
+      setHowOpen(true);
+      localStorage.setItem(key, "1");
+    }
+  }, [session]);
 
   const fetchTelegramLink = useCallback(async () => {
     if (!session?.user) return;
@@ -670,9 +682,14 @@ const Contributions = () => {
                             {profile?.name && <p className="text-xs text-muted-foreground">{session.user.email}</p>}
                           </div>
                         </div>
-                        <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
-                          <LogOut className="w-3 h-3" /> Sign out
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => setHowOpen(true)} className="text-xs text-primary flex items-center gap-1 hover:underline">
+                            <HelpCircle className="w-3.5 h-3.5" /> How it works
+                          </button>
+                          <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
+                            <LogOut className="w-3 h-3" /> Sign out
+                          </button>
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="p-3 rounded-lg bg-primary/10 text-center">
@@ -960,6 +977,62 @@ const Contributions = () => {
           )}
         </div>
       </main>
+
+      {/* How it works modal */}
+      <Dialog open={howOpen} onOpenChange={setHowOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              How RaidFi Contributions Work
+            </DialogTitle>
+            <DialogDescription>
+              A quick tour — takes less than a minute.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div className="flex gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">1</div>
+              <div>
+                <p className="font-medium text-foreground">Submit your X posts</p>
+                <p className="text-xs text-muted-foreground">Post about RaidFi on X, then paste the link here. Approved posts earn XP, scored within {scoringDelay}h.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">2</div>
+              <div>
+                <p className="font-medium text-foreground">Complete tasks</p>
+                <p className="text-xs text-muted-foreground">Open tasks (engage, repost, write threads, etc.) reward bonus XP. Pinned ones are highest priority.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">3</div>
+              <div>
+                <p className="font-medium text-foreground">Refer friends</p>
+                <p className="text-xs text-muted-foreground">Share your referral link — you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">4</div>
+              <div>
+                <p className="font-medium text-foreground">Connect Telegram (optional)</p>
+                <p className="text-xs text-muted-foreground">
+                  Copy your code from the <b>Connect Telegram</b> card and DM <a href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer" className="text-primary underline">@raidficontributionbot</a> with <code>/link CODE</code>.
+                  You'll get task alerts and can submit posts with <code>/submit &lt;url&gt;</code>, check XP with <code>/mypoints</code>, and more.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">5</div>
+              <div>
+                <p className="font-medium text-foreground">Climb the leaderboard</p>
+                <p className="text-xs text-muted-foreground">Top contributors unlock perks and visibility once early access opens.</p>
+              </div>
+            </div>
+          </div>
+          <Button onClick={() => setHowOpen(false)} className="w-full mt-2">Got it</Button>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
