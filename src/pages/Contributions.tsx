@@ -682,9 +682,14 @@ const Contributions = () => {
                             {profile?.name && <p className="text-xs text-muted-foreground">{session.user.email}</p>}
                           </div>
                         </div>
-                        <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
-                          <LogOut className="w-3 h-3" /> Sign out
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => setHowOpen(true)} className="text-xs text-primary flex items-center gap-1 hover:underline">
+                            <HelpCircle className="w-3.5 h-3.5" /> How it works
+                          </button>
+                          <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
+                            <LogOut className="w-3 h-3" /> Sign out
+                          </button>
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="p-3 rounded-lg bg-primary/10 text-center">
