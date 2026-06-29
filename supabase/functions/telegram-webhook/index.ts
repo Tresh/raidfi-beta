@@ -124,6 +124,34 @@ async function handle(update: any, supabase: any) {
   const cmd = m[1].toLowerCase();
   const arg = (m[2] || "").trim();
 
+  // ---- Chat-type gating ----
+  // Commands allowed in groups (only in the OFFICIAL RaidFi group):
+  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper"]);
+  // Commands that ONLY work in DM (private chat):
+  const DM_ONLY = new Set(["link", "verify", "whoami", "mypoints", "submit", "subscribe", "unsubscribe"]);
+
+  if (isGroup(chatType)) {
+    // Fetch the configured official RaidFi group id
+    const { data: settings } = await supabase
+      .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
+    const officialId = settings?.telegram_chat_id ? String(settings.telegram_chat_id) : null;
+    if (!officialId || String(chatId) !== officialId) {
+      // Silently ignore in unauthorized groups
+      return;
+    }
+    if (DM_ONLY.has(cmd)) {
+      await reply(chatId,
+        `🤫 That's a personal command — please DM me instead.`,
+        [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
+        msgId);
+      return;
+    }
+    if (!GROUP_ALLOWED.has(cmd)) {
+      // Unknown / not-allowed in group — stay quiet
+      return;
+    }
+  }
+
   // Look up existing link by Telegram user id
   const { data: link } = await supabase
     .from("telegram_links")
@@ -135,16 +163,19 @@ async function handle(update: any, supabase: any) {
     if (link) return true;
     await reply(chatId,
       `🔒 You need to link your RaidFi account first.\nSend <code>/start</code> in a DM with me to begin.`,
-      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/${(await tg("getMe", {})).data?.result?.username || "RaidFiBot"}` }]],
+      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
       msgId,
     );
     return false;
   };
 
   switch (cmd) {
-    case "start":
+    case "start": {
+      await reply(chatId, isPrivate(chatType) ? START_DM : START_GROUP, [], msgId);
+      return;
+    }
     case "help": {
-      await reply(chatId, isPrivate(chatType) ? START_DM : HELP, [], msgId);
+      await reply(chatId, HELP, [], msgId);
       return;
     }
 
