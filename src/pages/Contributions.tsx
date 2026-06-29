@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Loader2, Send, LogOut, Copy, Check, ExternalLink,
-  Mail, KeyRound, User, Link2, ClipboardList, History
+  Mail, KeyRound, User, Link2, ClipboardList, History, HelpCircle, Trophy, Sparkles, X
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
