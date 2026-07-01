@@ -173,32 +173,21 @@ serve(async (req) => {
         : "<i>Content unavailable — open the post to view.</i>";
 
       const status = contrib.status === "approved"
-        ? `✅ Approved${contrib.manual_score ?? contrib.ai_score ? ` (+${contrib.manual_score ?? contrib.ai_score} XP)` : ""}`
-        : `⏳ Awaiting Score`;
+        ? `Approved${contrib.manual_score ?? contrib.ai_score ? ` · +${contrib.manual_score ?? contrib.ai_score} XP` : ""}`
+        : `Awaiting review`;
 
       const lines = [
-        "📝 <b>New Contribution</b>",
+        `<b>New contribution from ${handleOrName}</b>`,
+        `<i>${escapeHtml(typeLabel)} · ${status}</i>`,
         "",
-        "👤 <b>Contributor</b>",
-        handleOrName,
-        "",
-        "🏷️ <b>Type</b>",
-        escapeHtml(typeLabel),
-        "",
-        "📄 <b>Content</b>",
         snippet,
-        "",
-        "⏳ <b>Status</b>",
-        status,
-        "",
-        "💬 <i>Join the conversation and support fellow contributors.</i>",
       ];
 
       const buttons: TgButton[] = [
-        { text: "🔗 View Post", url: contrib.post_url },
+        { text: "View post", url: contrib.post_url },
       ];
       if (profile?.referral_code) {
-        buttons.push({ text: "👤 View Contributor", url: `${baseOrigin}/u/${profile.referral_code}` });
+        buttons.push({ text: "View contributor", url: `${baseOrigin}/u/${profile.referral_code}` });
       }
 
       const result = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
