@@ -682,15 +682,11 @@ const Contributions = () => {
                             {profile?.name && <p className="text-xs text-muted-foreground">{session.user.email}</p>}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => setHowOpen(true)} className="text-xs text-primary flex items-center gap-1 hover:underline">
-                            <HelpCircle className="w-3.5 h-3.5" /> How it works
-                          </button>
-                          <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
-                            <LogOut className="w-3 h-3" /> Sign out
-                          </button>
-                        </div>
+                        <button onClick={handleSignOut} className="text-xs text-muted-foreground flex items-center gap-1">
+                          <LogOut className="w-3 h-3" /> Sign out
+                        </button>
                       </div>
+
                       <div className="grid grid-cols-3 gap-3">
                         <div className="p-3 rounded-lg bg-primary/10 text-center">
                           <p className="text-lg font-bold text-foreground">{userTotalPoints}</p>
@@ -978,9 +974,21 @@ const Contributions = () => {
         </div>
       </main>
 
+      {/* Floating help button — only when signed in */}
+      {session && (
+        <button
+          onClick={() => setHowOpen(true)}
+          aria-label="How to contribute"
+          className="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        >
+          <HelpCircle className="w-5 h-5" />
+        </button>
+      )}
+
       {/* How it works modal */}
       <Dialog open={howOpen} onOpenChange={setHowOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md w-[calc(100%-2rem)] rounded-2xl sm:rounded-2xl">
+
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />

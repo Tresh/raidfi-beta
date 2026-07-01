@@ -61,50 +61,47 @@ async function reply(chatId: number, text: string, buttons: Btn[][] = [], replyT
 function isPrivate(chatType: string) { return chatType === "private"; }
 function isGroup(chatType: string) { return chatType === "group" || chatType === "supergroup"; }
 
-const HELP = `<b>🤖 RaidFi Bot — Commands</b>
+const HELP = `<b>RaidFi bot — quick reference</b>
 
-<b>Getting started</b>
-• /start — welcome & how to link your account
-• /link &lt;code|email&gt; — link via a code from the site, or by email <i>(DM only)</i>
-• /verify &lt;otp&gt; — finish email linking <i>(DM only)</i>
-• /help — show this list
+<b>Get started</b>
+/start · welcome + linking help
+/link &lt;code|email&gt; · link your account (DM)
+/verify &lt;otp&gt; · finish email linking (DM)
+/help · this list
 
-<b>Your account</b> <i>(DM only)</i>
-• /whoami — show your linked email & status
-• /mypoints — your XP, rank & approved contributions
-• /subscribe · /unsubscribe — toggle task DM alerts
+<b>Your account (DM only)</b>
+/whoami · your linked email
+/mypoints · your XP, rank & approved posts
+/subscribe · /unsubscribe · toggle task DMs
 
 <b>Contribute</b>
-• /tasks — open contribute tasks <i>(DM or group)</i>
-• /submit &lt;x-url&gt; — submit a contribution <i>(DM only)</i>
+/tasks · open tasks (here or in the group)
+/submit &lt;x-url&gt; · submit an X post (DM)
 
 <b>Community</b>
-• /leaderboard — top contributors <i>(DM or group)</i>
-• /whitepaper — link to the whitepaper <i>(DM or group)</i>
+/leaderboard · top contributors
+/whitepaper · read the whitepaper
 
-<i>Note: group commands only work in the official RaidFi group. Personal commands (linking, submitting, points) only work in DM with me — for your privacy.</i>`;
+<i>Group commands only work in the official RaidFi group. Personal stuff stays in DM so your email isn't shared publicly.</i>`;
 
-const START_DM = `👋 <b>Welcome to RaidFi — the reputation layer for Web3.</b>
+const START_DM = `Hey — welcome to RaidFi 👋
 
-I'm your contribution companion. Through me you can submit posts, track your XP & rank, see open tasks, and get pinged when new tasks drop — all without leaving Telegram.
+I'm the bot that keeps you in the loop: submit posts, check your XP, see open tasks, and get pinged when new ones drop. No dashboard needed.
 
-<b>🔗 First, link your RaidFi account</b> (you must be on the waitlist):
+To use me, first link your RaidFi account (you need to be on the waitlist).
 
-<b>Option 1 — Code from the site</b> <i>(recommended)</i>
-Open <a href="${SITE_ORIGIN}/contributions">RaidFi Contributions</a>, copy the Telegram code, then send:
+<b>Fastest — code from the site</b>
+Grab your Telegram code at <a href="${SITE_ORIGIN}/contributions">raidfi.site/contributions</a>, then send:
 <code>/link YOURCODE</code>
 
-<b>Option 2 — Email OTP</b>
-Send: <code>/link you@example.com</code>
-Then reply with the 6-digit code you receive: <code>/verify 123456</code>
+<b>Or use your email</b>
+Send <code>/link you@example.com</code>, then reply with the code we email you: <code>/verify 123456</code>
 
-Once linked, try /tasks, /mypoints or /leaderboard.
-Type /help anytime to see every command.`;
+Once linked, try /tasks or /mypoints. Type /help to see everything.`;
 
-const START_GROUP = `👋 Hey! I'm the <b>RaidFi bot</b>. I post new contribute tasks here and respond to /tasks, /leaderboard and /whitepaper.
-
-For personal stuff (linking your account, submitting posts, checking your XP), DM me: @raidficontributionbot
-Type /help for the full command list.`;
+const START_GROUP = `Hey, I'm the RaidFi bot 👋
+I post new contribute tasks here and answer /tasks, /leaderboard and /whitepaper.
+For anything personal, DM me → @raidficontributionbot`;
 
 async function handle(update: any, supabase: any) {
   const message = update.message;
@@ -360,12 +357,31 @@ async function handle(update: any, supabase: any) {
       if (!(await requireLink())) return;
       const url = arg;
       if (!TWEET_URL_REGEX.test(url)) {
-        await reply(chatId, `❌ Please send a valid X post URL.\nExample: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
+        await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
       }
-      // Find user_id from profile
-      const { data: profile } = await supabase
-        .from("profiles").select("user_id").eq("email", link.email).maybeSingle();
+
+      // Ensure a profile row exists so contributions link to a real user —
+      // that's what makes "View Contributor" appear on the live feed.
+      let { data: profile } = await supabase
+        .from("profiles").select("user_id,referral_code").eq("email", link.email).maybeSingle();
+
+      if (!profile?.user_id) {
+        const { data: usersList } = await supabase.auth.admin.listUsers();
+        const authUser = usersList?.users?.find(
+          (u: any) => (u.email || "").toLowerCase() === link.email.toLowerCase()
+        );
+        if (authUser) {
+          const { data: wl } = await supabase.from("waitlist_submissions")
+            .select("referral_code").eq("email", link.email).maybeSingle();
+          const payload: any = { user_id: authUser.id, email: link.email, waitlist_completed: true };
+          if ((wl as any)?.referral_code) payload.referral_code = (wl as any).referral_code;
+          const { data: created } = await supabase.from("profiles")
+            .upsert(payload, { onConflict: "user_id" }).select().single();
+          profile = created as any;
+        }
+      }
+
       const id = crypto.randomUUID();
       const { error } = await supabase.from("contributions").insert({
         id,
@@ -375,12 +391,15 @@ async function handle(update: any, supabase: any) {
         content_type: "post",
         points_earned: 10,
         status: "pending",
+        published_to_feed: true,
       });
       if (error) {
-        await reply(chatId, `❌ Could not submit: ${escapeHtml(error.message)}`, [], msgId);
+        await reply(chatId, `Couldn't submit: ${escapeHtml(error.message)}`, [], msgId);
         return;
       }
-      // Best-effort kick off downstream
+
+      // Fire the same pipeline the website runs — fetch text/image,
+      // notify admins, AND post to the group feed.
       const fnUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
       const fnHeaders = {
         "Content-Type": "application/json",
@@ -388,7 +407,12 @@ async function handle(update: any, supabase: any) {
       };
       fetch(`${fnUrl}/fetch-post-text`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ contribution_id: id, post_url: url }) }).catch(() => {});
       fetch(`${fnUrl}/notify-admin-contribution`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ post_url: url, user_email: link.email, contribution_id: id }) }).catch(() => {});
-      await reply(chatId, `⏳ <b>Submitted.</b>\nYou'll be scored once an admin reviews it.`, [[{ text: "🔗 View Post", url }]], msgId);
+      // Small delay so post_text is likely saved before the group card renders
+      setTimeout(() => {
+        fetch(`${fnUrl}/notify-telegram`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ kind: "feed", contribution_id: id, origin: SITE_ORIGIN }) }).catch(() => {});
+      }, 1500);
+
+      await reply(chatId, `Got it — your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
       return;
     }
 
