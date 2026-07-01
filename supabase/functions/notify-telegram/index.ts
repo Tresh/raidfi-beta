@@ -224,43 +224,23 @@ serve(async (req) => {
 
       const isPinned = !!task.is_pinned;
 
-      const header = isPinned
-        ? ["📌 <b>Priority Task</b>", "", "🎯 <b>Featured Opportunity</b>"]
-        : ["🎯 <b>New Task Available</b>"];
-
       const lines: string[] = [
-        ...header,
-        "",
-        "📝 <b>Task</b>",
-        escapeHtml(task.label || "Untitled"),
+        isPinned
+          ? `<b>📌 Pinned task · ${escapeHtml(task.label || "Untitled")}</b>`
+          : `<b>New task · ${escapeHtml(task.label || "Untitled")}</b>`,
+        `<i>+${task.points} XP</i>`,
       ];
 
       if (task.description) {
-        lines.push("", "📋 <b>Details</b>", escapeHtml(task.description));
+        lines.push("", escapeHtml(task.description));
       }
 
       if (actionLabels.length) {
-        lines.push("", "⚡ <b>Actions Required</b>", ...actionLabels.map((a) => `• ${escapeHtml(a)}`));
+        lines.push("", `<b>What to do</b>`, ...actionLabels.map((a) => `• ${escapeHtml(a)}`));
       }
-
-      lines.push("", "🏆 <b>Reward</b>", `+${task.points} XP`);
-
-      if (!isPinned) {
-        // Optional deadline-ish note (today + 2 days as a soft hint) — only when not pinned
-        const d = new Date();
-        d.setDate(d.getDate() + 2);
-        lines.push("", "⏰ <b>Posted</b>", formatDate(new Date(task.created_at || Date.now())));
-      }
-
-      lines.push(
-        "",
-        isPinned
-          ? "🔥 <i>This task is currently prioritized and may have a higher impact on your contributor profile.</i>"
-          : "🚀 <i>Complete this task and grow your contributor reputation on RaidFi.</i>",
-      );
 
       const buttons: TgButton[] = [
-        { text: "🔗 Do Task", url: `${baseOrigin}/contributions` },
+        { text: "Do task", url: `${baseOrigin}/contributions` },
       ];
 
       const groupResult = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
