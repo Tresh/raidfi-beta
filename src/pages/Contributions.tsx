@@ -687,7 +687,6 @@ const Contributions = () => {
                         </button>
                       </div>
 
-                      </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="p-3 rounded-lg bg-primary/10 text-center">
                           <p className="text-lg font-bold text-foreground">{userTotalPoints}</p>
