@@ -61,12 +61,20 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
       });
       if (error) throw error;
 
+      // Fetch current points and add 200 (don't overwrite)
+      const { data: current } = await supabase
+        .from("waitlist_submissions")
+        .select("points")
+        .eq("id", userId)
+        .maybeSingle();
+      const currentPoints = (current as any)?.points ?? 0;
+      const newTotal = currentPoints + 200;
       await supabase
         .from("waitlist_submissions")
-        .update({ points: 250 })
+        .update({ points: newTotal })
         .eq("id", userId);
 
-      toast({ title: "You earned 200 bonus points!", description: "Total: 250 RaidFi Points" });
+      toast({ title: "You earned 200 bonus points!", description: `Total: ${newTotal} RaidFi Points` });
       onComplete();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
