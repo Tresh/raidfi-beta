@@ -168,11 +168,19 @@ const Contributions = () => {
     const fetchProfile = async () => {
       const userEmail = session.user.email!.trim().toLowerCase();
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle();
+
+      console.log("[Contributions] profile fetch", {
+        userId: session.user.id,
+        email: userEmail,
+        hasRow: !!data,
+        referral_code: (data as any)?.referral_code,
+        error: error?.message,
+      });
 
       if (data && (data as any).referral_code) {
         setProfile(data as any);
