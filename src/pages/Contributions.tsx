@@ -215,6 +215,23 @@ const Contributions = () => {
         return;
       }
 
+      // Profile exists but still has no referral_code — generate one client-side
+      if (data && !(data as any).referral_code) {
+        const genCode = () => Math.random().toString(36).slice(2, 10).toUpperCase();
+        let code = genCode();
+        // Retry once on collision
+        for (let i = 0; i < 3; i++) {
+          const { data: updated, error } = await supabase
+            .from("profiles")
+            .update({ referral_code: code } as any)
+            .eq("user_id", session.user.id)
+            .select()
+            .single();
+          if (!error && updated) { setProfile(updated as any); return; }
+          code = genCode();
+        }
+      }
+
       setProfile(data as any);
     };
     fetchProfile();
