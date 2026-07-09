@@ -214,12 +214,27 @@ const Contributions = () => {
           waitlist_completed: true,
         };
         if (existingCode) insertPayload.referral_code = existingCode;
-        const { data: newProfile } = await supabase
+        const { data: newProfile, error: insErr } = await supabase
           .from("profiles")
           .insert(insertPayload)
           .select()
           .single();
-        if (newProfile) setProfile(newProfile as any);
+        if (newProfile) { setProfile(newProfile as any); return; }
+
+        // Insert failed (likely email already exists on a different user_id).
+        // Fall back to fetching by email and syncing user_id.
+        console.warn("[Contributions] insert failed, falling back to email lookup", insErr?.message);
+        const { data: byEmail } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("email", userEmail)
+          .maybeSingle();
+        if (byEmail) {
+          // Try to update user_id so subsequent lookups work
+          await supabase.from("profiles").update({ user_id: session.user.id } as any).eq("email", userEmail);
+          setProfile({ ...(byEmail as any), user_id: session.user.id });
+          return;
+        }
         return;
       }
 
@@ -227,7 +242,6 @@ const Contributions = () => {
       if (data && !(data as any).referral_code) {
         const genCode = () => Math.random().toString(36).slice(2, 10).toUpperCase();
         let code = genCode();
-        // Retry once on collision
         for (let i = 0; i < 3; i++) {
           const { data: updated, error } = await supabase
             .from("profiles")
