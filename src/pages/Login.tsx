@@ -25,7 +25,7 @@ const Login = () => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/contributions");
+      if (session) navigate("/dashboard");
     });
   }, [navigate]);
 
@@ -94,7 +94,7 @@ const Login = () => {
         }
       }
 
-      navigate("/contributions");
+      navigate("/dashboard");
     }
     setLoading(false);
   };

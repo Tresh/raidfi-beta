@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Waitlist from "./pages/Waitlist";
 import WaitlistConfirmed from "./pages/WaitlistConfirmed";
@@ -11,6 +11,11 @@ import Login from "./pages/Login";
 import Contributions from "./pages/Contributions";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
+import Overview from "./pages/dashboard/Overview";
+import DashContributions from "./pages/dashboard/DashContributions";
+import ReputationPage from "./pages/dashboard/Reputation";
+import AnalyticsDash from "./pages/dashboard/Analytics";
+import DashSettings from "./pages/dashboard/Settings";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import WaitlistManager from "./pages/admin/WaitlistManager";
@@ -46,9 +51,12 @@ const App = () => (
           <Route path="/contributions" element={<Contributions />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/u/:code" element={<Profile />} />
-          {/* Legacy redirects */}
-          <Route path="/dashboard" element={<Navigate to="/contributions" replace />} />
-          <Route path="/dashboard/*" element={<Navigate to="/contributions" replace />} />
+          {/* Contributor dashboard (MVP) */}
+          <Route path="/dashboard" element={<Overview />} />
+          <Route path="/dashboard/contributions" element={<DashContributions />} />
+          <Route path="/dashboard/reputation" element={<ReputationPage />} />
+          <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
+          <Route path="/dashboard/settings" element={<DashSettings />} />
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
