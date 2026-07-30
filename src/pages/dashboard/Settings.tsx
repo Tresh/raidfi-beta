@@ -8,7 +8,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel } from "@/components/dashboard/Primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Copy, Loader2, LogOut, Send } from "lucide-react";
+import { Check, Copy, Loader2, LogOut, Send, Unlink, BadgeCheck } from "lucide-react";
 
 const Settings = () => {
   useSEO({
@@ -25,11 +25,18 @@ const Settings = () => {
   const [tgCode, setTgCode] = useState<string | null>(null);
   const [tgLink, setTgLink] = useState<any>(null);
   const [tgLoading, setTgLoading] = useState(false);
+  const [unlinking, setUnlinking] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const [xHandle, setXHandle] = useState("");
+  const [xPostUrl, setXPostUrl] = useState("");
+  const [xVerifying, setXVerifying] = useState(false);
 
   useEffect(() => {
     if (data.profile?.name) setName(data.profile.name);
-  }, [data.profile?.name]);
+    const existingHandle = (data.profile as any)?.x_username;
+    if (existingHandle) setXHandle(existingHandle);
+  }, [data.profile?.name, (data.profile as any)?.x_username]);
 
   const loadTelegram = async () => {
     setTgLoading(true);
@@ -49,6 +56,20 @@ const Settings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  const unlinkTelegram = async () => {
+    setUnlinking(true);
+    const { data: res, error } = await supabase.functions.invoke("telegram-unlink", { body: {} });
+    setUnlinking(false);
+    if (error || (res as any)?.error) {
+      toast({ title: "Could not unlink", description: (res as any)?.error ?? error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Telegram unlinked", description: "You can connect a different account any time." });
+    setTgLink(null);
+    loadTelegram();
+    data.refresh();
+  };
+
   const saveName = async () => {
     if (!data.profile) return;
     setSavingName(true);
@@ -65,6 +86,36 @@ const Settings = () => {
     data.refresh();
   };
 
+  const verifyX = async () => {
+    const handle = xHandle.trim().replace(/^@/, "");
+    if (!handle || !xPostUrl.trim()) {
+      toast({ title: "Missing details", description: "Add your X username and the link to your post.", variant: "destructive" });
+      return;
+    }
+    setXVerifying(true);
+
+    const { data: taken } = await supabase.rpc("x_handle_taken", { _handle: handle });
+    if (taken) {
+      setXVerifying(false);
+      toast({ title: "Already claimed", description: `@${handle} is already linked to another contributor.`, variant: "destructive" });
+      return;
+    }
+
+    const { data: res, error } = await supabase.functions.invoke("verify-x-handle", {
+      body: { handle, post_url: xPostUrl.trim() },
+    });
+    setXVerifying(false);
+
+    const err = (res as any)?.error ?? error?.message;
+    if (err) {
+      toast({ title: "Verification failed", description: err, variant: "destructive" });
+      return;
+    }
+    toast({ title: "X account verified", description: `@${handle} is now linked to your profile.` });
+    setXPostUrl("");
+    data.refresh();
+  };
+
   const copy = (value: string, key: string) => {
     navigator.clipboard.writeText(value);
     setCopied(key);
@@ -74,6 +125,11 @@ const Settings = () => {
   const referralUrl = data.profile?.referral_code
     ? `${window.location.origin}/waitlist?ref=${data.profile.referral_code}`
     : null;
+
+  const xVerified = Boolean((data.profile as any)?.x_verified);
+  const verifiedHandle = (data.profile as any)?.x_username as string | undefined;
+  const challenge = data.profile?.referral_code ?? "";
+  const verificationPost = `Verifying my X account for @raidfi_app — building the credibility layer for Web3. ${challenge}`;
 
   return (
     <DashboardLayout>
@@ -110,21 +166,32 @@ const Settings = () => {
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
           ) : tgLink ? (
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs text-foreground">
-                  Connected as{" "}
-                  <span className="font-medium">
-                    @{tgLink.telegram_username ?? tgLink.first_name ?? "telegram user"}
-                  </span>
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Cross-platform footprint is contributing to your reputation.
-                </p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs text-foreground">
+                    Connected as{" "}
+                    <span className="font-medium">
+                      @{tgLink.telegram_username ?? tgLink.first_name ?? "telegram user"}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Cross-platform footprint is contributing to your reputation.
+                  </p>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                  Linked
+                </span>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                Linked
-              </span>
+              <Button
+                variant="outline"
+                className="h-9 text-xs text-destructive"
+                onClick={unlinkTelegram}
+                disabled={unlinking}
+              >
+                {unlinking ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Unlink className="w-3.5 h-3.5 mr-2" />}
+                Unlink Telegram
+              </Button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -156,6 +223,80 @@ const Settings = () => {
           )}
         </Panel>
 
+        <Panel title="X (Twitter)" description="Verify the account your contributions are posted from.">
+          {xVerified ? (
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs text-foreground flex items-center gap-1.5">
+                  <BadgeCheck className="w-3.5 h-3.5 text-primary" />
+                  Verified as <span className="font-medium">@{verifiedHandle}</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Contributions from this handle are attributed to you automatically.
+                </p>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                Verified
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                  X username
+                </label>
+                <Input
+                  value={xHandle}
+                  onChange={(e) => setXHandle(e.target.value)}
+                  placeholder="@yourhandle"
+                  className="h-10 text-sm mt-1.5"
+                />
+              </div>
+              <div className="rounded-md bg-muted p-3 space-y-2">
+                <p className="text-[11px] text-muted-foreground">
+                  Post this on X, then paste the post link below.
+                </p>
+                <p className="text-xs text-foreground break-words">{verificationPost}</p>
+                <Button
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() => copy(verificationPost, "xpost")}
+                  disabled={!challenge}
+                >
+                  {copied === "xpost" ? <Check className="w-3.5 h-3.5 mr-1.5" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+                  Copy post
+                </Button>
+              </div>
+              <div>
+                <label className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                  Post link
+                </label>
+                <Input
+                  value={xPostUrl}
+                  onChange={(e) => setXPostUrl(e.target.value)}
+                  placeholder="https://x.com/you/status/..."
+                  className="h-10 text-sm mt-1.5"
+                />
+              </div>
+              <Button onClick={verifyX} disabled={xVerifying} className="h-9 text-sm">
+                {xVerifying && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Verify account
+              </Button>
+            </div>
+          )}
+        </Panel>
+
+        <Panel title="Discord" description="Bring your Discord activity into your reputation score.">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              Discord linking is on the way — you'll be able to connect your server activity here.
+            </p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap">
+              Coming soon
+            </span>
+          </div>
+        </Panel>
+
         <Panel title="Referral link" description="Invite contributors and earn +50 XP for each one who joins.">
           {referralUrl ? (
             <div className="space-y-2">
@@ -169,7 +310,8 @@ const Settings = () => {
               </div>
               <p className="text-[11px] text-muted-foreground">
                 {data.profile?.referral_count ?? 0} referral
-                {(data.profile?.referral_count ?? 0) === 1 ? "" : "s"} so far.
+                {(data.profile?.referral_count ?? 0) === 1 ? "" : "s"} so far — you earn +50 XP for each
+                one who joins.
               </p>
             </div>
           ) : (
