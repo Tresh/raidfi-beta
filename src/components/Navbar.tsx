@@ -65,9 +65,13 @@ const Navbar = () => {
                     {link.label}
                   </a>
                 ))}
+                <a href="/login" onClick={handleLinkClick} className="text-foreground text-base font-medium">
+                  Sign in
+                </a>
                 <Button className="mt-4" asChild>
                   <a href="/waitlist" onClick={handleLinkClick}>Request Access</a>
                 </Button>
+
               </div>
             </SheetContent>
           </Sheet>
