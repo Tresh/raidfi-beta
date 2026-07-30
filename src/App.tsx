@@ -59,6 +59,8 @@ const App = () => (
           <Route path="/dashboard/reputation" element={<ReputationPage />} />
           <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
           <Route path="/dashboard/settings" element={<DashSettings />} />
+          <Route path="/dashboard/feedback" element={<DashFeedback />} />
+
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
