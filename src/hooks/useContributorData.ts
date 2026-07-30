@@ -98,32 +98,45 @@ export function useContributorData(email: string | null | undefined): Contributo
       supabase.from("telegram_links").select("telegram_user_id").ilike("email", lower).maybeSingle(),
     ]);
 
-    setProfile((profileRes.data as any) ?? null);
-    setContributions(((contribRes.data as any) ?? []) as ContributionRow[]);
-    setActivities(((activityRes.data as any) ?? []) as ActivityRow[]);
-    setTelegramLinked(Boolean(tgRes.data));
+    const nextProfile = ((profileRes.data as any) ?? null) as ContributorProfile | null;
+    const nextContributions = (((contribRes.data as any) ?? []) as ContributionRow[]);
+    const nextActivities = (((activityRes.data as any) ?? []) as ActivityRow[]);
+    const nextTelegram = Boolean(tgRes.data);
+
+    setProfile(nextProfile);
+    setContributions(nextContributions);
+    setActivities(nextActivities);
+    setTelegramLinked(nextTelegram);
 
     const board = (boardRes.data as any[]) ?? [];
     setCohortSize(board.length);
     const mine = board.find(
       (r) => (r.email ?? "").toLowerCase() === lower || (r.display_name ?? "").toLowerCase() === lower
     );
-    if (mine) {
-      setRank(mine.overall_rank ?? null);
-      setTotalXp(mine.total_xp ?? 0);
-    } else {
-      setRank(null);
-      setTotalXp(((profileRes.data as any)?.total_points as number) ?? 0);
-    }
+    const nextRank = mine ? (mine.overall_rank ?? null) : null;
+    const nextXp = mine ? (mine.total_xp ?? 0) : ((nextProfile?.total_points as number) ?? 0);
+    setRank(nextRank);
+    setTotalXp(nextXp);
+
+    cache.set(lower, {
+      profile: nextProfile,
+      contributions: nextContributions,
+      activities: nextActivities,
+      totalXp: nextXp,
+      rank: nextRank,
+      cohortSize: board.length,
+      telegramLinked: nextTelegram,
+    });
 
     setLoading(false);
   }, [email]);
 
   useEffect(() => {
     if (!email) return;
-    setLoading(true);
+    if (!cache.has(email.toLowerCase())) setLoading(true);
     load();
   }, [email, load]);
+
 
   const reputation = computeReputation({
     contributions,
