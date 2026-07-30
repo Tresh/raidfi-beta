@@ -49,15 +49,30 @@ export interface ContributorData {
   refresh: () => Promise<void>;
 }
 
+interface CacheEntry {
+  profile: ContributorProfile | null;
+  contributions: ContributionRow[];
+  activities: ActivityRow[];
+  totalXp: number;
+  rank: number | null;
+  cohortSize: number;
+  telegramLinked: boolean;
+}
+
+// Keeps data across dashboard page changes so navigation doesn't feel like a reload.
+const cache = new Map<string, CacheEntry>();
+
 export function useContributorData(email: string | null | undefined): ContributorData {
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<ContributorProfile | null>(null);
-  const [contributions, setContributions] = useState<ContributionRow[]>([]);
-  const [activities, setActivities] = useState<ActivityRow[]>([]);
-  const [totalXp, setTotalXp] = useState(0);
-  const [rank, setRank] = useState<number | null>(null);
-  const [cohortSize, setCohortSize] = useState(0);
-  const [telegramLinked, setTelegramLinked] = useState(false);
+  const cached = email ? cache.get(email.toLowerCase()) : undefined;
+  const [loading, setLoading] = useState(!cached);
+  const [profile, setProfile] = useState<ContributorProfile | null>(cached?.profile ?? null);
+  const [contributions, setContributions] = useState<ContributionRow[]>(cached?.contributions ?? []);
+  const [activities, setActivities] = useState<ActivityRow[]>(cached?.activities ?? []);
+  const [totalXp, setTotalXp] = useState(cached?.totalXp ?? 0);
+  const [rank, setRank] = useState<number | null>(cached?.rank ?? null);
+  const [cohortSize, setCohortSize] = useState(cached?.cohortSize ?? 0);
+  const [telegramLinked, setTelegramLinked] = useState(cached?.telegramLinked ?? false);
+
 
   const load = useCallback(async () => {
     if (!email) return;
