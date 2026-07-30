@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Loader2,
+  MessageSquareWarning,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "/logo.png";
@@ -20,8 +21,10 @@ const navItems = [
   { label: "Contributions", to: "/dashboard/contributions", icon: Signal },
   { label: "Reputation", to: "/dashboard/reputation", icon: ShieldCheck },
   { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
+  { label: "Feedback", to: "/dashboard/feedback", icon: MessageSquareWarning },
   { label: "Settings", to: "/dashboard/settings", icon: Settings },
 ];
+
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { loading, session, signOut } = useAuth();
