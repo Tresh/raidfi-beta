@@ -16,6 +16,8 @@ import DashContributions from "./pages/dashboard/DashContributions";
 import ReputationPage from "./pages/dashboard/Reputation";
 import AnalyticsDash from "./pages/dashboard/Analytics";
 import DashSettings from "./pages/dashboard/Settings";
+import DashFeedback from "./pages/dashboard/Feedback";
+
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import WaitlistManager from "./pages/admin/WaitlistManager";
