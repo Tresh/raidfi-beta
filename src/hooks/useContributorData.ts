@@ -49,15 +49,30 @@ export interface ContributorData {
   refresh: () => Promise<void>;
 }
 
+interface CacheEntry {
+  profile: ContributorProfile | null;
+  contributions: ContributionRow[];
+  activities: ActivityRow[];
+  totalXp: number;
+  rank: number | null;
+  cohortSize: number;
+  telegramLinked: boolean;
+}
+
+// Keeps data across dashboard page changes so navigation doesn't feel like a reload.
+const cache = new Map<string, CacheEntry>();
+
 export function useContributorData(email: string | null | undefined): ContributorData {
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<ContributorProfile | null>(null);
-  const [contributions, setContributions] = useState<ContributionRow[]>([]);
-  const [activities, setActivities] = useState<ActivityRow[]>([]);
-  const [totalXp, setTotalXp] = useState(0);
-  const [rank, setRank] = useState<number | null>(null);
-  const [cohortSize, setCohortSize] = useState(0);
-  const [telegramLinked, setTelegramLinked] = useState(false);
+  const cached = email ? cache.get(email.toLowerCase()) : undefined;
+  const [loading, setLoading] = useState(!cached);
+  const [profile, setProfile] = useState<ContributorProfile | null>(cached?.profile ?? null);
+  const [contributions, setContributions] = useState<ContributionRow[]>(cached?.contributions ?? []);
+  const [activities, setActivities] = useState<ActivityRow[]>(cached?.activities ?? []);
+  const [totalXp, setTotalXp] = useState(cached?.totalXp ?? 0);
+  const [rank, setRank] = useState<number | null>(cached?.rank ?? null);
+  const [cohortSize, setCohortSize] = useState(cached?.cohortSize ?? 0);
+  const [telegramLinked, setTelegramLinked] = useState(cached?.telegramLinked ?? false);
+
 
   const load = useCallback(async () => {
     if (!email) return;
@@ -83,32 +98,45 @@ export function useContributorData(email: string | null | undefined): Contributo
       supabase.from("telegram_links").select("telegram_user_id").ilike("email", lower).maybeSingle(),
     ]);
 
-    setProfile((profileRes.data as any) ?? null);
-    setContributions(((contribRes.data as any) ?? []) as ContributionRow[]);
-    setActivities(((activityRes.data as any) ?? []) as ActivityRow[]);
-    setTelegramLinked(Boolean(tgRes.data));
+    const nextProfile = ((profileRes.data as any) ?? null) as ContributorProfile | null;
+    const nextContributions = (((contribRes.data as any) ?? []) as ContributionRow[]);
+    const nextActivities = (((activityRes.data as any) ?? []) as ActivityRow[]);
+    const nextTelegram = Boolean(tgRes.data);
+
+    setProfile(nextProfile);
+    setContributions(nextContributions);
+    setActivities(nextActivities);
+    setTelegramLinked(nextTelegram);
 
     const board = (boardRes.data as any[]) ?? [];
     setCohortSize(board.length);
     const mine = board.find(
       (r) => (r.email ?? "").toLowerCase() === lower || (r.display_name ?? "").toLowerCase() === lower
     );
-    if (mine) {
-      setRank(mine.overall_rank ?? null);
-      setTotalXp(mine.total_xp ?? 0);
-    } else {
-      setRank(null);
-      setTotalXp(((profileRes.data as any)?.total_points as number) ?? 0);
-    }
+    const nextRank = mine ? (mine.overall_rank ?? null) : null;
+    const nextXp = mine ? (mine.total_xp ?? 0) : ((nextProfile?.total_points as number) ?? 0);
+    setRank(nextRank);
+    setTotalXp(nextXp);
+
+    cache.set(lower, {
+      profile: nextProfile,
+      contributions: nextContributions,
+      activities: nextActivities,
+      totalXp: nextXp,
+      rank: nextRank,
+      cohortSize: board.length,
+      telegramLinked: nextTelegram,
+    });
 
     setLoading(false);
   }, [email]);
 
   useEffect(() => {
     if (!email) return;
-    setLoading(true);
+    if (!cache.has(email.toLowerCase())) setLoading(true);
     load();
   }, [email, load]);
+
 
   const reputation = computeReputation({
     contributions,

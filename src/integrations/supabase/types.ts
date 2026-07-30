@@ -47,6 +47,48 @@ export type Database = {
         }
         Relationships: []
       }
+      beta_requests: {
+        Row: {
+          admin_notes: string | null
+          code: string | null
+          created_at: string
+          email: string
+          expires_at: string | null
+          id: string
+          name: string | null
+          reason: string | null
+          reviewed_at: string | null
+          status: string
+          x_handle: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          code?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          id?: string
+          name?: string | null
+          reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          x_handle?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          code?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          id?: string
+          name?: string | null
+          reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          x_handle?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -292,6 +334,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_reports: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          status: string
+          subject: string
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message: string
+          status?: string
+          subject: string
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          status?: string
+          subject?: string
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       leaderboard_scores: {
         Row: {
           contribution_xp: number
@@ -366,6 +441,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          beta_code: string | null
           created_at: string | null
           email: string
           id: string
@@ -376,8 +452,12 @@ export type Database = {
           user_id: string
           waitlist_completed: boolean | null
           x_shared: boolean | null
+          x_username: string | null
+          x_verified: boolean
+          x_verified_at: string | null
         }
         Insert: {
+          beta_code?: string | null
           created_at?: string | null
           email: string
           id?: string
@@ -388,8 +468,12 @@ export type Database = {
           user_id: string
           waitlist_completed?: boolean | null
           x_shared?: boolean | null
+          x_username?: string | null
+          x_verified?: boolean
+          x_verified_at?: string | null
         }
         Update: {
+          beta_code?: string | null
           created_at?: string | null
           email?: string
           id?: string
@@ -400,6 +484,9 @@ export type Database = {
           user_id?: string
           waitlist_completed?: boolean | null
           x_shared?: boolean | null
+          x_username?: string | null
+          x_verified?: boolean
+          x_verified_at?: string | null
         }
         Relationships: []
       }
@@ -861,6 +948,7 @@ export type Database = {
     Functions: {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }
+      ensure_user_role: { Args: never; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
       get_leaderboard: {
         Args: { _period?: string }
@@ -897,11 +985,16 @@ export type Database = {
         Args: { _email: string }
         Returns: undefined
       }
+      redeem_beta_code: {
+        Args: { _code: string; _email: string }
+        Returns: boolean
+      }
       refresh_whitepaper_live: { Args: never; Returns: undefined }
       update_waitlist_task_email: {
         Args: { _new_email: string; _old_email: string }
         Returns: undefined
       }
+      x_handle_taken: { Args: { _handle: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "moderator"

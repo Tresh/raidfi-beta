@@ -13,16 +13,23 @@ interface Profile {
   x_shared: boolean;
 }
 
+// Module-level cache so switching dashboard pages doesn't re-trigger the
+// full-screen loading state on every navigation.
+let cachedSession: Session | null = null;
+let cachedProfile: Profile | null = null;
+
 export function useAuth() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(!cachedSession);
+  const [session, setSession] = useState<Session | null>(cachedSession);
+  const [profile, setProfile] = useState<Profile | null>(cachedProfile);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      cachedSession = session;
       setSession(session);
       if (!session) {
+        cachedProfile = null;
         navigate("/login");
         return;
       }
@@ -31,10 +38,13 @@ export function useAuth() {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        cachedSession = null;
+        cachedProfile = null;
         navigate("/login");
         return;
       }
 
+      cachedSession = session;
       setSession(session);
 
       // Fetch profile
@@ -45,6 +55,7 @@ export function useAuth() {
         .maybeSingle();
 
       if (profileData) {
+        cachedProfile = profileData as any;
         setProfile(profileData as any);
       }
 
@@ -56,6 +67,8 @@ export function useAuth() {
   }, [navigate]);
 
   const signOut = async () => {
+    cachedSession = null;
+    cachedProfile = null;
     await supabase.auth.signOut();
     navigate("/login");
   };

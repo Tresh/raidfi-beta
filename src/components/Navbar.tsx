@@ -17,11 +17,11 @@ const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/whitepaper", label: "Whitepaper" },
-    { href: "/dashboard", label: "Dashboard" },
     { href: "/contributions", label: "Contribute" },
     { href: "/feed", label: "Live Feed" },
     { href: "/contact", label: "Contact" },
   ];
+
 
   const handleLinkClick = () => setOpen(false);
 
@@ -42,10 +42,14 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
+            <a href="/login" className="text-sm text-muted-foreground transition-colors">
+              Sign in
+            </a>
             <Button size="sm" asChild className="h-9 px-5 text-xs">
               <a href="/waitlist">Request Access</a>
             </Button>
           </div>
+
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -61,9 +65,13 @@ const Navbar = () => {
                     {link.label}
                   </a>
                 ))}
+                <a href="/login" onClick={handleLinkClick} className="text-foreground text-base font-medium">
+                  Sign in
+                </a>
                 <Button className="mt-4" asChild>
                   <a href="/waitlist" onClick={handleLinkClick}>Request Access</a>
                 </Button>
+
               </div>
             </SheetContent>
           </Sheet>
