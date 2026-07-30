@@ -415,18 +415,10 @@ const handleXShare = () => {
                   Thanks for sharing on X — your spot is locked in. We'll email you when early access opens.
                 </p>
 
-                <div className="glass-card p-6 rounded-xl text-left">
-                  <h3 className="text-sm font-semibold text-foreground mb-2">Want to earn more XP?</h3>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Contributors get extra XP, climb the leaderboard, and unlock early perks by sharing, engaging, and completing simple tasks. Totally optional.
-                  </p>
-                  <Button asChild className="w-full h-11 text-sm font-semibold">
-                    <a href="/contributions">Become a Contributor <ArrowRight className="w-4 h-4 ml-2" /></a>
-                  </Button>
-                  <Button variant="ghost" asChild className="w-full h-9 text-xs mt-2 text-muted-foreground">
-                    <a href="/">Maybe later</a>
-                  </Button>
-                </div>
+                <Button variant="outline" asChild className="h-10 text-sm">
+                  <a href="/">Back to home</a>
+                </Button>
+
               </motion.div>
             )}
           </AnimatePresence>
