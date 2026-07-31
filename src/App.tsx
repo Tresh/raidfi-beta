@@ -32,6 +32,15 @@ import UsersManager from "./pages/admin/UsersManager";
 import SettingsManager from "./pages/admin/SettingsManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import BetaRequestsManager from "./pages/admin/BetaRequestsManager";
+import ProjectRequestsManager from "./pages/admin/ProjectRequestsManager";
+import ReportsManager from "./pages/admin/ReportsManager";
+import ProjectOverview from "./pages/project/ProjectOverview";
+import ProjectContributors from "./pages/project/ProjectContributors";
+import ProjectCampaigns from "./pages/project/ProjectCampaigns";
+import ProjectAnalytics from "./pages/project/ProjectAnalytics";
+import ProjectSettings from "./pages/project/ProjectSettings";
+
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
 
@@ -61,7 +70,15 @@ const App = () => (
           <Route path="/dashboard/settings" element={<DashSettings />} />
           <Route path="/dashboard/feedback" element={<DashFeedback />} />
 
+          {/* Project workspace */}
+          <Route path="/project" element={<ProjectOverview />} />
+          <Route path="/project/contributors" element={<ProjectContributors />} />
+          <Route path="/project/campaigns" element={<ProjectCampaigns />} />
+          <Route path="/project/analytics" element={<ProjectAnalytics />} />
+          <Route path="/project/settings" element={<ProjectSettings />} />
+
           {/* Admin */}
+
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
           <Route path="/admin/waitlist" element={<AdminLayout requiredPermission="waitlist"><WaitlistManager /></AdminLayout>} />
@@ -75,6 +92,10 @@ const App = () => (
           <Route path="/admin/users" element={<AdminLayout requiredPermission="users"><UsersManager /></AdminLayout>} />
           <Route path="/admin/analytics" element={<AdminLayout requiredPermission="dashboard"><AnalyticsPage /></AdminLayout>} />
           <Route path="/admin/settings" element={<AdminLayout requiredPermission="settings"><SettingsManager /></AdminLayout>} />
+          <Route path="/admin/beta" element={<AdminLayout requiredPermission="beta"><BetaRequestsManager /></AdminLayout>} />
+          <Route path="/admin/projects" element={<AdminLayout requiredPermission="projects"><ProjectRequestsManager /></AdminLayout>} />
+          <Route path="/admin/reports" element={<AdminLayout requiredPermission="reports"><ReportsManager /></AdminLayout>} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

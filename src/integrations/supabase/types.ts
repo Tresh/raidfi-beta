@@ -55,10 +55,14 @@ export type Database = {
           email: string
           expires_at: string | null
           id: string
+          max_uses: number
           name: string | null
           reason: string | null
+          requested_role: string
           reviewed_at: string | null
+          reviewed_by: string | null
           status: string
+          uses_count: number
           x_handle: string | null
         }
         Insert: {
@@ -68,10 +72,14 @@ export type Database = {
           email: string
           expires_at?: string | null
           id?: string
+          max_uses?: number
           name?: string | null
           reason?: string | null
+          requested_role?: string
           reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
+          uses_count?: number
           x_handle?: string | null
         }
         Update: {
@@ -81,10 +89,14 @@ export type Database = {
           email?: string
           expires_at?: string | null
           id?: string
+          max_uses?: number
           name?: string | null
           reason?: string | null
+          requested_role?: string
           reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
+          uses_count?: number
           x_handle?: string | null
         }
         Relationships: []
@@ -487,6 +499,152 @@ export type Database = {
           x_username?: string | null
           x_verified?: boolean
           x_verified_at?: string | null
+        }
+        Relationships: []
+      }
+      project_members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          member_role: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          member_role?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          member_role?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_requests: {
+        Row: {
+          admin_notes: string | null
+          code: string | null
+          created_at: string
+          discord: string | null
+          email: string
+          expires_at: string | null
+          founder_name: string
+          id: string
+          project_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          telegram: string | null
+          website: string | null
+          why: string | null
+          x_handle: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          code?: string | null
+          created_at?: string
+          discord?: string | null
+          email: string
+          expires_at?: string | null
+          founder_name: string
+          id?: string
+          project_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          telegram?: string | null
+          website?: string | null
+          why?: string | null
+          x_handle?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          code?: string | null
+          created_at?: string
+          discord?: string | null
+          email?: string
+          expires_at?: string | null
+          founder_name?: string
+          id?: string
+          project_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          telegram?: string | null
+          website?: string | null
+          why?: string | null
+          x_handle?: string | null
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          contact_email: string
+          created_at: string
+          description: string | null
+          discord: string | null
+          founder_name: string | null
+          id: string
+          name: string
+          slug: string
+          status: string
+          telegram: string | null
+          trust_score: number
+          updated_at: string
+          verification: string
+          website: string | null
+          x_handle: string | null
+        }
+        Insert: {
+          contact_email: string
+          created_at?: string
+          description?: string | null
+          discord?: string | null
+          founder_name?: string | null
+          id?: string
+          name: string
+          slug: string
+          status?: string
+          telegram?: string | null
+          trust_score?: number
+          updated_at?: string
+          verification?: string
+          website?: string | null
+          x_handle?: string | null
+        }
+        Update: {
+          contact_email?: string
+          created_at?: string
+          description?: string | null
+          discord?: string | null
+          founder_name?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          status?: string
+          telegram?: string | null
+          trust_score?: number
+          updated_at?: string
+          verification?: string
+          website?: string | null
+          x_handle?: string | null
         }
         Relationships: []
       }
@@ -946,7 +1104,12 @@ export type Database = {
       }
     }
     Functions: {
+      check_beta_code: { Args: { _code: string }; Returns: Json }
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
+      consume_beta_code: {
+        Args: { _code: string; _email: string }
+        Returns: Json
+      }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }
       ensure_user_role: { Args: never; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
@@ -978,6 +1141,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_project_member: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_super_or_admin: { Args: { _user_id: string }; Returns: boolean }
       mark_waitlist_x_shared: { Args: { _id: string }; Returns: undefined }
       process_referral: { Args: { referrer_code: string }; Returns: undefined }
       recalculate_all_leaderboard_scores: { Args: never; Returns: undefined }
@@ -997,7 +1166,7 @@ export type Database = {
       x_handle_taken: { Args: { _handle: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user" | "moderator"
+      app_role: "admin" | "user" | "moderator" | "super_admin" | "project_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1125,7 +1294,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "moderator"],
+      app_role: ["admin", "user", "moderator", "super_admin", "project_admin"],
     },
   },
 } as const

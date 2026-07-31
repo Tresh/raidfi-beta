@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation, Navigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins, ShieldCheck, BarChart3, Settings as SettingsIcon,
+  LayoutDashboard, Users, Mail, ClipboardList, LogOut, Home, Menu, X, ListChecks, Award, Coins, ShieldCheck, BarChart3, Settings as SettingsIcon, KeyRound, Building2, MessageSquareWarning,
 } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Loader2 } from "lucide-react";
@@ -11,6 +11,9 @@ import logo from "@/assets/logo.png";
 const allNavItems = [
   { label: "Dashboard", to: "/admin", permKey: "dashboard", icon: LayoutDashboard, end: true },
   { label: "User Roles", to: "/admin/users", permKey: "users", icon: ShieldCheck, adminOnly: true },
+  { label: "Beta Requests", to: "/admin/beta", permKey: "beta", icon: KeyRound },
+  { label: "Project Requests", to: "/admin/projects", permKey: "projects", icon: Building2 },
+  { label: "Reports", to: "/admin/reports", permKey: "reports", icon: MessageSquareWarning },
   { label: "Points Manager", to: "/admin/points", permKey: "points", icon: Coins },
   { label: "Waitlist", to: "/admin/waitlist", permKey: "waitlist", icon: Users },
   { label: "Waitlist Tasks", to: "/admin/tasks", permKey: "tasks", icon: ListChecks },
@@ -22,6 +25,7 @@ const allNavItems = [
   { label: "Analytics", to: "/admin/analytics", permKey: "dashboard", icon: BarChart3 },
   { label: "Settings", to: "/admin/settings", permKey: "settings", icon: SettingsIcon, adminOnly: true },
 ];
+
 
 const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; requiredPermission?: string }) => {
   const { loading, isAdmin, isModerator, hasPermission, userEmail, signOut } = useAdmin();

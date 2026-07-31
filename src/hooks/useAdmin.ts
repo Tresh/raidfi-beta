@@ -13,10 +13,14 @@ export const ADMIN_PERMISSIONS = [
   { key: "contacts", label: "Contacts" },
   { key: "whitepaper", label: "Whitepaper" },
   { key: "contributions", label: "Contributions" },
+  { key: "beta", label: "Beta Requests" },
+  { key: "projects", label: "Project Requests" },
+  { key: "reports", label: "Reports" },
   { key: "settings", label: "Settings" },
 ] as const;
 
 export type PermissionKey = typeof ADMIN_PERMISSIONS[number]["key"];
+
 
 export function useAdmin() {
   const navigate = useNavigate();
@@ -37,12 +41,13 @@ export function useAdmin() {
 
       const uid = session.user.id;
 
-      const { data: adminRole } = await supabase.rpc("has_role", {
-        _user_id: uid,
-        _role: "admin",
-      });
+      const [{ data: adminRole }, { data: superRole }] = await Promise.all([
+        supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
+        supabase.rpc("has_role", { _user_id: uid, _role: "super_admin" as any }),
+      ]);
 
-      if (adminRole) {
+      if (adminRole || superRole) {
+
         setUserId(uid);
         setUserEmail(session.user.email ?? null);
         setIsAdmin(true);

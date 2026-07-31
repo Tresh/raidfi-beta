@@ -20,6 +20,7 @@ const Login = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [betaCode, setBetaCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -34,16 +35,43 @@ const Login = () => {
     if (!email) return;
     setLoading(true);
 
-    const { data: emailExists } = await supabase.rpc("check_email_exists", {
-      check_email: email.trim().toLowerCase(),
-    });
-    if (!emailExists) {
-      toast({ title: "Not on the waitlist", description: "Complete the waitlist first to get access.", variant: "destructive" });
-      setLoading(false);
-      return;
+    const cleanEmail = email.trim().toLowerCase();
+    const code = betaCode.trim().toUpperCase();
+
+    let allowed = false;
+
+    if (code) {
+      const { data: check } = await supabase.rpc("check_beta_code" as any, { _code: code, _email: cleanEmail });
+      const result: any = Array.isArray(check) ? check[0] : check;
+      if (!result?.valid) {
+        toast({
+          title: "Invalid beta code",
+          description: "That code is unknown, already used, or expired. Request a new one from the homepage.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      allowed = true;
     }
 
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase() });
+    if (!allowed) {
+      const { data: emailExists } = await supabase.rpc("check_email_exists", { check_email: cleanEmail });
+      if (!emailExists) {
+        toast({
+          title: "No access yet",
+          description: "Join the waitlist or enter a beta access code to sign in.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: { shouldCreateUser: true },
+    });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -52,6 +80,7 @@ const Login = () => {
     }
     setLoading(false);
   };
+
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +123,18 @@ const Login = () => {
         }
       }
 
-      navigate("/dashboard");
+      const code = betaCode.trim().toUpperCase();
+      if (code) {
+        await supabase.rpc("consume_beta_code" as any, { _code: code, _email: email.trim().toLowerCase() });
+      }
+
+      const { data: isProjectAdmin } = await supabase.rpc("has_role", {
+        _user_id: data.session.user.id,
+        _role: "project_admin" as any,
+      });
+
+      navigate(isProjectAdmin ? "/project" : "/dashboard");
+
     }
     setLoading(false);
   };
@@ -117,10 +157,14 @@ const Login = () => {
                     <Input type="email" placeholder="you@example.com" value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base" required />
+                    <Input type="text" placeholder="Beta access code (optional)" value={betaCode}
+                      onChange={(e) => setBetaCode(e.target.value)}
+                      className="bg-white/[0.05] border-white/[0.1] text-foreground h-11 text-sm mt-3 tracking-widest uppercase font-mono" />
                     <Button type="submit" className="w-full mt-4 h-12 text-base font-semibold" disabled={loading}>
                       {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                       Send Code
                     </Button>
+
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Don't have access? <a href="/waitlist" className="text-primary hover:underline">Join the waitlist</a>

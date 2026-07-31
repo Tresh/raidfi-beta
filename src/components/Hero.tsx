@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import RequestAccessDialog from "@/components/RequestAccessDialog";
 
 const Hero = () => {
+  const [accessOpen, setAccessOpen] = useState(false);
+
   return (
+
     <section className="min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center relative pt-16 md:pt-20 overflow-hidden">
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
@@ -42,20 +47,35 @@ const Hero = () => {
             
             <Button size="lg" asChild className="h-11 px-7 text-sm w-full sm:w-auto">
               <a href="/waitlist" className="group">
-                Request Early Access
+                Join Waitlist
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
             </Button>
-            <Button size="lg" variant="outline" asChild className="h-11 px-7 text-sm w-full sm:w-auto">
-              <a href="/whitepaper">Read Whitepaper</a>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-11 px-7 text-sm w-full sm:w-auto"
+              onClick={() => setAccessOpen(true)}
+            >
+              Request Beta Access
             </Button>
           </motion.div>
+
+          <p className="mt-4 text-xs text-muted-foreground">
+            Building a project?{" "}
+            <button onClick={() => setAccessOpen(true)} className="text-primary underline underline-offset-4">
+              Request project access
+            </button>
+          </p>
         </div>
       </div>
+
+      <RequestAccessDialog open={accessOpen} onOpenChange={setAccessOpen} />
 
       {/* Gradient fade at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>);
+
 
 };
 
