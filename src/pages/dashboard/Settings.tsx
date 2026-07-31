@@ -88,8 +88,21 @@ const Settings = () => {
 
   const verifyX = async () => {
     const handle = xHandle.trim().replace(/^@/, "");
-    if (!handle || !xPostUrl.trim()) {
+    const postUrl = xPostUrl.trim();
+    if (!handle || !postUrl) {
       toast({ title: "Missing details", description: "Add your X username and the link to your post.", variant: "destructive" });
+      return;
+    }
+    if (!/^[A-Za-z0-9_]{1,15}$/.test(handle)) {
+      toast({ title: "Invalid username", description: "X usernames are 1–15 characters: letters, numbers and underscores only.", variant: "destructive" });
+      return;
+    }
+    if (!/^https?:\/\/(www\.)?(twitter|x)\.com\/[^/\s]+\/status\/\d+/i.test(postUrl)) {
+      toast({
+        title: "That doesn't look like a post link",
+        description: "Paste the direct link to your post, e.g. https://x.com/yourhandle/status/1234567890 — not your profile or a shortened link.",
+        variant: "destructive",
+      });
       return;
     }
     setXVerifying(true);
@@ -101,20 +114,43 @@ const Settings = () => {
       return;
     }
 
-    const { data: res, error } = await supabase.functions.invoke("verify-x-handle", {
-      body: { handle, post_url: xPostUrl.trim() },
-    });
+    let message: string | null = null;
+    try {
+      const { data: res, error } = await supabase.functions.invoke("verify-x-handle", {
+        body: { handle, post_url: postUrl },
+      });
+
+      if (error) {
+        // Edge functions surface real reasons in the response body, not error.message.
+        let detail = "";
+        try {
+          detail = (await (error as any)?.context?.text?.()) ?? "";
+        } catch {
+          detail = "";
+        }
+        try {
+          message = detail ? (JSON.parse(detail).error as string) : null;
+        } catch {
+          message = detail || null;
+        }
+        message = message || "We couldn't verify that post right now. Please try again in a moment.";
+      } else if ((res as any)?.error) {
+        message = (res as any).error as string;
+      }
+    } catch {
+      message = "Network problem — check your connection and try again.";
+    }
     setXVerifying(false);
 
-    const err = (res as any)?.error ?? error?.message;
-    if (err) {
-      toast({ title: "Verification failed", description: err, variant: "destructive" });
+    if (message) {
+      toast({ title: "Verification failed", description: message, variant: "destructive" });
       return;
     }
     toast({ title: "X account verified", description: `@${handle} is now linked to your profile.` });
     setXPostUrl("");
     data.refresh();
   };
+
 
   const copy = (value: string, key: string) => {
     navigator.clipboard.writeText(value);
