@@ -20,6 +20,7 @@ const Login = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [betaCode, setBetaCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -34,16 +35,43 @@ const Login = () => {
     if (!email) return;
     setLoading(true);
 
-    const { data: emailExists } = await supabase.rpc("check_email_exists", {
-      check_email: email.trim().toLowerCase(),
-    });
-    if (!emailExists) {
-      toast({ title: "Not on the waitlist", description: "Complete the waitlist first to get access.", variant: "destructive" });
-      setLoading(false);
-      return;
+    const cleanEmail = email.trim().toLowerCase();
+    const code = betaCode.trim().toUpperCase();
+
+    let allowed = false;
+
+    if (code) {
+      const { data: check } = await supabase.rpc("check_beta_code" as any, { _code: code, _email: cleanEmail });
+      const result: any = Array.isArray(check) ? check[0] : check;
+      if (!result?.valid) {
+        toast({
+          title: "Invalid beta code",
+          description: "That code is unknown, already used, or expired. Request a new one from the homepage.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      allowed = true;
     }
 
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase() });
+    if (!allowed) {
+      const { data: emailExists } = await supabase.rpc("check_email_exists", { check_email: cleanEmail });
+      if (!emailExists) {
+        toast({
+          title: "No access yet",
+          description: "Join the waitlist or enter a beta access code to sign in.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: { shouldCreateUser: true },
+    });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -52,6 +80,7 @@ const Login = () => {
     }
     setLoading(false);
   };
+
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
