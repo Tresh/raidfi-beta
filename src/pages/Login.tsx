@@ -123,7 +123,18 @@ const Login = () => {
         }
       }
 
-      navigate("/dashboard");
+      const code = betaCode.trim().toUpperCase();
+      if (code) {
+        await supabase.rpc("consume_beta_code" as any, { _code: code, _email: email.trim().toLowerCase() });
+      }
+
+      const { data: isProjectAdmin } = await supabase.rpc("has_role", {
+        _user_id: data.session.user.id,
+        _role: "project_admin" as any,
+      });
+
+      navigate(isProjectAdmin ? "/project" : "/dashboard");
+
     }
     setLoading(false);
   };
