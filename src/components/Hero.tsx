@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import RequestAccessDialog from "@/components/RequestAccessDialog";
 
 const Hero = () => {
+  const [accessOpen, setAccessOpen] = useState(false);
+
   return (
+
     <section className="min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center relative pt-16 md:pt-20 overflow-hidden">
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
