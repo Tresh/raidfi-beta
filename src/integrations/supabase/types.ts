@@ -1104,7 +1104,12 @@ export type Database = {
       }
     }
     Functions: {
+      check_beta_code: { Args: { _code: string }; Returns: Json }
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
+      consume_beta_code: {
+        Args: { _code: string; _email: string }
+        Returns: Json
+      }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }
       ensure_user_role: { Args: never; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
