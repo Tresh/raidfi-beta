@@ -32,6 +32,15 @@ import UsersManager from "./pages/admin/UsersManager";
 import SettingsManager from "./pages/admin/SettingsManager";
 import AdminLayout from "./components/admin/AdminLayout";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import BetaRequestsManager from "./pages/admin/BetaRequestsManager";
+import ProjectRequestsManager from "./pages/admin/ProjectRequestsManager";
+import ReportsManager from "./pages/admin/ReportsManager";
+import ProjectOverview from "./pages/project/ProjectOverview";
+import ProjectContributors from "./pages/project/ProjectContributors";
+import ProjectCampaigns from "./pages/project/ProjectCampaigns";
+import ProjectAnalytics from "./pages/project/ProjectAnalytics";
+import ProjectSettings from "./pages/project/ProjectSettings";
+
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
 
