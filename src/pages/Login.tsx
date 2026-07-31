@@ -157,10 +157,14 @@ const Login = () => {
                     <Input type="email" placeholder="you@example.com" value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base" required />
+                    <Input type="text" placeholder="Beta access code (optional)" value={betaCode}
+                      onChange={(e) => setBetaCode(e.target.value)}
+                      className="bg-white/[0.05] border-white/[0.1] text-foreground h-11 text-sm mt-3 tracking-widest uppercase font-mono" />
                     <Button type="submit" className="w-full mt-4 h-12 text-base font-semibold" disabled={loading}>
                       {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                       Send Code
                     </Button>
+
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Don't have access? <a href="/waitlist" className="text-primary hover:underline">Join the waitlist</a>
