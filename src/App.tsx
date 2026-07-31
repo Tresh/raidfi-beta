@@ -70,7 +70,15 @@ const App = () => (
           <Route path="/dashboard/settings" element={<DashSettings />} />
           <Route path="/dashboard/feedback" element={<DashFeedback />} />
 
+          {/* Project workspace */}
+          <Route path="/project" element={<ProjectOverview />} />
+          <Route path="/project/contributors" element={<ProjectContributors />} />
+          <Route path="/project/campaigns" element={<ProjectCampaigns />} />
+          <Route path="/project/analytics" element={<ProjectAnalytics />} />
+          <Route path="/project/settings" element={<ProjectSettings />} />
+
           {/* Admin */}
+
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
           <Route path="/admin/waitlist" element={<AdminLayout requiredPermission="waitlist"><WaitlistManager /></AdminLayout>} />
