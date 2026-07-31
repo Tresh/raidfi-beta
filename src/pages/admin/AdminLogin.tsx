@@ -68,15 +68,17 @@ const AdminLogin = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error("Session not found");
 
-      const [{ data: admin }, { data: moderator }] = await Promise.all([
+      const [{ data: admin }, { data: superAdmin }, { data: moderator }] = await Promise.all([
         supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" }),
+        supabase.rpc("has_role", { _user_id: session.user.id, _role: "super_admin" as any }),
         supabase.rpc("has_role", { _user_id: session.user.id, _role: "moderator" }),
       ]);
 
-      if (!admin && !moderator) {
+      if (!admin && !superAdmin && !moderator) {
         await supabase.auth.signOut();
         throw new Error("You do not have admin access.");
       }
+
 
       navigate("/admin");
     } catch (err: any) {
