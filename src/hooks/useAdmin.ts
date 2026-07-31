@@ -13,10 +13,14 @@ export const ADMIN_PERMISSIONS = [
   { key: "contacts", label: "Contacts" },
   { key: "whitepaper", label: "Whitepaper" },
   { key: "contributions", label: "Contributions" },
+  { key: "beta", label: "Beta Requests" },
+  { key: "projects", label: "Project Requests" },
+  { key: "reports", label: "Reports" },
   { key: "settings", label: "Settings" },
 ] as const;
 
 export type PermissionKey = typeof ADMIN_PERMISSIONS[number]["key"];
+
 
 export function useAdmin() {
   const navigate = useNavigate();
