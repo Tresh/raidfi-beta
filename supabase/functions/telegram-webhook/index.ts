@@ -361,6 +361,30 @@ async function handle(update: any, supabase: any) {
         return;
       }
 
+      const { data: ownerProfile } = await supabase
+        .from("profiles").select("x_username,x_verified").eq("email", link.email).maybeSingle();
+      if (!ownerProfile?.x_verified || !ownerProfile.x_username) {
+        await reply(chatId, `Verify your X account in RaidFi Settings before submitting contributions.`, [[{ text: "Open Settings", url: `${SITE_ORIGIN}/dashboard/settings` }]], msgId);
+        return;
+      }
+      try {
+        const oembed = await fetch(`https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=1&dnt=1`);
+        if (!oembed.ok) {
+          await reply(chatId, `I couldn't read that post. Make sure it is public and try again.`, [], msgId);
+          return;
+        }
+        const post = await oembed.json();
+        const submittedHandle = String(post.author_url ?? "").split("/").filter(Boolean).pop()?.replace(/^@/, "").toLowerCase();
+        const verifiedHandle = ownerProfile.x_username.replace(/^@/, "").toLowerCase();
+        if (!submittedHandle || submittedHandle !== verifiedHandle) {
+          await reply(chatId, `Only posts from your verified @${escapeHtml(verifiedHandle)} account are accepted.`, [], msgId);
+          return;
+        }
+      } catch {
+        await reply(chatId, `I couldn't verify who published that post. Please try again.`, [], msgId);
+        return;
+      }
+
       // Ensure a profile row exists so contributions link to a real user —
       // that's what makes "View Contributor" appear on the live feed.
       let { data: profile } = await supabase

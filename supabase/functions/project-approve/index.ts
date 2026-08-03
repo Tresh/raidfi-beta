@@ -90,6 +90,27 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (projErr) return json({ error: projErr.message }, 500);
 
+    // If the founder already has an account, grant workspace access immediately.
+    // New users are linked later when they redeem the project beta code.
+    if (project?.id) {
+      const { data: usersPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const founder = usersPage?.users?.find(
+        (candidate) => (candidate.email ?? "").toLowerCase() === String(request.email).toLowerCase(),
+      );
+      if (founder) {
+        await admin.from("project_members").upsert({
+          project_id: project.id,
+          user_id: founder.id,
+          email: request.email,
+          member_role: "project_admin",
+        }, { onConflict: "project_id,user_id" });
+        await admin.from("user_roles").upsert(
+          { user_id: founder.id, role: "project_admin" },
+          { onConflict: "user_id,role" },
+        );
+      }
+    }
+
     // Mint a beta code for the founder with the project_admin role
     const code = makeCode();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
