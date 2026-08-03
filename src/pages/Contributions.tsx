@@ -25,6 +25,8 @@ interface Profile {
   name: string | null;
   total_points: number;
   waitlist_completed: boolean;
+  x_username?: string | null;
+  x_verified?: boolean;
 }
 
 interface ContributeTask {
@@ -482,6 +484,12 @@ const Contributions = () => {
     }
     setSubmittingPost(true);
     try {
+      const { data: ownership, error: ownershipError } = await supabase.functions.invoke("validate-x-post-owner", { body: { post_url: postUrl.trim() } });
+      if (ownershipError || !(ownership as any)?.valid) {
+        toast({ title: "Post not accepted", description: (ownership as any)?.error ?? "Only posts published by your verified X account are accepted.", variant: "destructive" });
+        setSubmittingPost(false);
+        return;
+      }
       const contributionId = crypto.randomUUID();
       const ct = contentTypes.find(t => t.value === contentType);
       const points = ct?.default_points ?? 10;

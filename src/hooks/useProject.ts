@@ -34,7 +34,7 @@ export function useProject() {
 
       const { data: membership } = await supabase
         .from("project_members" as any)
-        .select("role, project_id, projects:project_id(*)")
+        .select("member_role, project_id, projects:project_id(*)")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
@@ -46,7 +46,7 @@ export function useProject() {
       }
 
       cachedProject = proj;
-      cachedRole = (membership as any).role ?? "member";
+      cachedRole = (membership as any).member_role ?? "member";
       setProject(proj);
       setRole(cachedRole);
       setLoading(false);

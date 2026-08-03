@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, ExternalLink, Star, Clock } from "lucide-react";
+import { Loader2, ExternalLink, Star, Clock, Compass, FolderKanban, Bell, Home, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -183,15 +183,16 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Feed = () => {
   useSEO({
-    title: "Live Feed — RaidFi",
-    description: "Live community contributions on RaidFi — see the latest posts and raids in real time.",
-    path: "/feed",
+    title: "Explore — RaidFi",
+    description: "Explore quality Web3 contributions, reputation signals, and projects on RaidFi.",
+    path: "/explore",
   });
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [refMap, setRefMap] = useState<Record<string, { code?: string; name?: string }>>({});
+  const [tab, setTab] = useState<"contributions" | "projects" | "notifications">("contributions");
+  const [projects, setProjects] = useState<any[]>([]);
   const PAGE_SIZE = 20;
 
   const fetchContributions = useCallback(async (pageNum: number, append = false) => {
@@ -205,13 +206,25 @@ const Feed = () => {
       .order("created_at", { ascending: false })
       .range(from, to);
     if (data) {
-      setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
+      const ranked = [...(data as unknown as Contribution[])].sort((a, b) => {
+        const scoreA = a.manual_score ?? a.ai_score ?? 0;
+        const scoreB = b.manual_score ?? b.ai_score ?? 0;
+        const ageA = Math.max(0, (Date.now() - new Date(a.created_at).getTime()) / 86_400_000);
+        const ageB = Math.max(0, (Date.now() - new Date(b.created_at).getTime()) / 86_400_000);
+        const qualityA = scoreA * 8 + Math.log1p(Math.max(0, a.points_earned)) * 4 - Math.min(ageA, 30) * 0.35;
+        const qualityB = scoreB * 8 + Math.log1p(Math.max(0, b.points_earned)) * 4 - Math.min(ageB, 30) * 0.35;
+        return qualityB - qualityA;
+      });
+      setContributions(prev => append ? [...prev, ...ranked] : ranked);
       setHasMore(data.length === PAGE_SIZE);
     }
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchContributions(0); }, [fetchContributions]);
+  useEffect(() => {
+    fetchContributions(0);
+    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score").eq("status", "active").order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
+  }, [fetchContributions]);
 
   const formatRelative = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
@@ -228,17 +241,32 @@ const Feed = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Live Feed — RaidFi", "description": "Live community contributions on RaidFi — see the latest posts and raids in real time.", "url": "https://raidfi.site/feed" }) }} />
-      <main className="flex-1 pt-24 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Explore — RaidFi", "description": "Quality Web3 contributions and projects on RaidFi.", "url": "https://raidfi.site/explore" }) }} />
+      <main className="flex-1 pt-20 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-              Live <span className="text-gradient">Feed</span>
-            </h1>
-            <p className="text-muted-foreground text-sm">Community posts about RaidFi.</p>
+          <div className="mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Explore</h1>
+            <p className="text-muted-foreground text-sm">Learn from strong contributions and discover credible Web3 communities.</p>
+          </div>
+          <div className="grid grid-cols-3 border-b border-border mb-4">
+            <button onClick={() => setTab("contributions")} className={`py-2.5 text-xs font-medium border-b-2 ${tab === "contributions" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>Contributions</button>
+            <button onClick={() => setTab("projects")} className={`py-2.5 text-xs font-medium border-b-2 ${tab === "projects" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>Projects</button>
+            <button onClick={() => setTab("notifications")} className={`py-2.5 text-xs font-medium border-b-2 ${tab === "notifications" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>Updates</button>
           </div>
 
-          {loading ? (
+          {tab === "projects" ? (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {projects.length ? projects.map((project) => (
+                <Card key={project.id}><CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3"><div><h2 className="text-sm font-semibold">{project.name}</h2><p className="text-[11px] text-muted-foreground">{project.verification} · Trust {project.trust_score}</p></div><FolderKanban className="w-4 h-4 text-primary" /></div>
+                  {project.description && <p className="text-xs text-muted-foreground mt-3 line-clamp-3">{project.description}</p>}
+                  <div className="mt-3 flex gap-3 text-xs">{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">Website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
+                </CardContent></Card>
+              )) : <p className="text-sm text-muted-foreground py-10 text-center col-span-2">Project listings will appear here after verification.</p>}
+            </div>
+          ) : tab === "notifications" ? (
+            <Card><CardContent className="py-12 text-center"><Bell className="w-5 h-5 text-primary mx-auto mb-3" /><p className="text-sm font-medium">Community updates are coming here</p><p className="text-xs text-muted-foreground mt-1">Campaigns, project listings and contribution milestones will appear in this stream.</p></CardContent></Card>
+          ) : loading ? (
             <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : contributions.length === 0 ? (
             <Card className="border-dashed"><CardContent className="py-12 text-center"><p className="text-muted-foreground">No posts yet.</p></CardContent></Card>
@@ -341,6 +369,12 @@ const Feed = () => {
           )}
         </div>
       </main>
+      <nav className="fixed bottom-0 inset-x-0 z-40 grid grid-cols-4 bg-background border-t border-border md:hidden" aria-label="Mobile navigation">
+        <a href="/" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground"><Home className="w-4 h-4" />Home</a>
+        <a href="/explore" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-primary"><Compass className="w-4 h-4" />Explore</a>
+        <a href="/contributions" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground"><Send className="w-4 h-4" />Contribute</a>
+        <a href="/login" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground"><Bell className="w-4 h-4" />Account</a>
+      </nav>
       <Footer />
     </div>
   );
