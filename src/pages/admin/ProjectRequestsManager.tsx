@@ -105,7 +105,7 @@ const ProjectRequestsManager = () => {
                 <StatusPill status={r.status} />
               </div>
 
-              {!!r.request_types?.length && <p className="text-[11px] text-primary mt-2">{r.request_types.map((item) => item.replaceAll("_", " ")).join(" · ")}</p>}
+              {!!r.request_types?.length && <p className="text-[11px] text-primary mt-2">{r.request_types.map((item) => item.replace(/_/g, " ")).join(" · ")}</p>}
               {r.goal && <p className="text-xs text-foreground mt-2"><span className="font-medium">Goal:</span> {r.goal}</p>}
               {r.expectations && <p className="text-xs text-muted-foreground mt-1"><span className="font-medium text-foreground">Expected:</span> {r.expectations}</p>}
               {(r.investment_ready !== null || r.estimated_budget) && <p className="text-[11px] text-muted-foreground mt-2">Investment: {r.investment_ready === true ? "Open" : r.investment_ready === false ? "Not currently" : "Discuss"}{r.estimated_budget ? ` · ${r.estimated_budget}` : ""}</p>}

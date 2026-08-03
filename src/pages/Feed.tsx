@@ -206,7 +206,7 @@ const Feed = () => {
       .order("created_at", { ascending: false })
       .range(from, to);
     if (data) {
-      const ranked = [...(data as Contribution[])].sort((a, b) => {
+      const ranked = [...(data as unknown as Contribution[])].sort((a, b) => {
         const scoreA = a.manual_score ?? a.ai_score ?? 0;
         const scoreB = b.manual_score ?? b.ai_score ?? 0;
         const ageA = Math.max(0, (Date.now() - new Date(a.created_at).getTime()) / 86_400_000);
