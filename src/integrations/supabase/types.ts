@@ -346,6 +346,93 @@ export type Database = {
         }
         Relationships: []
       }
+      email_send_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string
+          status?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
+      email_send_state: {
+        Row: {
+          auth_email_ttl_minutes: number
+          batch_size: number
+          id: number
+          retry_after_until: string | null
+          send_delay_ms: number
+          transactional_email_ttl_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_unsubscribe_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       feedback_reports: {
         Row: {
           created_at: string
@@ -544,14 +631,23 @@ export type Database = {
           created_at: string
           discord: string | null
           email: string
+          estimated_budget: string | null
+          expectations: string | null
           expires_at: string | null
           founder_name: string
+          goal: string | null
           id: string
+          investment_ready: boolean | null
+          logo_data_url: string | null
           project_name: string
+          raidfi_community_opt_in: boolean
+          request_types: string[]
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
           telegram: string | null
+          telegram_bot_added: boolean
+          telegram_group_id: string | null
           website: string | null
           why: string | null
           x_handle: string | null
@@ -562,14 +658,23 @@ export type Database = {
           created_at?: string
           discord?: string | null
           email: string
+          estimated_budget?: string | null
+          expectations?: string | null
           expires_at?: string | null
           founder_name: string
+          goal?: string | null
           id?: string
+          investment_ready?: boolean | null
+          logo_data_url?: string | null
           project_name: string
+          raidfi_community_opt_in?: boolean
+          request_types?: string[]
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           telegram?: string | null
+          telegram_bot_added?: boolean
+          telegram_group_id?: string | null
           website?: string | null
           why?: string | null
           x_handle?: string | null
@@ -580,14 +685,23 @@ export type Database = {
           created_at?: string
           discord?: string | null
           email?: string
+          estimated_budget?: string | null
+          expectations?: string | null
           expires_at?: string | null
           founder_name?: string
+          goal?: string | null
           id?: string
+          investment_ready?: boolean | null
+          logo_data_url?: string | null
           project_name?: string
+          raidfi_community_opt_in?: boolean
+          request_types?: string[]
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           telegram?: string | null
+          telegram_bot_added?: boolean
+          telegram_group_id?: string | null
           website?: string | null
           why?: string | null
           x_handle?: string | null
@@ -645,6 +759,30 @@ export type Database = {
           verification?: string
           website?: string | null
           x_handle?: string | null
+        }
+        Relationships: []
+      }
+      suppressed_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string
         }
         Relationships: []
       }
@@ -1104,13 +1242,24 @@ export type Database = {
       }
     }
     Functions: {
-      check_beta_code: { Args: { _code: string }; Returns: Json }
+      check_beta_code:
+        | { Args: { _code: string }; Returns: Json }
+        | { Args: { _code: string; _email?: string }; Returns: Json }
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       consume_beta_code: {
         Args: { _code: string; _email: string }
         Returns: Json
       }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }
+      delete_email: {
+        Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
+      email_queue_dispatch: { Args: never; Returns: undefined }
+      enqueue_email: {
+        Args: { payload: Json; queue_name: string }
+        Returns: number
+      }
       ensure_user_role: { Args: never; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
       get_leaderboard: {
@@ -1148,7 +1297,24 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_super_or_admin: { Args: { _user_id: string }; Returns: boolean }
       mark_waitlist_x_shared: { Args: { _id: string }; Returns: undefined }
+      move_to_dlq: {
+        Args: {
+          dlq_name: string
+          message_id: number
+          payload: Json
+          source_queue: string
+        }
+        Returns: number
+      }
       process_referral: { Args: { referrer_code: string }; Returns: undefined }
+      read_email_batch: {
+        Args: { batch_size: number; queue_name: string; vt: number }
+        Returns: {
+          message: Json
+          msg_id: number
+          read_ct: number
+        }[]
+      }
       recalculate_all_leaderboard_scores: { Args: never; Returns: undefined }
       recalculate_leaderboard_score: {
         Args: { _email: string }
