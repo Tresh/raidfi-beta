@@ -15,6 +15,13 @@ type Row = {
   founder_name: string;
   email: string;
   why: string | null;
+  goal?: string | null;
+  expectations?: string | null;
+  request_types?: string[];
+  investment_ready?: boolean | null;
+  estimated_budget?: string | null;
+  telegram_group_id?: string | null;
+  logo_data_url?: string | null;
   status: string;
   created_at: string;
 };
@@ -89,6 +96,7 @@ const ProjectRequestsManager = () => {
             <div key={r.id} className="bg-card border border-border rounded-lg p-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div>
+                  {r.logo_data_url && <img src={r.logo_data_url} alt="" className="w-10 h-10 rounded-md object-cover border border-border mb-2" />}
                   <p className="text-sm font-semibold text-foreground">{r.project_name}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     {r.founder_name} · {r.email} · {new Date(r.created_at).toLocaleDateString()}
@@ -96,6 +104,12 @@ const ProjectRequestsManager = () => {
                 </div>
                 <StatusPill status={r.status} />
               </div>
+
+              {!!r.request_types?.length && <p className="text-[11px] text-primary mt-2">{r.request_types.map((item) => item.replaceAll("_", " ")).join(" · ")}</p>}
+              {r.goal && <p className="text-xs text-foreground mt-2"><span className="font-medium">Goal:</span> {r.goal}</p>}
+              {r.expectations && <p className="text-xs text-muted-foreground mt-1"><span className="font-medium text-foreground">Expected:</span> {r.expectations}</p>}
+              {(r.investment_ready !== null || r.estimated_budget) && <p className="text-[11px] text-muted-foreground mt-2">Investment: {r.investment_ready === true ? "Open" : r.investment_ready === false ? "Not currently" : "Discuss"}{r.estimated_budget ? ` · ${r.estimated_budget}` : ""}</p>}
+              {r.telegram_group_id && <p className="text-[11px] text-muted-foreground mt-1">Telegram group ID: {r.telegram_group_id}</p>}
 
               <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-muted-foreground">
                 {r.website && (

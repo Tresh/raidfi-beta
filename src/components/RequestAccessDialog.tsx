@@ -41,7 +41,7 @@ const RequestAccessDialog = ({
 
   const close = (v: boolean) => {
     onOpenChange(v);
-    if (!v) setTimeout(() => setDone(null), 200);
+    if (!v) setTimeout(() => setDone(false), 200);
   };
 
   const submitBeta = async (e: React.FormEvent) => {

@@ -206,7 +206,16 @@ const Feed = () => {
       .order("created_at", { ascending: false })
       .range(from, to);
     if (data) {
-      setContributions(prev => append ? [...prev, ...(data as any)] : (data as any));
+      const ranked = [...(data as Contribution[])].sort((a, b) => {
+        const scoreA = a.manual_score ?? a.ai_score ?? 0;
+        const scoreB = b.manual_score ?? b.ai_score ?? 0;
+        const ageA = Math.max(0, (Date.now() - new Date(a.created_at).getTime()) / 86_400_000);
+        const ageB = Math.max(0, (Date.now() - new Date(b.created_at).getTime()) / 86_400_000);
+        const qualityA = scoreA * 8 + Math.log1p(Math.max(0, a.points_earned)) * 4 - Math.min(ageA, 30) * 0.35;
+        const qualityB = scoreB * 8 + Math.log1p(Math.max(0, b.points_earned)) * 4 - Math.min(ageB, 30) * 0.35;
+        return qualityB - qualityA;
+      });
+      setContributions(prev => append ? [...prev, ...ranked] : ranked);
       setHasMore(data.length === PAGE_SIZE);
     }
     setLoading(false);

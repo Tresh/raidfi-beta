@@ -53,6 +53,12 @@ const DashContributions = () => {
       return;
     }
     setSubmitting(true);
+    const { data: ownership, error: ownershipError } = await supabase.functions.invoke("validate-x-post-owner", { body: { post_url: postUrl.trim() } });
+    if (ownershipError || !(ownership as any)?.valid) {
+      toast({ title: "Post not accepted", description: (ownership as any)?.error ?? "Only posts published by your verified X account are accepted.", variant: "destructive" });
+      setSubmitting(false);
+      return;
+    }
     const { data: inserted, error } = await supabase
       .from("contributions")
       .insert({
