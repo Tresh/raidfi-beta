@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
       code,
       expires_at: expiresAt.toISOString(),
       reviewed_at: new Date().toISOString(),
-      max_uses: 3,
+      max_uses: 1,
     });
 
     await admin

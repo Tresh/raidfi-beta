@@ -43,6 +43,7 @@ import ProjectSettings from "./pages/project/ProjectSettings";
 
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
+import ProjectRequest from "./pages/ProjectRequest";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,8 @@ const App = () => (
           <Route path="/whitepaper" element={<Whitepaper />} />
           <Route path="/contributions" element={<Contributions />} />
           <Route path="/feed" element={<Feed />} />
+          <Route path="/explore" element={<Feed />} />
+          <Route path="/project-request" element={<ProjectRequest />} />
           <Route path="/u/:code" element={<Profile />} />
           {/* Contributor dashboard (MVP) */}
           <Route path="/dashboard" element={<Overview />} />

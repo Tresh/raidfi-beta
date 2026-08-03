@@ -45,13 +45,14 @@ Deno.serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id);
-    const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
+    const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin" || r.role === "super_admin");
     if (!isAdmin) return json({ error: "Admin access required" }, 403);
 
     const body = await req.json().catch(() => ({}));
     const requestId = String(body.request_id ?? "");
     const action = String(body.action ?? "approve");
     const daysValid = Number.isFinite(Number(body.days_valid)) ? Number(body.days_valid) : 14;
+    const maxUses = Math.max(1, Math.min(100, Number.isFinite(Number(body.max_uses)) ? Math.floor(Number(body.max_uses)) : 1));
     if (!requestId) return json({ error: "request_id is required" }, 400);
 
     const { data: request, error: reqErr } = await admin
@@ -78,6 +79,8 @@ Deno.serve(async (req) => {
         status: "approved",
         code,
         expires_at: expiresAt.toISOString(),
+        max_uses: maxUses,
+        uses_count: 0,
         reviewed_at: new Date().toISOString(),
       })
       .eq("id", requestId);
@@ -114,7 +117,7 @@ Deno.serve(async (req) => {
       emailError = e instanceof Error ? e.message : "Unknown email error";
     }
 
-    return json({ ok: true, status: "approved", code, expires_at: expiresAt.toISOString(), emailed, emailError });
+    return json({ ok: true, status: "approved", code, expires_at: expiresAt.toISOString(), max_uses: maxUses, emailed, emailError });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Unknown" }, 500);
   }

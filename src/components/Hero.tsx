@@ -63,9 +63,9 @@ const Hero = () => {
 
           <p className="mt-4 text-xs text-muted-foreground">
             Building a project?{" "}
-            <button onClick={() => setAccessOpen(true)} className="text-primary underline underline-offset-4">
-              Request project access
-            </button>
+            <a href="/project-request" className="text-primary underline underline-offset-4">
+              Request a listing, partnership or workspace
+            </a>
           </p>
         </div>
       </div>
