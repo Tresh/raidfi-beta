@@ -47,7 +47,7 @@ const Hero = () => {
             
             <Button size="lg" asChild className="h-11 px-7 text-sm w-full sm:w-auto">
               <a href="/waitlist" className="group">
-                Join Waitlist
+                Request Beta
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
             </Button>

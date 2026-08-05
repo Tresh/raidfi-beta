@@ -46,7 +46,7 @@ const Navbar = () => {
               Sign in
             </a>
             <Button size="sm" asChild className="h-9 px-5 text-xs">
-              <a href="/waitlist">Request Access</a>
+              <a href="/waitlist">Request Beta</a>
             </Button>
           </div>
 
@@ -69,7 +69,7 @@ const Navbar = () => {
                   Sign in
                 </a>
                 <Button className="mt-4" asChild>
-                  <a href="/waitlist" onClick={handleLinkClick}>Request Access</a>
+                  <a href="/waitlist" onClick={handleLinkClick}>Request Beta</a>
                 </Button>
 
               </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, ExternalLink, Star, Clock, Compass, FolderKanban, Bell, Home, Send } from "lucide-react";
+import { Loader2, ExternalLink, Star, Clock, Compass, FolderKanban, Home, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -191,7 +191,7 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [tab, setTab] = useState<"contributions" | "projects" | "notifications">("contributions");
+  const [tab, setTab] = useState<"contributions" | "projects">("contributions");
   const [projects, setProjects] = useState<any[]>([]);
   const PAGE_SIZE = 20;
 
