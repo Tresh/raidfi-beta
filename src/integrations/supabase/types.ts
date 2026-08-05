@@ -768,6 +768,8 @@ export type Database = {
           slug: string
           status: string
           telegram: string | null
+          telegram_bot_added: boolean
+          telegram_group_id: string | null
           trust_score: number
           updated_at: string
           verification: string
@@ -785,6 +787,8 @@ export type Database = {
           slug: string
           status?: string
           telegram?: string | null
+          telegram_bot_added?: boolean
+          telegram_group_id?: string | null
           trust_score?: number
           updated_at?: string
           verification?: string
@@ -802,6 +806,8 @@ export type Database = {
           slug?: string
           status?: string
           telegram?: string | null
+          telegram_bot_added?: boolean
+          telegram_group_id?: string | null
           trust_score?: number
           updated_at?: string
           verification?: string
