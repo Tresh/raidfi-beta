@@ -11,7 +11,11 @@ export interface ProjectRecord {
   description: string | null;
   verification_tier: string | null;
   trust_score: number | null;
+  telegram: string | null;
+  telegram_group_id: string | null;
+  telegram_bot_added: boolean | null;
 }
+
 
 let cachedProject: ProjectRecord | null = null;
 let cachedRole: string | null = null;

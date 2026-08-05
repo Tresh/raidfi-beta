@@ -191,7 +191,7 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [tab, setTab] = useState<"contributions" | "projects" | "notifications">("contributions");
+  const [tab, setTab] = useState<"contributions" | "projects">("contributions");
   const [projects, setProjects] = useState<any[]>([]);
   const PAGE_SIZE = 20;
 
@@ -242,16 +242,23 @@ const Feed = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Explore — RaidFi", "description": "Quality Web3 contributions and projects on RaidFi.", "url": "https://raidfi.site/explore" }) }} />
-      <main className="flex-1 pt-20 pb-24 md:pb-16">
+      <main className="flex-1 pt-16 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Explore</h1>
-            <p className="text-muted-foreground text-sm">Learn from strong contributions and discover credible Web3 communities.</p>
-          </div>
-          <div className="grid grid-cols-3 border-b border-border mb-4">
-            <button onClick={() => setTab("contributions")} className={`py-2.5 text-xs font-medium border-b-2 ${tab === "contributions" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>Contributions</button>
-            <button onClick={() => setTab("projects")} className={`py-2.5 text-xs font-medium border-b-2 ${tab === "projects" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>Projects</button>
-            <button onClick={() => setTab("notifications")} className={`py-2.5 text-xs font-medium border-b-2 ${tab === "notifications" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>Updates</button>
+          <div className="sticky top-14 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-background/90 backdrop-blur border-b border-border mb-3">
+            <div className="flex gap-1 py-2">
+              <button
+                onClick={() => setTab("contributions")}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${tab === "contributions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                For you
+              </button>
+              <button
+                onClick={() => setTab("projects")}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${tab === "projects" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Projects
+              </button>
+            </div>
           </div>
 
           {tab === "projects" ? (
@@ -264,9 +271,8 @@ const Feed = () => {
                 </CardContent></Card>
               )) : <p className="text-sm text-muted-foreground py-10 text-center col-span-2">Project listings will appear here after verification.</p>}
             </div>
-          ) : tab === "notifications" ? (
-            <Card><CardContent className="py-12 text-center"><Bell className="w-5 h-5 text-primary mx-auto mb-3" /><p className="text-sm font-medium">Community updates are coming here</p><p className="text-xs text-muted-foreground mt-1">Campaigns, project listings and contribution milestones will appear in this stream.</p></CardContent></Card>
           ) : loading ? (
+
             <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : contributions.length === 0 ? (
             <Card className="border-dashed"><CardContent className="py-12 text-center"><p className="text-muted-foreground">No posts yet.</p></CardContent></Card>

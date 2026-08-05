@@ -38,51 +38,72 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Require authenticated caller
+    // Require authenticated caller (user JWT) or a trusted service-role call.
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const authedClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsErr } = await authedClient.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const callerId = claimsData.claims.sub as string;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const isService = token === serviceKey;
 
-    const { contribution_id, post_url } = await req.json();
-    if (!contribution_id || !post_url) {
-      return new Response(JSON.stringify({ error: "Missing fields" }), {
+    let callerId: string | null = null;
+    if (!isService) {
+      const authedClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } },
+      );
+      const { data: claimsData, error: claimsErr } = await authedClient.auth.getClaims(token);
+      if (claimsErr || !claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      callerId = claimsData.claims.sub as string;
+    }
+
+    const payload = await req.json().catch(() => ({}));
+    const contribution_id = payload.contribution_id;
+    if (!contribution_id) {
+      return new Response(JSON.stringify({ error: "Missing contribution_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Ownership / admin check
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const adminClient = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
     const { data: contribRow } = await adminClient
       .from("contributions")
-      .select("user_id")
+      .select("user_id,post_url")
       .eq("id", contribution_id)
       .maybeSingle();
-    const { data: isAdmin } = await adminClient.rpc("has_role", { _user_id: callerId, _role: "admin" });
-    if (!contribRow || (contribRow.user_id !== callerId && !isAdmin)) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+    if (!contribRow) {
+      return new Response(JSON.stringify({ error: "Contribution not found" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // post_url is optional from the client — always trust the stored one.
+    const post_url = contribRow.post_url ?? payload.post_url;
+    if (!post_url) {
+      return new Response(JSON.stringify({ error: "Missing post_url" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!isService) {
+      const { data: isAdmin } = await adminClient.rpc("has_role", { _user_id: callerId, _role: "admin" });
+      if (contribRow.user_id !== callerId && !isAdmin) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
 
     let post_text: string | null = null;
     let post_author: string | null = null;

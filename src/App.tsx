@@ -17,6 +17,7 @@ import ReputationPage from "./pages/dashboard/Reputation";
 import AnalyticsDash from "./pages/dashboard/Analytics";
 import DashSettings from "./pages/dashboard/Settings";
 import DashFeedback from "./pages/dashboard/Feedback";
+import DashReferrals from "./pages/dashboard/Referrals";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
@@ -72,6 +73,7 @@ const App = () => (
           <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
           <Route path="/dashboard/settings" element={<DashSettings />} />
           <Route path="/dashboard/feedback" element={<DashFeedback />} />
+          <Route path="/dashboard/referrals" element={<DashReferrals />} />
 
           {/* Project workspace */}
           <Route path="/project" element={<ProjectOverview />} />

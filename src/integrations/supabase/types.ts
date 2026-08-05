@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           auto_publish_contributions: boolean
           id: string
+          project_referral_percent: number
+          referral_xp_per_signup: number
           scoring_delay_hours: number
           telegram_chat_id: string | null
           telegram_enabled: boolean
@@ -28,6 +30,8 @@ export type Database = {
         Insert: {
           auto_publish_contributions?: boolean
           id?: string
+          project_referral_percent?: number
+          referral_xp_per_signup?: number
           scoring_delay_hours?: number
           telegram_chat_id?: string | null
           telegram_enabled?: boolean
@@ -38,6 +42,8 @@ export type Database = {
         Update: {
           auto_publish_contributions?: boolean
           id?: string
+          project_referral_percent?: number
+          referral_xp_per_signup?: number
           scoring_delay_hours?: number
           telegram_chat_id?: string | null
           telegram_enabled?: boolean
@@ -54,6 +60,7 @@ export type Database = {
           created_at: string
           email: string
           expires_at: string | null
+          from_waitlist: boolean
           id: string
           max_uses: number
           name: string | null
@@ -71,6 +78,7 @@ export type Database = {
           created_at?: string
           email: string
           expires_at?: string | null
+          from_waitlist?: boolean
           id?: string
           max_uses?: number
           name?: string | null
@@ -88,6 +96,7 @@ export type Database = {
           created_at?: string
           email?: string
           expires_at?: string | null
+          from_waitlist?: boolean
           id?: string
           max_uses?: number
           name?: string | null
@@ -290,12 +299,14 @@ export type Database = {
         Row: {
           admin_notes: string | null
           ai_feedback: string | null
+          ai_generated: boolean
           ai_score: number | null
           content_type: string
           created_at: string
           engagement_count: number
           id: string
           manual_score: number | null
+          media_type: string
           points_earned: number
           post_author: string | null
           post_fetched_at: string | null
@@ -309,12 +320,14 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           ai_feedback?: string | null
+          ai_generated?: boolean
           ai_score?: number | null
           content_type?: string
           created_at?: string
           engagement_count?: number
           id?: string
           manual_score?: number | null
+          media_type?: string
           points_earned?: number
           post_author?: string | null
           post_fetched_at?: string | null
@@ -328,12 +341,14 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           ai_feedback?: string | null
+          ai_generated?: boolean
           ai_score?: number | null
           content_type?: string
           created_at?: string
           engagement_count?: number
           id?: string
           manual_score?: number | null
+          media_type?: string
           points_earned?: number
           post_author?: string | null
           post_fetched_at?: string | null
@@ -624,6 +639,39 @@ export type Database = {
           },
         ]
       }
+      project_referrals: {
+        Row: {
+          commission_percent: number
+          contact_email: string | null
+          created_at: string
+          id: string
+          note: string | null
+          project_name: string
+          referrer_email: string
+          status: string
+        }
+        Insert: {
+          commission_percent?: number
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          project_name: string
+          referrer_email: string
+          status?: string
+        }
+        Update: {
+          commission_percent?: number
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          project_name?: string
+          referrer_email?: string
+          status?: string
+        }
+        Relationships: []
+      }
       project_requests: {
         Row: {
           admin_notes: string | null
@@ -720,6 +768,8 @@ export type Database = {
           slug: string
           status: string
           telegram: string | null
+          telegram_bot_added: boolean
+          telegram_group_id: string | null
           trust_score: number
           updated_at: string
           verification: string
@@ -737,6 +787,8 @@ export type Database = {
           slug: string
           status?: string
           telegram?: string | null
+          telegram_bot_added?: boolean
+          telegram_group_id?: string | null
           trust_score?: number
           updated_at?: string
           verification?: string
@@ -754,6 +806,8 @@ export type Database = {
           slug?: string
           status?: string
           telegram?: string | null
+          telegram_bot_added?: boolean
+          telegram_group_id?: string | null
           trust_score?: number
           updated_at?: string
           verification?: string

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,15 +20,23 @@ const ProjectSettings = () => {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [telegram, setTelegram] = useState("");
+  const [groupId, setGroupId] = useState("");
+  const [botAdded, setBotAdded] = useState(false);
+  const [savingTg, setSavingTg] = useState(false);
+
   useEffect(() => {
     if (!project) return;
     setName(project.name ?? "");
     setWebsite(project.website ?? "");
     setXHandle(project.x_handle ?? "");
     setDescription(project.description ?? "");
+    setTelegram(project.telegram ?? "");
+    setGroupId(project.telegram_group_id ?? "");
+    setBotAdded(Boolean(project.telegram_bot_added));
   }, [project]);
 
-  const canEdit = role === "owner" || role === "manager";
+  const canEdit = role === "owner" || role === "manager" || role === "project_admin";
 
   const save = async () => {
     if (!project) return;
@@ -48,6 +57,26 @@ const ProjectSettings = () => {
     }
     toast({ title: "Saved", description: "Project profile updated." });
   };
+
+  const saveTelegram = async () => {
+    if (!project) return;
+    setSavingTg(true);
+    const { error } = await supabase
+      .from("projects" as any)
+      .update({
+        telegram: telegram.trim() || null,
+        telegram_group_id: groupId.trim() || null,
+        telegram_bot_added: botAdded,
+      })
+      .eq("id", project.id);
+    setSavingTg(false);
+    if (error) {
+      toast({ title: "Couldn't save", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Telegram settings saved", description: "Alerts will use this group." });
+  };
+
 
   return (
     <ProjectLayout>
@@ -80,6 +109,35 @@ const ProjectSettings = () => {
           </div>
         </Panel>
 
+        <Panel title="Telegram community" description="Send contribution alerts straight into your own group.">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="p-tg">Group invite link</Label>
+              <Input id="p-tg" value={telegram} onChange={(e) => setTelegram(e.target.value)} disabled={!canEdit} placeholder="t.me/yourcommunity" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="p-tgid">Telegram group ID</Label>
+              <Input id="p-tgid" value={groupId} onChange={(e) => setGroupId(e.target.value)} disabled={!canEdit} placeholder="-1001234567890" />
+              <p className="text-[11px] text-muted-foreground">
+                Add <a className="text-primary" href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">@raidficontributionbot</a>{" "}
+                to your group as an admin, then paste the group ID here to receive contribution and task alerts.
+              </p>
+            </div>
+            <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+              <div>
+                <p className="text-xs font-medium text-foreground">RaidFi bot added to the group</p>
+                <p className="text-[11px] text-muted-foreground">Turn on once the bot is an admin in your group.</p>
+              </div>
+              <Switch checked={botAdded} onCheckedChange={setBotAdded} disabled={!canEdit} />
+            </div>
+            {canEdit && (
+              <Button onClick={saveTelegram} disabled={savingTg} variant="outline">
+                {savingTg && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Save Telegram settings
+              </Button>
+            )}
+          </div>
+        </Panel>
+
         <Panel title="Workspace" description="Access and verification status.">
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-3">
@@ -103,6 +161,7 @@ const ProjectSettings = () => {
             Need more seats or a higher verification tier? Reach out to the RaidFi team and we'll upgrade your workspace.
           </p>
         </Panel>
+
       </div>
     </ProjectLayout>
   );

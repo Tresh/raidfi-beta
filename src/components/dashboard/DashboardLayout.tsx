@@ -11,9 +11,12 @@ import {
   Menu,
   X,
   Loader2,
+  Bell,
+  Gift,
   MessageSquareWarning,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import ContributeFab from "@/components/dashboard/ContributeFab";
 import logo from "/logo.png";
 
 const navItems = [
@@ -21,9 +24,11 @@ const navItems = [
   { label: "Contributions", to: "/dashboard/contributions", icon: Signal },
   { label: "Reputation", to: "/dashboard/reputation", icon: ShieldCheck },
   { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
+  { label: "Referrals", to: "/dashboard/referrals", icon: Gift },
   { label: "Feedback", to: "/dashboard/feedback", icon: MessageSquareWarning },
   { label: "Settings", to: "/dashboard/settings", icon: Settings },
 ];
+
 
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
@@ -128,6 +133,13 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             Contribution intelligence workspace
           </div>
           <div className="flex items-center gap-2.5">
+            <a
+              href="/explore"
+              aria-label="Notifications"
+              className="relative w-8 h-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground"
+            >
+              <Bell className="w-4 h-4" />
+            </a>
             <span className="hidden sm:block text-xs text-muted-foreground truncate max-w-[200px]">
               {email}
             </span>
@@ -138,7 +150,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         </header>
 
         <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
+        <ContributeFab />
       </div>
+
     </div>
   );
 };
