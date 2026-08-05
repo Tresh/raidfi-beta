@@ -1,16 +1,11 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useContributorData } from "@/hooks/useContributorData";
-import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, StatCard, StatusPill } from "@/components/dashboard/Primitives";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ExternalLink, Loader2, Send } from "lucide-react";
-
-const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/;
+import ContributionComposer from "@/components/dashboard/ContributionComposer";
+import { ExternalLink, Loader2, Sparkles } from "lucide-react";
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -26,66 +21,8 @@ const DashContributions = () => {
     path: "/dashboard/contributions",
   });
   const { session } = useAuth();
-  const { toast } = useToast();
   const data = useContributorData(session?.user?.email);
-
-  const [postUrl, setPostUrl] = useState("");
-  const [contentType, setContentType] = useState("post");
-  const [types, setTypes] = useState<{ value: string; label: string }[]>([]);
-  const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
-
-  useEffect(() => {
-    supabase
-      .from("content_types")
-      .select("value,label")
-      .eq("is_active", true)
-      .order("sort_order")
-      .then(({ data }) => setTypes((data as any) ?? []));
-  }, []);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const email = session?.user?.email?.toLowerCase();
-    if (!email) return;
-    if (!TWEET_URL_REGEX.test(postUrl.trim())) {
-      toast({ title: "Invalid link", description: "Paste a full X post URL.", variant: "destructive" });
-      return;
-    }
-    setSubmitting(true);
-    const { data: ownership, error: ownershipError } = await supabase.functions.invoke("validate-x-post-owner", { body: { post_url: postUrl.trim() } });
-    if (ownershipError || !(ownership as any)?.valid) {
-      toast({ title: "Post not accepted", description: (ownership as any)?.error ?? "Only posts published by your verified X account are accepted.", variant: "destructive" });
-      setSubmitting(false);
-      return;
-    }
-    const { data: inserted, error } = await supabase
-      .from("contributions")
-      .insert({
-        user_email: email,
-        user_id: session?.user?.id,
-        post_url: postUrl.trim(),
-        content_type: contentType,
-      })
-      .select("id")
-      .maybeSingle();
-
-    if (error) {
-      toast({ title: "Could not submit", description: error.message, variant: "destructive" });
-      setSubmitting(false);
-      return;
-    }
-
-    if (inserted?.id) {
-      supabase.functions.invoke("fetch-post-text", { body: { contribution_id: inserted.id } }).catch(() => {});
-      supabase.functions.invoke("notify-admin-contribution", { body: { contribution_id: inserted.id } }).catch(() => {});
-    }
-
-    setPostUrl("");
-    toast({ title: "Contribution tracked", description: "It will be scored after review." });
-    await data.refresh();
-    setSubmitting(false);
-  };
 
   const rows = data.contributions.filter((c) => (filter === "all" ? true : c.status === filter));
   const rep = data.reputation;
@@ -107,37 +44,7 @@ const DashContributions = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-1">
           <Panel title="Track a contribution" description="Submit an X post to add it to your record.">
-            <form onSubmit={submit} className="space-y-3">
-              <Input
-                placeholder="https://x.com/user/status/..."
-                value={postUrl}
-                onChange={(e) => setPostUrl(e.target.value)}
-                className="h-10 text-sm"
-              />
-              <select
-                value={contentType}
-                onChange={(e) => setContentType(e.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
-              >
-                {(types.length ? types : [{ value: "post", label: "Post" }]).map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-              <Button type="submit" className="w-full h-10 text-sm" disabled={submitting}>
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4 mr-2" />
-                )}
-                Submit
-              </Button>
-              <p className="text-[11px] text-muted-foreground">
-                Submissions are reviewed before they affect reputation. Quality and consistency matter
-                more than volume.
-              </p>
-            </form>
+            <ContributionComposer onSubmitted={() => data.refresh()} />
           </Panel>
         </div>
 
@@ -178,9 +85,16 @@ const DashContributions = () => {
                         <p className="text-xs text-foreground line-clamp-2">
                           {c.post_text?.replace(/&mdash;/g, "—") || c.post_url}
                         </p>
-                        <p className="text-[11px] text-muted-foreground mt-1">
-                          {new Date(c.created_at).toLocaleDateString()} · {c.content_type}
-                          {c.status === "approved" && ` · +${c.points_earned} XP`}
+                        <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span>
+                            {new Date(c.created_at).toLocaleDateString()} · {c.content_type}
+                            {c.status === "approved" && ` · +${c.points_earned} XP`}
+                          </span>
+                          {(c as any).ai_generated && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-[10px]">
+                              <Sparkles className="w-2.5 h-2.5" /> AI
+                            </span>
+                          )}
                         </p>
                         {c.ai_feedback && (
                           <p className="text-[11px] text-muted-foreground mt-1 italic line-clamp-2">
