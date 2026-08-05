@@ -361,36 +361,11 @@ async function handle(update: any, supabase: any) {
         return;
       }
 
-      const { data: ownerProfile } = await supabase
-        .from("profiles").select("x_username,x_verified").eq("email", link.email).maybeSingle();
-      if (!ownerProfile?.x_verified || !ownerProfile.x_username) {
-        await reply(chatId, `Verify your X account in RaidFi Settings before submitting contributions.`, [[{ text: "Open Settings", url: `${SITE_ORIGIN}/dashboard/settings` }]], msgId);
-        return;
-      }
-      try {
-        const oembed = await fetch(`https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=1&dnt=1`);
-        if (!oembed.ok) {
-          await reply(chatId, `I couldn't read that post. Make sure it is public and try again.`, [], msgId);
-          return;
-        }
-        const post = await oembed.json();
-        const submittedHandle = String(post.author_url ?? "").split("/").filter(Boolean).pop()?.replace(/^@/, "").toLowerCase();
-        const verifiedHandle = ownerProfile.x_username.replace(/^@/, "").toLowerCase();
-        if (!submittedHandle || submittedHandle !== verifiedHandle) {
-          await reply(chatId, `Only posts from your verified @${escapeHtml(verifiedHandle)} account are accepted.`, [], msgId);
-          return;
-        }
-      } catch {
-        await reply(chatId, `I couldn't verify who published that post. Please try again.`, [], msgId);
-        return;
-      }
-
       // Ensure a profile row exists so contributions link to a real user —
       // that's what makes "View Contributor" appear on the live feed.
-      let { data: profile } = await supabase
-        .from("profiles").select("user_id,referral_code").eq("email", link.email).maybeSingle();
-
-      if (!profile?.user_id) {
+      const { data: existingProfile } = await supabase
+        .from("profiles").select("user_id").eq("email", link.email).maybeSingle();
+      if (!existingProfile?.user_id) {
         const { data: usersList } = await supabase.auth.admin.listUsers();
         const authUser = usersList?.users?.find(
           (u: any) => (u.email || "").toLowerCase() === link.email.toLowerCase()
@@ -400,45 +375,36 @@ async function handle(update: any, supabase: any) {
             .select("referral_code").eq("email", link.email).maybeSingle();
           const payload: any = { user_id: authUser.id, email: link.email, waitlist_completed: true };
           if ((wl as any)?.referral_code) payload.referral_code = (wl as any).referral_code;
-          const { data: created } = await supabase.from("profiles")
-            .upsert(payload, { onConflict: "user_id" }).select().single();
-          profile = created as any;
+          await supabase.from("profiles").upsert(payload, { onConflict: "user_id" });
         }
       }
 
-      const id = crypto.randomUUID();
-      const { error } = await supabase.from("contributions").insert({
-        id,
-        user_email: link.email,
-        user_id: profile?.user_id || null,
-        post_url: url,
-        content_type: "post",
-        points_earned: 10,
-        status: "pending",
-        published_to_feed: true,
+      // Exactly the same pipeline the website uses.
+      const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/submit-contribution`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          apikey: `${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({
+          post_url: url,
+          user_email: link.email,
+          content_type: "post",
+          origin: SITE_ORIGIN,
+        }),
       });
-      if (error) {
-        await reply(chatId, `Couldn't submit: ${escapeHtml(error.message)}`, [], msgId);
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok || out?.error) {
+        await reply(chatId, `${escapeHtml(out?.error || "Couldn't submit that post.")}`,
+          [[{ text: "Open Settings", url: `${SITE_ORIGIN}/dashboard/settings` }]], msgId);
         return;
       }
-
-      // Fire the same pipeline the website runs — fetch text/image,
-      // notify admins, AND post to the group feed.
-      const fnUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
-      const fnHeaders = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-      };
-      fetch(`${fnUrl}/fetch-post-text`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ contribution_id: id, post_url: url }) }).catch(() => {});
-      fetch(`${fnUrl}/notify-admin-contribution`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ post_url: url, user_email: link.email, contribution_id: id }) }).catch(() => {});
-      // Small delay so post_text is likely saved before the group card renders
-      setTimeout(() => {
-        fetch(`${fnUrl}/notify-telegram`, { method: "POST", headers: fnHeaders, body: JSON.stringify({ kind: "feed", contribution_id: id, origin: SITE_ORIGIN }) }).catch(() => {});
-      }, 1500);
 
       await reply(chatId, `Got it — your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
       return;
     }
+
 
     case "whitepaper": {
       const { data: wp } = await supabase.from("whitepaper_live").select("version,updated_at").eq("id", "live").maybeSingle();
