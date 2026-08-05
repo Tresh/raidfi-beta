@@ -1,8 +1,10 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Megaphone, BarChart3, Settings as SettingsIcon, Menu, X, Home, Loader2 } from "lucide-react";
+import { LayoutDashboard, Users, Megaphone, BarChart3, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
+
 
 const navItems = [
   { label: "Overview", to: "/project", icon: LayoutDashboard, end: true },
@@ -76,12 +78,22 @@ const ProjectLayout = ({ children }: { children: ReactNode }) => {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border space-y-0.5">
           <a href="/" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground">
             <Home className="w-4 h-4" /> Back to site
           </a>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/login";
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-4 h-4" /> Sign out
+          </button>
         </div>
       </aside>
+
 
       <div className="flex-1 lg:ml-60 min-w-0">
         <header className="lg:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 h-14 flex items-center gap-3">
