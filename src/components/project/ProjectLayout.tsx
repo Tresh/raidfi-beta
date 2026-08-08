@@ -1,15 +1,12 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Search, Activity, Gauge, Sparkles, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut } from "lucide-react";
+import { Search, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Find", to: "/project", icon: Search, end: true, hint: "Pick the right contributors" },
-  { label: "Activity", to: "/project/activity", icon: Activity, hint: "What is happening" },
-  { label: "Evaluate", to: "/project/evaluate", icon: Gauge, hint: "Who actually performed" },
-  { label: "AI Analyst", to: "/project/ai", icon: Sparkles, hint: "Ask questions about your data" },
   { label: "Settings", to: "/project/settings", icon: SettingsIcon },
 ];
 

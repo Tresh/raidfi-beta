@@ -36,10 +36,7 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import BetaRequestsManager from "./pages/admin/BetaRequestsManager";
 import ProjectRequestsManager from "./pages/admin/ProjectRequestsManager";
 import ReportsManager from "./pages/admin/ReportsManager";
-import ProjectOverview from "./pages/project/ProjectOverview";
-import ProjectContributors from "./pages/project/ProjectContributors";
-import ProjectCampaigns from "./pages/project/ProjectCampaigns";
-import ProjectAnalytics from "./pages/project/ProjectAnalytics";
+import ProjectFind from "./pages/project/ProjectFind";
 import ProjectSettings from "./pages/project/ProjectSettings";
 
 import Whitepaper from "./pages/Whitepaper";
@@ -76,10 +73,7 @@ const App = () => (
           <Route path="/dashboard/referrals" element={<DashReferrals />} />
 
           {/* Project workspace */}
-          <Route path="/project" element={<ProjectOverview />} />
-          <Route path="/project/contributors" element={<ProjectContributors />} />
-          <Route path="/project/campaigns" element={<ProjectCampaigns />} />
-          <Route path="/project/analytics" element={<ProjectAnalytics />} />
+          <Route path="/project" element={<ProjectFind />} />
           <Route path="/project/settings" element={<ProjectSettings />} />
 
           {/* Admin */}
