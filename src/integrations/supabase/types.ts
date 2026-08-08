@@ -604,6 +604,91 @@ export type Database = {
         }
         Relationships: []
       }
+      project_ai_config: {
+        Row: {
+          api_key: string | null
+          consent_at: string | null
+          consent_by: string | null
+          created_at: string
+          key_hint: string | null
+          model: string
+          project_id: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string | null
+          consent_at?: string | null
+          consent_by?: string | null
+          created_at?: string
+          key_hint?: string | null
+          model?: string
+          project_id: string
+          provider?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string | null
+          consent_at?: string | null
+          consent_by?: string | null
+          created_at?: string
+          key_hint?: string | null
+          model?: string
+          project_id?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_ai_config_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_contributor_lists: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          emails: string[]
+          id: string
+          name: string
+          note: string | null
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          emails?: string[]
+          id?: string
+          name: string
+          note?: string | null
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          emails?: string[]
+          id?: string
+          name?: string
+          note?: string | null
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_contributor_lists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_members: {
         Row: {
           created_at: string
@@ -756,6 +841,47 @@ export type Database = {
         }
         Relationships: []
       }
+      project_saved_views: {
+        Row: {
+          config: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          name: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          name: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_saved_views_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           contact_email: string
@@ -775,6 +901,8 @@ export type Database = {
           verification: string
           website: string | null
           x_handle: string | null
+          x_verified: boolean
+          x_verified_at: string | null
         }
         Insert: {
           contact_email: string
@@ -794,6 +922,8 @@ export type Database = {
           verification?: string
           website?: string | null
           x_handle?: string | null
+          x_verified?: boolean
+          x_verified_at?: string | null
         }
         Update: {
           contact_email?: string
@@ -813,6 +943,8 @@ export type Database = {
           verification?: string
           website?: string | null
           x_handle?: string | null
+          x_verified?: boolean
+          x_verified_at?: string | null
         }
         Relationships: []
       }
@@ -1264,6 +1396,7 @@ export type Database = {
           referral_code: string | null
           status: string | null
           user_id: string | null
+          x_username: string | null
         }
         Relationships: []
       }
@@ -1293,6 +1426,44 @@ export type Database = {
           waitlist_xp?: number | null
         }
         Relationships: []
+      }
+      project_ai_config_public: {
+        Row: {
+          connected: boolean | null
+          consent_at: string | null
+          key_hint: string | null
+          model: string | null
+          project_id: string | null
+          provider: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          connected?: never
+          consent_at?: string | null
+          key_hint?: string | null
+          model?: string | null
+          project_id?: string | null
+          provider?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          connected?: never
+          consent_at?: string | null
+          key_hint?: string | null
+          model?: string | null
+          project_id?: string | null
+          provider?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_ai_config_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -1344,6 +1515,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_project_admin: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_project_member: {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
@@ -1361,6 +1536,64 @@ export type Database = {
         Returns: number
       }
       process_referral: { Args: { referrer_code: string }; Returns: undefined }
+      project_activity: {
+        Args: {
+          _from?: string
+          _limit?: number
+          _offset?: number
+          _only_project?: boolean
+          _project_id: string
+          _to?: string
+        }
+        Returns: {
+          ai_generated: boolean
+          content_type: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          is_project: boolean
+          media_type: string
+          points_earned: number
+          post_text: string
+          post_url: string
+          referral_code: string
+          score: number
+          status: string
+          x_username: string
+        }[]
+      }
+      project_contributor_analytics: {
+        Args: { _from?: string; _project_id: string; _to?: string }
+        Returns: {
+          acceptance_rate: number
+          accepted: number
+          active_days: number
+          active_weeks: number
+          ai_generated_count: number
+          avg_quality: number
+          contributions: number
+          display_name: string
+          email: string
+          first_contribution: string
+          last_contribution: string
+          max_quality: number
+          pending: number
+          project_accepted: number
+          project_contributions: number
+          project_last: string
+          project_xp: number
+          referral_code: string
+          rejected: number
+          total_xp: number
+          x_username: string
+          xp_earned: number
+        }[]
+      }
+      project_period_stats: {
+        Args: { _from: string; _project_id: string; _to: string }
+        Returns: Json
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
