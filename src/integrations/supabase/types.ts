@@ -696,7 +696,7 @@ export type Database = {
           id: string
           member_role: string
           project_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -704,7 +704,7 @@ export type Database = {
           id?: string
           member_role?: string
           project_id: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -712,7 +712,7 @@ export type Database = {
           id?: string
           member_role?: string
           project_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1427,50 +1427,13 @@ export type Database = {
         }
         Relationships: []
       }
-      project_ai_config_public: {
-        Row: {
-          connected: boolean | null
-          consent_at: string | null
-          key_hint: string | null
-          model: string | null
-          project_id: string | null
-          provider: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          connected?: never
-          consent_at?: string | null
-          key_hint?: string | null
-          model?: string | null
-          project_id?: string | null
-          provider?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          connected?: never
-          consent_at?: string | null
-          key_hint?: string | null
-          model?: string | null
-          project_id?: string | null
-          provider?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_ai_config_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: true
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Functions: {
       check_beta_code:
         | { Args: { _code: string }; Returns: Json }
         | { Args: { _code: string; _email?: string }; Returns: Json }
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
+      claim_project_memberships: { Args: never; Returns: number }
       consume_beta_code: {
         Args: { _code: string; _email: string }
         Returns: Json
@@ -1563,6 +1526,7 @@ export type Database = {
           x_username: string
         }[]
       }
+      project_ai_status: { Args: { _project_id: string }; Returns: Json }
       project_contributor_analytics: {
         Args: { _from?: string; _project_id: string; _to?: string }
         Returns: {
