@@ -1,16 +1,15 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Megaphone, BarChart3, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut } from "lucide-react";
+import { Search, Activity, Gauge, Sparkles, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
-
 const navItems = [
-  { label: "Overview", to: "/project", icon: LayoutDashboard, end: true },
-  { label: "Contributors", to: "/project/contributors", icon: Users },
-  { label: "Campaigns", to: "/project/campaigns", icon: Megaphone },
-  { label: "Analytics", to: "/project/analytics", icon: BarChart3 },
+  { label: "Find", to: "/project", icon: Search, end: true, hint: "Pick the right contributors" },
+  { label: "Activity", to: "/project/activity", icon: Activity, hint: "What is happening" },
+  { label: "Evaluate", to: "/project/evaluate", icon: Gauge, hint: "Who actually performed" },
+  { label: "AI Analyst", to: "/project/ai", icon: Sparkles, hint: "Ask questions about your data" },
   { label: "Settings", to: "/project/settings", icon: SettingsIcon },
 ];
 
@@ -48,38 +47,41 @@ const ProjectLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {open && <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setOpen(false)} />}
+      {open && <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setOpen(false)} />}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-60 bg-background border-r border-border flex flex-col transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="p-5 border-b border-border flex items-center justify-between">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="min-w-0">
             <p className="font-semibold text-sm text-foreground truncate">{project.name}</p>
-            <p className="text-[11px] text-muted-foreground capitalize">{role ?? "member"} · project workspace</p>
+            <p className="text-[11px] text-muted-foreground capitalize">{(role ?? "member").replace("_", " ")}</p>
           </div>
           <button onClick={() => setOpen(false)} className="lg:hidden text-muted-foreground"><X className="w-5 h-5" /></button>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               onClick={() => setOpen(false)}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+              className={`block px-3 py-2 rounded-md transition-colors ${
                 isActive(item.to, item.end)
-                  ? "bg-primary/10 text-primary font-medium"
+                  ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
-              <item.icon className="w-4 h-4" />
-              {item.label}
+              <span className="flex items-center gap-2.5 text-[13px] font-medium">
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </span>
+              {item.hint && <span className="block pl-6.5 ml-[26px] text-[10.5px] opacity-70 leading-tight">{item.hint}</span>}
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-3 border-t border-border space-y-0.5">
-          <a href="/" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground">
+        <div className="p-2.5 border-t border-border space-y-0.5">
+          <a href="/" className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-muted-foreground hover:text-foreground hover:bg-muted">
             <Home className="w-4 h-4" /> Back to site
           </a>
           <button
@@ -87,20 +89,19 @@ const ProjectLayout = ({ children }: { children: ReactNode }) => {
               await supabase.auth.signOut();
               window.location.href = "/login";
             }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-destructive hover:bg-destructive/10"
           >
             <LogOut className="w-4 h-4" /> Sign out
           </button>
         </div>
       </aside>
 
-
       <div className="flex-1 lg:ml-60 min-w-0">
         <header className="lg:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 h-14 flex items-center gap-3">
           <button onClick={() => setOpen(true)} className="text-muted-foreground"><Menu className="w-5 h-5" /></button>
           <span className="text-sm font-semibold text-foreground truncate">{project.name}</span>
         </header>
-        <main className="p-4 sm:p-6 lg:p-8 max-w-6xl">{children}</main>
+        <main className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">{children}</main>
       </div>
     </div>
   );
