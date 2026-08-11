@@ -24,7 +24,7 @@ const navItems = [
   { label: "Contributions", to: "/dashboard/contributions", icon: Signal },
   { label: "Reputation", to: "/dashboard/reputation", icon: ShieldCheck },
   { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-  { label: "Referrals", to: "/dashboard/referrals", icon: Gift },
+  
   { label: "Feedback", to: "/dashboard/feedback", icon: MessageSquareWarning },
   { label: "Settings", to: "/dashboard/settings", icon: Settings },
 ];
