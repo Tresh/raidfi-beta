@@ -78,7 +78,7 @@ const ProjectLayout = ({ children }: { children: ReactNode }) => {
                 <item.icon className="w-4 h-4" />
                 {item.label}
               </span>
-              {item.hint && <span className="block pl-6.5 ml-[26px] text-[10.5px] opacity-70 leading-tight">{item.hint}</span>}
+              
             </NavLink>
           ))}
         </nav>
