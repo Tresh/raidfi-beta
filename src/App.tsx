@@ -36,7 +36,12 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import BetaRequestsManager from "./pages/admin/BetaRequestsManager";
 import ProjectRequestsManager from "./pages/admin/ProjectRequestsManager";
 import ReportsManager from "./pages/admin/ReportsManager";
-import ProjectFind from "./pages/project/ProjectFind";
+import ProjectOverview from "./pages/project/ProjectOverview";
+import ProjectContributors from "./pages/project/ProjectContributors";
+import ProjectActivity from "./pages/project/ProjectActivity";
+import ProjectEvaluate from "./pages/project/ProjectEvaluate";
+import ProjectAnalytics from "./pages/project/ProjectAnalytics";
+import ProjectAIAnalyst from "./pages/project/ProjectAIAnalyst";
 import ProjectSettings from "./pages/project/ProjectSettings";
 
 import Whitepaper from "./pages/Whitepaper";
