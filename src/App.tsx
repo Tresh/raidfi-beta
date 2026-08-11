@@ -17,7 +17,6 @@ import ReputationPage from "./pages/dashboard/Reputation";
 import AnalyticsDash from "./pages/dashboard/Analytics";
 import DashSettings from "./pages/dashboard/Settings";
 import DashFeedback from "./pages/dashboard/Feedback";
-import DashReferrals from "./pages/dashboard/Referrals";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
@@ -36,7 +35,12 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import BetaRequestsManager from "./pages/admin/BetaRequestsManager";
 import ProjectRequestsManager from "./pages/admin/ProjectRequestsManager";
 import ReportsManager from "./pages/admin/ReportsManager";
-import ProjectFind from "./pages/project/ProjectFind";
+import ProjectOverview from "./pages/project/ProjectOverview";
+import ProjectContributors from "./pages/project/ProjectContributors";
+import ProjectActivity from "./pages/project/ProjectActivity";
+import ProjectEvaluate from "./pages/project/ProjectEvaluate";
+import ProjectAnalytics from "./pages/project/ProjectAnalytics";
+import ProjectAIAnalyst from "./pages/project/ProjectAIAnalyst";
 import ProjectSettings from "./pages/project/ProjectSettings";
 
 import Whitepaper from "./pages/Whitepaper";
@@ -70,10 +74,14 @@ const App = () => (
           <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
           <Route path="/dashboard/settings" element={<DashSettings />} />
           <Route path="/dashboard/feedback" element={<DashFeedback />} />
-          <Route path="/dashboard/referrals" element={<DashReferrals />} />
 
           {/* Project workspace */}
-          <Route path="/project" element={<ProjectFind />} />
+          <Route path="/project" element={<ProjectOverview />} />
+          <Route path="/project/contributors" element={<ProjectContributors />} />
+          <Route path="/project/activity" element={<ProjectActivity />} />
+          <Route path="/project/evaluate" element={<ProjectEvaluate />} />
+          <Route path="/project/analytics" element={<ProjectAnalytics />} />
+          <Route path="/project/ai" element={<ProjectAIAnalyst />} />
           <Route path="/project/settings" element={<ProjectSettings />} />
 
           {/* Admin */}

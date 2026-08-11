@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, ExternalLink, Star, Clock, Compass, FolderKanban, Bell, Home, Send } from "lucide-react";
+import { Loader2, ExternalLink, Star, Clock, FolderKanban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -375,12 +375,6 @@ const Feed = () => {
           )}
         </div>
       </main>
-      <nav className="fixed bottom-0 inset-x-0 z-40 grid grid-cols-4 bg-background border-t border-border md:hidden" aria-label="Mobile navigation">
-        <a href="/" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground"><Home className="w-4 h-4" />Home</a>
-        <a href="/explore" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-primary"><Compass className="w-4 h-4" />Explore</a>
-        <a href="/contributions" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground"><Send className="w-4 h-4" />Contribute</a>
-        <a href="/login" className="h-14 flex flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground"><Bell className="w-4 h-4" />Account</a>
-      </nav>
       <Footer />
     </div>
   );
