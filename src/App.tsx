@@ -17,7 +17,6 @@ import ReputationPage from "./pages/dashboard/Reputation";
 import AnalyticsDash from "./pages/dashboard/Analytics";
 import DashSettings from "./pages/dashboard/Settings";
 import DashFeedback from "./pages/dashboard/Feedback";
-import DashReferrals from "./pages/dashboard/Referrals";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
