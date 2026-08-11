@@ -1,14 +1,20 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Search, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut } from "lucide-react";
+import { Users, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut, LayoutDashboard, Activity, ClipboardCheck, Bot, BarChart3 } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const navItems = [
-  { label: "Find", to: "/project", icon: Search, end: true, hint: "Pick the right contributors" },
+  { label: "Overview", to: "/project", icon: LayoutDashboard, end: true },
+  { label: "Contributors", to: "/project/contributors", icon: Users },
+  { label: "Activity", to: "/project/activity", icon: Activity },
+  { label: "Evaluate", to: "/project/evaluate", icon: ClipboardCheck },
+  { label: "Analytics", to: "/project/analytics", icon: BarChart3 },
+  { label: "AI Analyst", to: "/project/ai", icon: Bot },
   { label: "Settings", to: "/project/settings", icon: SettingsIcon },
 ];
+
 
 const ProjectLayout = ({ children }: { children: ReactNode }) => {
   const { loading, project, role } = useProject();
