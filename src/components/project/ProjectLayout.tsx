@@ -16,10 +16,11 @@ const navItems = [
 ];
 
 
-const ProjectLayout = ({ children }: { children: ReactNode }) => {
+const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; fullBleed?: boolean }) => {
   const { loading, project, role } = useProject();
   const [open, setOpen] = useState(false);
   const location = useLocation();
+
 
   if (loading) {
     return (
