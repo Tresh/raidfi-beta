@@ -25,6 +25,12 @@ const ProjectSettings = () => {
   const [botAdded, setBotAdded] = useState(false);
   const [savingTg, setSavingTg] = useState(false);
 
+  const [xVerified, setXVerified] = useState(false);
+  const [xClaim, setXClaim] = useState("");
+  const [xPostUrl, setXPostUrl] = useState("");
+  const [verifyingX, setVerifyingX] = useState(false);
+  const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
+
   useEffect(() => {
     if (!project) return;
     setName(project.name ?? "");
@@ -34,9 +40,30 @@ const ProjectSettings = () => {
     setTelegram(project.telegram ?? "");
     setGroupId(project.telegram_group_id ?? "");
     setBotAdded(Boolean(project.telegram_bot_added));
+    setXVerified(Boolean(project.x_verified));
+    setXClaim(project.x_handle ?? "");
   }, [project]);
 
   const canEdit = role === "owner" || role === "manager" || role === "project_admin";
+
+  const verifyX = async () => {
+    if (!project) return;
+    setVerifyingX(true);
+    const { data, error } = await supabase.functions.invoke("verify-project-x", {
+      body: { project_id: project.id, handle: xClaim.trim(), post_url: xPostUrl.trim() },
+    });
+    setVerifyingX(false);
+    const message = (data as any)?.error ?? (error ? "We couldn't verify that post. Check the link and try again." : null);
+    if (message) {
+      toast({ title: "Couldn't verify", description: message, variant: "destructive" });
+      return;
+    }
+    setXVerified(true);
+    setXHandle(xClaim.trim().replace(/^@/, ""));
+    setXPostUrl("");
+    toast({ title: "X account verified", description: `@${xClaim.trim().replace(/^@/, "")} is now linked to your project.` });
+  };
+
 
   const save = async () => {
     if (!project) return;
