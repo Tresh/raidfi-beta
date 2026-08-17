@@ -134,7 +134,7 @@ const ProjectContributors = () => {
       {loading ? (
         <div className="py-16 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
       ) : tab === "posts" ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {visiblePosts.length === 0 && !postsLoading ? (
             <Panel title="No posts yet">
               <p className="text-sm text-muted-foreground">
@@ -142,53 +142,14 @@ const ProjectContributors = () => {
               </p>
             </Panel>
           ) : (
-            visiblePosts.map((p) => (
-              <article key={p.id} className="border border-border rounded-lg bg-card p-3.5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    {p.referral_code ? (
-                      <Link to={`/u/${p.referral_code}`} target="_blank" className="text-[13px] font-medium text-foreground hover:text-primary">
-                        {p.display_name}
-                      </Link>
-                    ) : (
-                      <span className="text-[13px] font-medium text-foreground">{p.display_name}</span>
-                    )}
-                    {p.x_username && (
-                      <span className="text-[11.5px] text-muted-foreground ml-1.5">@{p.x_username.replace(/^@/, "")}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {p.score != null && (
-                      <span className="text-[10.5px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                        {p.score}/100
-                      </span>
-                    )}
-                    <span className="text-[10.5px] px-2 py-0.5 rounded-full border border-border text-muted-foreground capitalize">
-                      {p.status}
-                    </span>
-                  </div>
-                </div>
-                {p.post_text && (
-                  <p className="text-[12.5px] text-foreground/90 mt-2 leading-relaxed line-clamp-4 whitespace-pre-wrap">
-                    {decode(p.post_text)}
-                  </p>
-                )}
-                <div className="flex items-center gap-3 mt-2.5 text-[11px] text-muted-foreground">
-                  <span>{new Date(p.created_at).toLocaleDateString()}</span>
-                  <span>+{p.points_earned} XP</span>
-                  {p.ai_generated && <span>AI-assisted</span>}
-                  <a href={p.post_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline ml-auto">
-                    View post <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </article>
-            ))
+            <PostGrid posts={visiblePosts} />
           )}
           {postsLoading && <div className="py-6 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-primary" /></div>}
           {hasMore && !postsLoading && (
             <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={loadMore}>Load more</Button>
           )}
         </div>
+
       ) : tab === "leaderboard" ? (
         <Panel title="Leaderboard" description="Ranked by reviewed value delivered to your project in this period.">
           {leaderboard.length === 0 ? (
