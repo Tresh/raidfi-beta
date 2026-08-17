@@ -53,7 +53,15 @@ const ProjectSettings = () => {
       body: { project_id: project.id, handle: xClaim.trim(), post_url: xPostUrl.trim() },
     });
     setVerifyingX(false);
-    const message = (data as any)?.error ?? (error ? "We couldn't verify that post. Check the link and try again." : null);
+    let message: string | null = (data as any)?.error ?? null;
+    if (!message && error) {
+      try {
+        const body = await (error as any).context?.json?.();
+        message = body?.error ?? null;
+      } catch { /* ignore */ }
+      message = message ?? "We couldn't verify that post. Check the link and try again.";
+    }
+
     if (message) {
       toast({ title: "Couldn't verify", description: message, variant: "destructive" });
       return;
