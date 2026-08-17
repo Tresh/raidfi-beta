@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import ProjectLayout from "@/components/project/ProjectLayout";
 import ContributorTable from "@/components/project/ContributorTable";
 import CriteriaBar from "@/components/project/CriteriaBar";
+import PostGrid from "@/components/project/PostGrid";
+
 import { PageHeader, Panel } from "@/components/dashboard/Primitives";
 import { useProject } from "@/hooks/useProject";
 import {
