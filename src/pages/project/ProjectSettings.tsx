@@ -138,6 +138,60 @@ const ProjectSettings = () => {
           </div>
         </Panel>
 
+        <Panel title="X account" description="Verify the official X account for this project.">
+          {xVerified ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2.5">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground">@{(project?.x_handle ?? "").replace(/^@/, "")} verified</p>
+                  <p className="text-[11px] text-muted-foreground">Mentions from this account are attributed to your project.</p>
+                </div>
+              </div>
+              {canEdit && (
+                <Button variant="outline" size="sm" onClick={() => setXVerified(false)}>
+                  Connect a different account
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="p-xh">X username</Label>
+                <Input
+                  id="p-xh"
+                  value={xClaim}
+                  onChange={(e) => setXClaim(e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="@yourproject"
+                />
+              </div>
+              <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 space-y-1.5">
+                <p className="text-[11px] text-muted-foreground">
+                  Post this exact code from that account, then paste the post link below:
+                </p>
+                <code className="block text-xs font-mono text-foreground break-all">{challenge}</code>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="p-xp">Verification post link</Label>
+                <Input
+                  id="p-xp"
+                  value={xPostUrl}
+                  onChange={(e) => setXPostUrl(e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="https://x.com/yourproject/status/..."
+                />
+              </div>
+              {canEdit && (
+                <Button onClick={verifyX} disabled={verifyingX || !xClaim.trim() || !xPostUrl.trim()} variant="outline">
+                  {verifyingX && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Verify X account
+                </Button>
+              )}
+            </div>
+          )}
+        </Panel>
+
+
         <Panel title="Workspace" description="Access and verification status.">
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-3">

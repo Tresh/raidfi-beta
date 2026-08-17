@@ -10,6 +10,9 @@ export interface ProjectRecord {
   x_handle: string | null;
   description: string | null;
   verification_tier: string | null;
+  x_verified?: boolean | null;
+  x_verified_at?: string | null;
+
   trust_score: number | null;
   telegram: string | null;
   telegram_group_id: string | null;
