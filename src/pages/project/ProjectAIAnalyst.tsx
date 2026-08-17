@@ -204,7 +204,7 @@ const ProjectAIAnalyst = () => {
               className="ml-auto text-muted-foreground hover:text-foreground"
               aria-label="Toggle panel"
             >
-              {sidebar ? <PanelRightClose className="w-4.5 h-4.5" /> : <PanelRightOpen className="w-4.5 h-4.5" />}
+              {sidebar ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
             </button>
           </header>
 
