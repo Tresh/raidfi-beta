@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ProjectSettings = () => {
@@ -25,6 +25,12 @@ const ProjectSettings = () => {
   const [botAdded, setBotAdded] = useState(false);
   const [savingTg, setSavingTg] = useState(false);
 
+  const [xVerified, setXVerified] = useState(false);
+  const [xClaim, setXClaim] = useState("");
+  const [xPostUrl, setXPostUrl] = useState("");
+  const [verifyingX, setVerifyingX] = useState(false);
+  const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
+
   useEffect(() => {
     if (!project) return;
     setName(project.name ?? "");
@@ -34,9 +40,38 @@ const ProjectSettings = () => {
     setTelegram(project.telegram ?? "");
     setGroupId(project.telegram_group_id ?? "");
     setBotAdded(Boolean(project.telegram_bot_added));
+    setXVerified(Boolean(project.x_verified));
+    setXClaim(project.x_handle ?? "");
   }, [project]);
 
   const canEdit = role === "owner" || role === "manager" || role === "project_admin";
+
+  const verifyX = async () => {
+    if (!project) return;
+    setVerifyingX(true);
+    const { data, error } = await supabase.functions.invoke("verify-project-x", {
+      body: { project_id: project.id, handle: xClaim.trim(), post_url: xPostUrl.trim() },
+    });
+    setVerifyingX(false);
+    let message: string | null = (data as any)?.error ?? null;
+    if (!message && error) {
+      try {
+        const body = await (error as any).context?.json?.();
+        message = body?.error ?? null;
+      } catch { /* ignore */ }
+      message = message ?? "We couldn't verify that post. Check the link and try again.";
+    }
+
+    if (message) {
+      toast({ title: "Couldn't verify", description: message, variant: "destructive" });
+      return;
+    }
+    setXVerified(true);
+    setXHandle(xClaim.trim().replace(/^@/, ""));
+    setXPostUrl("");
+    toast({ title: "X account verified", description: `@${xClaim.trim().replace(/^@/, "")} is now linked to your project.` });
+  };
+
 
   const save = async () => {
     if (!project) return;
@@ -137,6 +172,60 @@ const ProjectSettings = () => {
             )}
           </div>
         </Panel>
+
+        <Panel title="X account" description="Verify the official X account for this project.">
+          {xVerified ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2.5">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground">@{(project?.x_handle ?? "").replace(/^@/, "")} verified</p>
+                  <p className="text-[11px] text-muted-foreground">Mentions from this account are attributed to your project.</p>
+                </div>
+              </div>
+              {canEdit && (
+                <Button variant="outline" size="sm" onClick={() => setXVerified(false)}>
+                  Connect a different account
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="p-xh">X username</Label>
+                <Input
+                  id="p-xh"
+                  value={xClaim}
+                  onChange={(e) => setXClaim(e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="@yourproject"
+                />
+              </div>
+              <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 space-y-1.5">
+                <p className="text-[11px] text-muted-foreground">
+                  Post this exact code from that account, then paste the post link below:
+                </p>
+                <code className="block text-xs font-mono text-foreground break-all">{challenge}</code>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="p-xp">Verification post link</Label>
+                <Input
+                  id="p-xp"
+                  value={xPostUrl}
+                  onChange={(e) => setXPostUrl(e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="https://x.com/yourproject/status/..."
+                />
+              </div>
+              {canEdit && (
+                <Button onClick={verifyX} disabled={verifyingX || !xClaim.trim() || !xPostUrl.trim()} variant="outline">
+                  {verifyingX && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Verify X account
+                </Button>
+              )}
+            </div>
+          )}
+        </Panel>
+
 
         <Panel title="Workspace" description="Access and verification status.">
           <dl className="space-y-3 text-sm">
