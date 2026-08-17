@@ -105,7 +105,12 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
           <button onClick={() => setOpen(true)} className="text-muted-foreground"><Menu className="w-5 h-5" /></button>
           <span className="text-sm font-semibold text-foreground truncate">{project.name}</span>
         </header>
-        <main className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">{children}</main>
+        {fullBleed ? (
+          <main className="h-[calc(100dvh-3.5rem)] lg:h-dvh overflow-hidden">{children}</main>
+        ) : (
+          <main className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">{children}</main>
+        )}
+
       </div>
     </div>
   );
