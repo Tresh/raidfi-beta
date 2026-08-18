@@ -14,8 +14,8 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Index = () => {
   useSEO({
-    title: "RaidFi — Web3 Reputation & Social Intelligence Layer",
-    description: "Make contribution measurable, reputation portable, and social performance analyzable. The credibility layer for Web3.",
+    title: "RaidFi — Get Credit for Promoting Crypto Projects",
+    description: "Post about crypto projects, submit the link, and earn XP. RaidFi turns your posts into a track record you keep — and shows projects who really grew them.",
     path: "/",
   });
   return (
