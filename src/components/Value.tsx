@@ -3,35 +3,35 @@ import { CheckCircle2 } from "lucide-react";
 
 const columns = [
   {
-    title: "For Projects",
-    subtitle: "Visibility into community impact",
+    title: "If you post",
+    subtitle: "Turn your posting into proof",
     items: [
-      "Structured cross-platform social data",
-      "Contributor performance analytics",
-      "Engagement efficiency and reach metrics",
-      "ROI tracking across on-chain and off-chain activity",
-      "Data-driven campaign deployment",
+      "A permanent record of everything you've contributed",
+      "XP and a rank that carry to every project on RaidFi",
+      "Paid tasks and whitelists you actually qualify for",
+      "Credit for good work, not just for posting a lot",
+      "One profile you can show anyone, anytime",
     ],
   },
   {
-    title: "For Contributors",
-    subtitle: "Verifiable social capital",
+    title: "If you run a project",
+    subtitle: "Know who is really growing you",
     items: [
-      "Portable reputation built on measured performance",
-      "Historical record of impact across projects",
-      "Eligibility for gated opportunities",
-      "Visibility based on consistent contribution quality",
-      "Activity becomes long-term credibility",
+      "See which people drive real reach and real sign-ups",
+      "Post tasks and track who finished them, without spreadsheets",
+      "Reward based on results you can check",
+      "Spot farmers before they eat your budget",
+      "Know what a campaign returned before you fund the next one",
     ],
   },
   {
-    title: "For the Ecosystem",
-    subtitle: "Data-driven distribution infrastructure",
+    title: "For everyone else",
+    subtitle: "One shared standard",
     items: [
-      "Standardized performance metrics across communities",
-      "Persistent contributor analytics beyond single campaigns",
-      "Visibility into community strength and influence",
-      "Intelligence graph that compounds over time",
+      "Scores that mean the same thing across communities",
+      "History that survives after a campaign ends",
+      "An honest read on how strong a community really is",
+      "Less guessing, fewer wasted incentives",
     ],
   },
 ];
@@ -48,11 +48,13 @@ const Value = () => {
             transition={{ duration: 0.5 }}
             className="text-center mb-20"
           >
-            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">Value</p>
+            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">Who it's for</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-5 text-foreground">
-              A New Infrastructure Layer
+              Built for both sides
             </h2>
-            <p className="text-lg text-muted-foreground font-light">For contributor economies</p>
+            <p className="text-lg text-muted-foreground font-light">
+              Contributors get proof. Projects get clarity.
+            </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden">

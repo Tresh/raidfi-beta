@@ -3,28 +3,33 @@ import { motion } from "framer-motion";
 const problems = [
   {
     number: "01",
-    title: "Surface Metrics",
-    description: "Projects rely on surface metrics. There's no structured way to measure real contribution impact.",
+    title: "You post, then it disappears",
+    description:
+      "You write the threads, make the videos, bring people in. A month later there's nothing that proves any of it was you.",
   },
   {
     number: "02",
-    title: "No Portable Reputation",
-    description: "Contributors cannot carry reputation across ecosystems. Performance disappears after every campaign.",
+    title: "The loudest get paid, not the best",
+    description:
+      "With no real data, rewards go to whoever spams the most or shouts loudest in the group chat.",
   },
   {
     number: "03",
-    title: "No Contribution Infrastructure",
-    description: "Protocols depend on social participation to grow, yet none of it is structured or measurable.",
+    title: "Your track record doesn't travel",
+    description:
+      "Grind six months for one project, join the next one, and you're a stranger starting from zero again.",
   },
   {
     number: "04",
-    title: "Fragmented Data",
-    description: "On-chain and off-chain social activity exist in silos with no unified intelligence layer.",
+    title: "Teams can't tell what worked",
+    description:
+      "Projects see follower counts and vibes. They can't tell which person actually brought real users through the door.",
   },
   {
     number: "05",
-    title: "Assumptions Over Evidence",
-    description: "The result is a system driven by assumptions instead of evidence.",
+    title: "So everyone just guesses",
+    description:
+      "Budgets, rewards and roles get handed out on gut feeling instead of evidence. Both sides lose.",
   },
 ];
 
@@ -43,13 +48,13 @@ const Problem = () => {
                 transition={{ duration: 0.5 }}
               >
                 <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">
-                  The Problem
+                  The problem
                 </p>
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground leading-[1.1]">
-                  Web3 runs on contributors.
+                  Crypto runs on people who post.
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed font-light">
-                  But contribution has no infrastructure. No measurement. No portability. No accountability.
+                  And right now, none of that work gets recorded, measured, or properly paid.
                 </p>
               </motion.div>
             </div>
