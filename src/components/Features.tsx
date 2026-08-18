@@ -1,49 +1,49 @@
 import { motion } from "framer-motion";
-import { 
-  Shield, BarChart3, Users, Layers, 
-  LineChart, Lock, Zap, ArrowUpRight 
+import {
+  Shield, BarChart3, Users, Layers,
+  LineChart, Lock, Zap, ArrowUpRight
 } from "lucide-react";
 
 const features = [
   {
     icon: Shield,
-    title: "Persistent Contributor Reputation",
-    description: "A reputation system built from verified performance data. Cross-project scoring and historical credibility tracking.",
+    title: "A score that's yours",
+    description: "Every approved contribution adds XP to one profile that follows you from project to project.",
   },
   {
     icon: Layers,
-    title: "Cross-Platform Social Intelligence",
-    description: "Aggregation across X, Farcaster, Telegram, and on-chain interactions — normalized into a single framework.",
+    title: "All your work in one place",
+    description: "Posts on X, tasks, referrals and on-chain activity counted together instead of scattered everywhere.",
   },
   {
     icon: Users,
-    title: "Contributor & Team Analytics",
-    description: "Individual performance history, team reputation, comparative analytics, and leaderboard intelligence.",
+    title: "Rankings that mean something",
+    description: "Leaderboards built from checked contributions, so the people actually doing the work are visible.",
   },
   {
     icon: BarChart3,
-    title: "Structured Campaign Infrastructure",
-    description: "Campaign deployment with autonomous tracking, performance-weighted reward pools, and reputation impact.",
+    title: "Tasks with the reward shown upfront",
+    description: "Projects post what they need and what it pays. You do it, submit it, and get credited automatically.",
   },
   {
     icon: LineChart,
-    title: "Intelligence Dashboards",
-    description: "Social ROI metrics, community strength diagnostics, contributor segmentation, and growth forecasting.",
+    title: "Dashboards for project teams",
+    description: "See who brings reach, who brings real users, and what a campaign actually returned before you spend again.",
   },
   {
     icon: Lock,
-    title: "Reputation-Based Access Control",
-    description: "Gate campaigns by credibility score. Tiered access with verified contributor filtering.",
+    title: "Access earned by track record",
+    description: "Projects can open paid campaigns and whitelists only to contributors who have proven they deliver.",
   },
   {
     icon: Zap,
-    title: "Multi-Signal Influence Engine",
-    description: "Scoring engine analyzing reach velocity, engagement depth, amplification patterns, and signal-to-noise ratios.",
+    title: "Quality beats spam",
+    description: "Scoring weighs reach, engagement and originality, so twenty copy-paste replies don't outrank one real thread.",
   },
   {
     icon: ArrowUpRight,
-    title: "Data Export & Integrations",
-    description: "Exportable contributor intelligence, DAO tooling integration, and plug-in layer for partner ecosystems.",
+    title: "Take your record with you",
+    description: "Export your contribution history or plug it into other tools, DAOs and communities you're part of.",
   },
 ];
 
@@ -59,9 +59,9 @@ const Features = () => {
             transition={{ duration: 0.5 }}
             className="text-center mb-20"
           >
-            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">Platform</p>
+            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">What you get</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-5 text-foreground">
-              Why RaidFi?
+              Everything RaidFi does
             </h2>
           </motion.div>
 

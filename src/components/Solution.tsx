@@ -2,10 +2,22 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 const steps = [
-  { label: "Capture", desc: "Monitor social participation across platforms and on-chain interactions" },
-  { label: "Analyze", desc: "Evaluate contribution quality, reach, consistency, and influence" },
-  { label: "Build Reputation", desc: "Feed performance into a persistent reputation graph that compounds over time" },
-  { label: "Unlock Access", desc: "Give projects structured analytics for data-driven decisions" },
+  {
+    label: "1. Do the work",
+    desc: "Post about a project on X, finish a task, or bring people in. Nothing new — this is what you already do.",
+  },
+  {
+    label: "2. Drop the link",
+    desc: "Paste the link to your post on RaidFi. We confirm the account is yours and read what you actually said.",
+  },
+  {
+    label: "3. Get scored",
+    desc: "We look at reach, engagement and whether it's real work or copy-paste, then award XP for it.",
+  },
+  {
+    label: "4. Build your record",
+    desc: "Your XP, rank and history live on one profile that follows you to every project on RaidFi.",
+  },
 ];
 
 const Solution = () => {
@@ -20,12 +32,12 @@ const Solution = () => {
             transition={{ duration: 0.5 }}
             className="text-center mb-20"
           >
-            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">How It Works</p>
+            <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">How it works</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-5 text-foreground">
-              From Noise to Signal
+              Four steps, start to paid
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto font-light text-lg">
-              Transforms social participation into structured data and persistent reputation.
+              No spreadsheets, no screenshots, no begging a mod in DMs to count your posts.
             </p>
           </motion.div>
 
@@ -39,9 +51,6 @@ const Solution = () => {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="bg-background p-8 flex flex-col relative group"
               >
-                <span className="text-[10px] font-mono text-muted-foreground/70 mb-6 tracking-wider">
-                  STEP {String(index + 1).padStart(2, '0')}
-                </span>
                 <h3 className="text-base font-semibold text-foreground mb-3 group-hover:text-primary transition-colors">
                   {item.label}
                 </h3>
