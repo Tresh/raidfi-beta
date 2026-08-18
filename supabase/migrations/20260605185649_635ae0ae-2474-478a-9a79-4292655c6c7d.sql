@@ -1,1 +1,0 @@
-ALTER TABLE public.contributions ADD COLUMN IF NOT EXISTS post_image_url text;
