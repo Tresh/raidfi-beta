@@ -242,11 +242,22 @@ const BetaRequestsManager = () => {
           {list.map((r) => (
             <div key={r.id} className="bg-card border border-border rounded-lg p-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
-                <div className="min-w-0">
+                <div className="min-w-0 flex items-start gap-2.5">
+                  {r.status === "pending" && (
+                    <Checkbox
+                      className="mt-0.5"
+                      checked={selected.includes(r.id)}
+                      onCheckedChange={(v) =>
+                        setSelected((s) => (v ? [...s, r.id] : s.filter((x) => x !== r.id)))
+                      }
+                    />
+                  )}
+                  <div className="min-w-0">
                   <p className="text-sm font-semibold text-foreground">
                     {r.name || "Unnamed"}{" "}
                     <span className="text-xs font-normal text-muted-foreground">{r.email}</span>
                   </p>
+
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     {r.requested_role?.replace("_", " ")}
                     {r.x_handle ? ` · @${r.x_handle}` : ""} · {new Date(r.created_at).toLocaleDateString()}
