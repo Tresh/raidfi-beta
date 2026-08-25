@@ -262,7 +262,9 @@ const BetaRequestsManager = () => {
                     {r.requested_role?.replace("_", " ")}
                     {r.x_handle ? ` · @${r.x_handle}` : ""} · {new Date(r.created_at).toLocaleDateString()}
                   </p>
+                  </div>
                 </div>
+
                 <StatusPill status={r.status} />
               </div>
 
