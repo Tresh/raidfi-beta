@@ -27,6 +27,7 @@ export interface ContributorSignal {
   lastActive: string;
   totalXp: number;
   globalRank: number | null;
+  xHandle: string | null;
 }
 
 const keywords = (project: ProjectRecord | null) => {
@@ -46,6 +47,7 @@ export function useProjectSignal(project: ProjectRecord | null) {
   const [all, setAll] = useState<SignalContribution[]>([]);
   const [board, setBoard] = useState<any[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [handles, setHandles] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -59,16 +61,21 @@ export function useProjectSignal(project: ProjectRecord | null) {
           .order("created_at", { ascending: false })
           .limit(1000),
         supabase.rpc("get_leaderboard", { _period: "all" }),
-        supabase.from("profiles").select("email,name"),
+        supabase.from("profiles").select("email,name,x_username"),
       ]);
       if (cancelled) return;
       setAll(((contributions as any) ?? []) as SignalContribution[]);
       setBoard((leaderboard as any) ?? []);
       const map: Record<string, string> = {};
+      const handleMap: Record<string, string> = {};
       for (const p of (profiles as any[]) ?? []) {
-        if (p.email) map[p.email.toLowerCase()] = p.name ?? "";
+        if (!p.email) continue;
+        const key = p.email.toLowerCase();
+        map[key] = p.name ?? "";
+        if (p.x_username) handleMap[key] = String(p.x_username).replace(/^@/, "");
       }
       setNames(map);
+      setHandles(handleMap);
       setLoading(false);
     };
     load();
@@ -95,7 +102,9 @@ export function useProjectSignal(project: ProjectRecord | null) {
       const score = c.manual_score ?? c.ai_score ?? 0;
       const existing = map.get(email) ?? {
         email,
-        displayName: names[email] || email.replace(/^(.{2}).*(@.*)$/, "$1***$2"),
+        displayName: handles[email]
+          ? `@${handles[email]}`
+          : names[email] || email.replace(/^(.{2}).*(@.*)$/, "$1***$2"),
         mentions: 0,
         approved: 0,
         xpFromProject: 0,
@@ -103,6 +112,7 @@ export function useProjectSignal(project: ProjectRecord | null) {
         lastActive: c.created_at,
         totalXp: 0,
         globalRank: null,
+        xHandle: handles[email] ?? null,
       };
       existing.mentions += 1;
       if (c.status === "approved") {
@@ -121,11 +131,11 @@ export function useProjectSignal(project: ProjectRecord | null) {
       if (entry) {
         entry.totalXp = row.total_xp ?? 0;
         entry.globalRank = row.overall_rank ?? null;
-        if (row.display_name) entry.displayName = row.display_name;
+        if (row.display_name && !entry.xHandle) entry.displayName = row.display_name;
       }
     }
     return [...map.values()].sort((a, b) => b.xpFromProject - a.xpFromProject || b.mentions - a.mentions);
-  }, [mentions, board, names]);
+  }, [mentions, board, names, handles]);
 
   const totals = useMemo(() => {
     const approved = mentions.filter((c) => c.status === "approved");
@@ -151,5 +161,17 @@ export function useProjectSignal(project: ProjectRecord | null) {
     };
   }, [mentions, contributors, all]);
 
-  return { loading, mentions, contributors, totals, ecosystemCount: all.length, terms, board };
+  /** Prefer the contributor's X identity over any email representation. */
+  const authorLabel = useMemo(
+    () => (c: { user_email?: string | null; post_author?: string | null }) => {
+      const email = (c.user_email ?? "").toLowerCase();
+      if (handles[email]) return `@${handles[email]}`;
+      if (c.post_author) return c.post_author.startsWith("@") ? c.post_author : `@${c.post_author}`;
+      if (names[email]) return names[email];
+      return email ? email.replace(/^(.{2}).*(@.*)$/, "$1***$2") : "Unknown";
+    },
+    [handles, names],
+  );
+
+  return { loading, mentions, contributors, totals, ecosystemCount: all.length, terms, board, handles, authorLabel };
 }

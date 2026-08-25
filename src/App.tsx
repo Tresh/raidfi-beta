@@ -35,6 +35,8 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import BetaRequestsManager from "./pages/admin/BetaRequestsManager";
 import ProjectRequestsManager from "./pages/admin/ProjectRequestsManager";
 import ReportsManager from "./pages/admin/ReportsManager";
+import ProjectsManager from "./pages/admin/ProjectsManager";
+import ContributorsManager from "./pages/admin/ContributorsManager";
 import ProjectOverview from "./pages/project/ProjectOverview";
 import ProjectContributors from "./pages/project/ProjectContributors";
 import ProjectActivity from "./pages/project/ProjectActivity";
@@ -101,6 +103,8 @@ const App = () => (
           <Route path="/admin/settings" element={<AdminLayout requiredPermission="settings"><SettingsManager /></AdminLayout>} />
           <Route path="/admin/beta" element={<AdminLayout requiredPermission="beta"><BetaRequestsManager /></AdminLayout>} />
           <Route path="/admin/projects" element={<AdminLayout requiredPermission="projects"><ProjectRequestsManager /></AdminLayout>} />
+          <Route path="/admin/manage-projects" element={<AdminLayout requiredPermission="manage-projects"><ProjectsManager /></AdminLayout>} />
+          <Route path="/admin/contributors" element={<AdminLayout requiredPermission="contributors"><ContributorsManager /></AdminLayout>} />
           <Route path="/admin/reports" element={<AdminLayout requiredPermission="reports"><ReportsManager /></AdminLayout>} />
 
           <Route path="*" element={<NotFound />} />

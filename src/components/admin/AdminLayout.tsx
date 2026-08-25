@@ -13,6 +13,8 @@ const allNavItems = [
   { label: "User Roles", to: "/admin/users", permKey: "users", icon: ShieldCheck, adminOnly: true },
   { label: "Beta Requests", to: "/admin/beta", permKey: "beta", icon: KeyRound },
   { label: "Project Requests", to: "/admin/projects", permKey: "projects", icon: Building2 },
+  { label: "Manage Projects", to: "/admin/manage-projects", permKey: "manage-projects", icon: Building2 },
+  { label: "Contributors", to: "/admin/contributors", permKey: "contributors", icon: Users },
   { label: "Reports", to: "/admin/reports", permKey: "reports", icon: MessageSquareWarning },
   { label: "Points Manager", to: "/admin/points", permKey: "points", icon: Coins },
   { label: "Waitlist", to: "/admin/waitlist", permKey: "waitlist", icon: Users },

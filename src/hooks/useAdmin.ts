@@ -15,6 +15,8 @@ export const ADMIN_PERMISSIONS = [
   { key: "contributions", label: "Contributions" },
   { key: "beta", label: "Beta Requests" },
   { key: "projects", label: "Project Requests" },
+  { key: "manage-projects", label: "Manage Projects" },
+  { key: "contributors", label: "Contributors" },
   { key: "reports", label: "Reports" },
   { key: "settings", label: "Settings" },
 ] as const;
