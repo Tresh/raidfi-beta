@@ -175,6 +175,64 @@ const BetaRequestsManager = () => {
         </div>
       </div>
 
+      <div className="bg-card border border-border rounded-lg p-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {tab === "pending" && list.length > 0 && (
+            <>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={(v) => setSelected(v ? list.map((r) => r.id) : [])}
+                />
+                Select all ({selected.length}/{list.length})
+              </label>
+              <Button size="sm" disabled={bulkBusy || selected.length === 0} onClick={() => bulkAct("approve")}>
+                {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+                Approve selected
+              </Button>
+              <Button size="sm" variant="outline" disabled={bulkBusy || selected.length === 0} onClick={() => bulkAct("reject")}>
+                Reject selected
+              </Button>
+            </>
+          )}
+          <Button size="sm" variant="outline" className="ml-auto" onClick={() => setIssueOpen((o) => !o)}>
+            <Zap className="w-3.5 h-3.5 mr-1.5" /> Issue codes directly
+          </Button>
+        </div>
+
+        {issueOpen && (
+          <div className="mt-3 space-y-2">
+            <Textarea
+              value={issueEmails}
+              onChange={(e) => setIssueEmails(e.target.value)}
+              placeholder="Paste emails — one per line, or comma separated"
+              rows={4}
+              className="text-xs"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Role</span>
+              <select
+                value={issueRole}
+                onChange={(e) => setIssueRole(e.target.value)}
+                className="h-8 rounded-md border border-border bg-background text-xs px-2 text-foreground"
+              >
+                <option value="user">Contributor</option>
+                <option value="project_admin">Project admin</option>
+              </select>
+              <Button size="sm" disabled={bulkBusy} onClick={issueCodes}>
+                {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+                Create & email codes
+              </Button>
+              <span className="text-[11px] text-muted-foreground">
+                Uses the expiry and max-uses set above.
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+
+
       {loading ? (
         <div className="py-16 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
       ) : list.length === 0 ? (
