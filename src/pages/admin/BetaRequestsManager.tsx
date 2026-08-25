@@ -35,6 +35,11 @@ const BetaRequestsManager = () => {
   const [days, setDays] = useState(14);
   const [maxUses, setMaxUses] = useState(1);
   const [copied, setCopied] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [issueOpen, setIssueOpen] = useState(false);
+  const [issueEmails, setIssueEmails] = useState("");
+  const [issueRole, setIssueRole] = useState("user");
 
   const load = async () => {
     setLoading(true);
@@ -43,16 +48,20 @@ const BetaRequestsManager = () => {
       .select("*")
       .order("created_at", { ascending: false });
     setRows((data as any) ?? []);
+    setSelected([]);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const act = async (id: string, action: "approve" | "reject") => {
-    setBusy(id);
-    const { data, error } = await supabase.functions.invoke("beta-approve", {
+  const approveOne = async (id: string, action: "approve" | "reject") =>
+    supabase.functions.invoke("beta-approve", {
       body: { request_id: id, action, days_valid: days, max_uses: maxUses },
     });
+
+  const act = async (id: string, action: "approve" | "reject") => {
+    setBusy(id);
+    const { data, error } = await approveOne(id, action);
     setBusy(null);
     if (error || (data as any)?.error) {
       toast({ title: "Action failed", description: (data as any)?.error ?? error?.message, variant: "destructive" });
@@ -67,6 +76,68 @@ const BetaRequestsManager = () => {
     load();
   };
 
+  const bulkAct = async (action: "approve" | "reject") => {
+    if (selected.length === 0) return;
+    setBulkBusy(true);
+    let ok = 0;
+    let failed = 0;
+    for (const id of selected) {
+      const { data, error } = await approveOne(id, action);
+      if (error || (data as any)?.error) failed += 1;
+      else ok += 1;
+    }
+    setBulkBusy(false);
+    toast({
+      title: `${ok} ${action === "approve" ? "approved" : "rejected"}`,
+      description: failed ? `${failed} failed — retry those individually.` : "All codes emailed.",
+      variant: failed ? "destructive" : undefined,
+    });
+    load();
+  };
+
+  const issueCodes = async () => {
+    const emails = Array.from(
+      new Set(
+        issueEmails
+          .split(/[\s,;]+/)
+          .map((e) => e.trim().toLowerCase())
+          .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)),
+      ),
+    );
+    if (emails.length === 0) {
+      toast({ title: "No valid emails", description: "Paste one email per line.", variant: "destructive" });
+      return;
+    }
+    setBulkBusy(true);
+    let ok = 0;
+    let failed = 0;
+    for (const email of emails) {
+      const existing = rows.find((r) => r.email.toLowerCase() === email && r.status === "pending");
+      let id = existing?.id;
+      if (!id) {
+        const { data, error } = await supabase
+          .from("beta_requests" as any)
+          .insert({ email, requested_role: issueRole, reason: "Issued directly by admin" } as any)
+          .select("id")
+          .maybeSingle();
+        if (error || !data) { failed += 1; continue; }
+        id = (data as any).id;
+      }
+      const { data: res, error: fnErr } = await approveOne(id!, "approve");
+      if (fnErr || (res as any)?.error) failed += 1;
+      else ok += 1;
+    }
+    setBulkBusy(false);
+    setIssueEmails("");
+    setIssueOpen(false);
+    toast({
+      title: `${ok} code${ok === 1 ? "" : "s"} issued`,
+      description: failed ? `${failed} failed.` : "Emails sent to every address.",
+      variant: failed ? "destructive" : undefined,
+    });
+    load();
+  };
+
   const copy = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopied(code);
@@ -74,6 +145,8 @@ const BetaRequestsManager = () => {
   };
 
   const list = rows.filter((r) => r.status === tab);
+  const allSelected = list.length > 0 && selected.length === list.length;
+
 
   return (
     <div>
