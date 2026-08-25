@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Copy, Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, Copy, Check, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader, StatusPill } from "@/components/dashboard/Primitives";
+
 
 type Row = {
   id: string;
