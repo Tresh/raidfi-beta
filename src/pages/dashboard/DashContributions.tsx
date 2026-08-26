@@ -24,7 +24,10 @@ const DashContributions = () => {
   const data = useContributorData(session?.user?.email);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
 
+  const [visible, setVisible] = useState(5);
+
   const rows = data.contributions.filter((c) => (filter === "all" ? true : c.status === filter));
+  const shown = rows.slice(0, visible);
   const rep = data.reputation;
 
   return (
@@ -57,7 +60,7 @@ const DashContributions = () => {
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
-                    onClick={() => setFilter(f.key)}
+                    onClick={() => { setFilter(f.key); setVisible(5); }}
                     className={`text-[11px] px-2 py-1 rounded-md transition-colors ${
                       filter === f.key
                         ? "bg-primary/10 text-primary font-medium"
@@ -77,8 +80,9 @@ const DashContributions = () => {
             ) : rows.length === 0 ? (
               <p className="text-xs text-muted-foreground py-10 text-center">Nothing here yet.</p>
             ) : (
+              <>
               <ul className="divide-y divide-border">
-                {rows.map((c) => (
+                {shown.map((c) => (
                   <li key={c.id} className="py-3 first:pt-0 last:pb-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -112,6 +116,15 @@ const DashContributions = () => {
                   </li>
                 ))}
               </ul>
+              {rows.length > visible && (
+                <button
+                  onClick={() => setVisible((v) => v + 5)}
+                  className="mt-3 w-full h-8 rounded-md border border-border text-xs text-foreground hover:bg-muted transition-colors"
+                >
+                  Load 5 more ({rows.length - visible} left)
+                </button>
+              )}
+              </>
             )}
           </Panel>
         </div>

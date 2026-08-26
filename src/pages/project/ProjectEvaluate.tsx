@@ -54,7 +54,7 @@ const ProjectEvaluate = () => {
     <ProjectLayout>
       <PageHeader
         title="Evaluate"
-        subtitle="Who actually performed — for one person or a whole group you select."
+        subtitle="Understand how a person — or a group you select — has actually contributed over time."
         action={
           <Select value={periodKey} onValueChange={setPeriodKey}>
             <SelectTrigger className="h-8 w-[148px] text-xs"><SelectValue /></SelectTrigger>
@@ -74,40 +74,66 @@ const ProjectEvaluate = () => {
           {summary && (
             <Panel
               title={selected.size ? `Group of ${summary.size} selected` : `All ${summary.size} matching contributors`}
-              description="Select rows below to evaluate a specific group."
+              description="Tick rows in the table below to evaluate a specific group. Every number here is explained underneath it."
             >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
-                  ["Avg quality", summary.avgQuality],
-                  ["Median quality", summary.medianQuality],
-                  ["Acceptance rate", `${summary.acceptance}%`],
-                  ["Total posts", summary.contributions],
-                  ["Active last 14d", `${summary.activePct}%`],
-                  ["Returning", `${summary.returningPct}%`],
-                ].map(([l, v]) => (
+                  [
+                    "Typical content quality",
+                    `${summary.avgQuality}/100`,
+                    "Average review score of their contributions.",
+                  ],
+                  [
+                    "Middle of the group",
+                    `${summary.medianQuality}/100`,
+                    "Half score above this, half below — less skewed by one standout.",
+                  ],
+                  [
+                    "Contributions that passed review",
+                    `${summary.acceptance}%`,
+                    "Of everything they submitted, how much was accepted as real contribution.",
+                  ],
+                  [
+                    "Contributions tracked",
+                    summary.contributions,
+                    "Total submissions in this period.",
+                  ],
+                  [
+                    "Still active",
+                    `${summary.activePct}%`,
+                    "Contributed at least once in the last 14 days.",
+                  ],
+                  [
+                    "Came back again",
+                    `${summary.returningPct}%`,
+                    "Contributed more than once — a sign of consistency, not a one-off.",
+                  ],
+                ].map(([l, v, hint]) => (
                   <div key={String(l)}>
                     <p className="text-[11px] text-muted-foreground">{l}</p>
                     <p className="text-base font-semibold text-foreground tabular-nums">{v}</p>
+                    <p className="text-[10.5px] text-muted-foreground leading-snug mt-0.5">{hint}</p>
                   </div>
                 ))}
               </div>
+
               <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-border">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Top performers</p>
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Strongest contributors</p>
                   <ul className="space-y-1">
                     {summary.top.map((r) => (
                       <li key={r.email} className="text-[12.5px] text-foreground">
-                        {r.display_name} <span className="text-muted-foreground">· quality {r.quality} · {r.contributions} posts</span>
+                        {r.display_name} <span className="text-muted-foreground">· quality {r.quality}/100 · {r.contributions} contributions</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Needs attention</p>
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Worth a closer look</p>
                   <ul className="space-y-1">
                     {summary.weak.map((r) => (
                       <li key={r.email} className="text-[12.5px] text-foreground">
-                        {r.display_name} <span className="text-muted-foreground">· quality {r.quality} · last post {r.days_since_last ?? "—"}d ago</span>
+                        {r.display_name} <span className="text-muted-foreground">· quality {r.quality}/100 · last contributed {r.days_since_last ?? "—"} days ago</span>
                       </li>
                     ))}
                   </ul>
