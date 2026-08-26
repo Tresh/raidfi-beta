@@ -243,7 +243,7 @@ const Feed = () => {
       <Navbar />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Explore — RaidFi", "description": "Quality Web3 contributions and projects on RaidFi.", "url": "https://raidfi.site/explore" }) }} />
       <main className="flex-1 pt-16 pb-24 md:pb-16">
-        <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
+        <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
           <div className="sticky top-14 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-background/90 backdrop-blur border-b border-border mb-3">
             <div className="flex gap-1 py-2">
               <button
