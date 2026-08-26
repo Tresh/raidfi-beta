@@ -20,6 +20,8 @@ import {
   Trash2,
   User,
 } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 
 const PROVIDERS = [
@@ -78,6 +80,8 @@ const ProjectAIAnalyst = () => {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [sidebar, setSidebar] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState(false);
+  const isMobile = useIsMobile();
   const endRef = useRef<HTMLDivElement>(null);
 
   const active = chats.find((c) => c.id === activeId) ?? chats[0];
@@ -319,11 +323,11 @@ const ProjectAIAnalyst = () => {
               </p>
             </div>
             <button
-              onClick={() => setSidebar((s) => !s)}
+              onClick={() => (isMobile ? setMobilePanel(true) : setSidebar((s) => !s))}
               className="ml-auto text-muted-foreground hover:text-foreground"
               aria-label="Toggle panel"
             >
-              {sidebar ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+              {sidebar && !isMobile ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
             </button>
           </header>
 
