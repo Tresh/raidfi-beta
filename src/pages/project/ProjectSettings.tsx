@@ -209,12 +209,37 @@ ${challenge}`;
                   placeholder="@yourproject"
                 />
               </div>
-              <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 space-y-1.5">
+              <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 space-y-2">
                 <p className="text-[11px] text-muted-foreground">
-                  Post this exact code from that account, then paste the post link below:
+                  Post this from that account, then paste the post link below. Edit it however you like — just keep the
+                  last line, that's the part we check.
                 </p>
-                <code className="block text-xs font-mono text-foreground break-all">{challenge}</code>
+                <pre className="text-xs text-foreground whitespace-pre-wrap font-sans leading-relaxed">{postText}</pre>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs gap-1.5"
+                    onClick={() => {
+                      navigator.clipboard.writeText(postText);
+                      toast({ title: "Copied", description: "Post text copied to your clipboard." });
+                    }}
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy text
+                  </Button>
+                  <Button asChild size="sm" className="h-8 text-xs gap-1.5">
+                    <a
+                      href={`https://x.com/intent/tweet?text=${encodeURIComponent(postText)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Post on X
+                    </a>
+                  </Button>
+                </div>
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="p-xp">Verification post link</Label>
                 <Input
