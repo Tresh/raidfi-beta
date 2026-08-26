@@ -87,26 +87,39 @@ const ProjectOverview = () => {
                     Nothing yet. Contributions naming your project or handle will appear here automatically.
                   </p>
                 ) : (
-                  <ul className="divide-y divide-border -my-1">
-                    {mentions.slice(0, 12).map((c) => (
-                      <li key={c.id} className="py-3">
-                        <p className="text-xs text-foreground line-clamp-2">
-                          {c.post_text?.replace(/&mdash;/g, "—") || c.post_url}
-                        </p>
-                        <div className="mt-1 flex items-center justify-between gap-3">
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {c.post_author || c.user_email?.replace(/^(.{2}).*(@.*)$/, "$1***$2")} ·{" "}
-                            {new Date(c.created_at).toLocaleDateString()} · {c.status}
-                            {c.ai_generated ? " · AI-assisted" : ""}
+                  <>
+                    <ul className="divide-y divide-border -my-1">
+                      {mentions.slice(0, visible).map((c) => (
+                        <li key={c.id} className="py-3">
+                          <p className="text-xs text-foreground line-clamp-2">
+                            {c.post_text?.replace(/&mdash;/g, "—") || c.post_url}
                           </p>
-                          <a href={c.post_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary shrink-0">
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                          <div className="mt-1 flex items-center justify-between gap-3">
+                            <p className="text-[11px] text-muted-foreground truncate">
+                              {authorLabel(c)} ·{" "}
+                              {new Date(c.created_at).toLocaleDateString()} · {c.status}
+                              {c.ai_generated ? " · AI-assisted" : ""}
+                            </p>
+                            <a href={c.post_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary shrink-0">
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    {mentions.length > visible && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-8 text-xs mt-3"
+                        onClick={() => setVisible((v) => v + 5)}
+                      >
+                        Load 5 more ({mentions.length - visible} left)
+                      </Button>
+                    )}
+                  </>
                 )}
+
               </Panel>
             </div>
           </div>
