@@ -76,21 +76,47 @@ const ProjectEvaluate = () => {
               title={selected.size ? `Group of ${summary.size} selected` : `All ${summary.size} matching contributors`}
               description="Select rows below to evaluate a specific group."
             >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
-                  ["Avg quality", summary.avgQuality],
-                  ["Median quality", summary.medianQuality],
-                  ["Acceptance rate", `${summary.acceptance}%`],
-                  ["Total posts", summary.contributions],
-                  ["Active last 14d", `${summary.activePct}%`],
-                  ["Returning", `${summary.returningPct}%`],
-                ].map(([l, v]) => (
+                  [
+                    "Typical content quality",
+                    `${summary.avgQuality}/100`,
+                    "Average review score of their contributions.",
+                  ],
+                  [
+                    "Middle of the group",
+                    `${summary.medianQuality}/100`,
+                    "Half score above this, half below — less skewed by one standout.",
+                  ],
+                  [
+                    "Contributions that passed review",
+                    `${summary.acceptance}%`,
+                    "Of everything they submitted, how much was accepted as real contribution.",
+                  ],
+                  [
+                    "Contributions tracked",
+                    summary.contributions,
+                    "Total submissions in this period.",
+                  ],
+                  [
+                    "Still active",
+                    `${summary.activePct}%`,
+                    "Contributed at least once in the last 14 days.",
+                  ],
+                  [
+                    "Came back again",
+                    `${summary.returningPct}%`,
+                    "Contributed more than once — a sign of consistency, not a one-off.",
+                  ],
+                ].map(([l, v, hint]) => (
                   <div key={String(l)}>
                     <p className="text-[11px] text-muted-foreground">{l}</p>
                     <p className="text-base font-semibold text-foreground tabular-nums">{v}</p>
+                    <p className="text-[10.5px] text-muted-foreground leading-snug mt-0.5">{hint}</p>
                   </div>
                 ))}
               </div>
+
               <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-border">
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Top performers</p>
