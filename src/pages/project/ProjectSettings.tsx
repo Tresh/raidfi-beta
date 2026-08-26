@@ -30,6 +30,14 @@ const ProjectSettings = () => {
   const [xPostUrl, setXPostUrl] = useState("");
   const [verifyingX, setVerifyingX] = useState(false);
   const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
+  const postText = `We're done guessing who actually shows up for ${project?.name ?? "us"}.
+
+We're now on @RaidFi — contribution tracking and reputation for our community. Real contribution, measured over time. Not likes. Not follower counts.
+
+If you build with us, your record follows you.
+
+${challenge}`;
+
 
   useEffect(() => {
     if (!project) return;
