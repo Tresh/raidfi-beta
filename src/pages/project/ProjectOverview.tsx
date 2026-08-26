@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import ProjectLayout from "@/components/project/ProjectLayout";
 import { PageHeader, StatCard, Panel } from "@/components/dashboard/Primitives";
+import { Button } from "@/components/ui/button";
 import { useProject } from "@/hooks/useProject";
 import { useProjectSignal } from "@/hooks/useProjectSignal";
 import { Loader2, TrendingDown, TrendingUp, ExternalLink } from "lucide-react";
 
 const ProjectOverview = () => {
   const { project } = useProject();
-  const { loading, mentions, contributors, totals, terms } = useProjectSignal(project);
+  const { loading, mentions, contributors, totals, terms, authorLabel } = useProjectSignal(project);
+  const [visible, setVisible] = useState(5);
+
 
   return (
     <ProjectLayout>
