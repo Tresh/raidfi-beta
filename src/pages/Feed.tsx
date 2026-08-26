@@ -277,7 +277,7 @@ const Feed = () => {
           ) : contributions.length === 0 ? (
             <Card className="border-dashed"><CardContent className="py-12 text-center"><p className="text-muted-foreground">No posts yet.</p></CardContent></Card>
           ) : (
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 items-start">
               {contributions.map((c) => {
                 const tweetId = extractTweetId(c.post_url);
                 const score = c.manual_score ?? c.ai_score;
