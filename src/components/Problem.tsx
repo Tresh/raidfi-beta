@@ -3,33 +3,33 @@ import { motion } from "framer-motion";
 const problems = [
   {
     number: "01",
-    title: "You post, then it disappears",
+    title: "Likes are not contribution",
     description:
-      "You write the threads, make the videos, bring people in. A month later there's nothing that proves any of it was you.",
+      "Impressions, follows and reply counts say something happened. They don't say anything about value.",
   },
   {
     number: "02",
-    title: "The loudest get paid, not the best",
+    title: "Contribution is scattered",
     description:
-      "With no real data, rewards go to whoever spams the most or shouts loudest in the group chat.",
+      "Work happens on X, in Discord, in Telegram and in calls. Nothing joins it into one readable picture.",
   },
   {
     number: "03",
-    title: "Your track record doesn't travel",
+    title: "Track records don't travel",
     description:
-      "Grind six months for one project, join the next one, and you're a stranger starting from zero again.",
+      "Six months of real contribution ends when a campaign ends. In the next community you start as a stranger.",
   },
   {
     number: "04",
-    title: "Teams can't tell what worked",
+    title: "Teams can't see who matters",
     description:
-      "Projects see follower counts and vibes. They can't tell which person actually brought real users through the door.",
+      "Projects can't tell consistent contributors from short bursts of noise, or genuine reach from farmed activity.",
   },
   {
     number: "05",
-    title: "So everyone just guesses",
+    title: "So decisions are guesses",
     description:
-      "Budgets, rewards and roles get handed out on gut feeling instead of evidence. Both sides lose.",
+      "Roles, budgets and trust get handed out on vibes and screenshots instead of evidence.",
   },
 ];
 

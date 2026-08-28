@@ -6,44 +6,44 @@ import {
 
 const features = [
   {
-    icon: Shield,
-    title: "A score that's yours",
-    description: "Every approved contribution adds XP to one profile that follows you from project to project.",
-  },
-  {
     icon: Layers,
-    title: "All your work in one place",
-    description: "Posts on X, tasks, referrals and on-chain activity counted together instead of scattered everywhere.",
+    title: "Multi-platform tracking",
+    description: "Activity from X, Discord and Telegram normalised into one consistent contribution model.",
   },
   {
-    icon: Users,
-    title: "Rankings that mean something",
-    description: "Leaderboards built from checked contributions, so the people actually doing the work are visible.",
-  },
-  {
-    icon: BarChart3,
-    title: "Tasks with the reward shown upfront",
-    description: "Projects post what they need and what it pays. You do it, submit it, and get credited automatically.",
-  },
-  {
-    icon: LineChart,
-    title: "Dashboards for project teams",
-    description: "See who brings reach, who brings real users, and what a campaign actually returned before you spend again.",
-  },
-  {
-    icon: Lock,
-    title: "Access earned by track record",
-    description: "Projects can open paid campaigns and whitelists only to contributors who have proven they deliver.",
+    icon: Shield,
+    title: "Contribution events, not counts",
+    description: "Every event keeps its source, type, timestamp and context — raw data stays separate from insight.",
   },
   {
     icon: Zap,
-    title: "Quality beats spam",
-    description: "Scoring weighs reach, engagement and originality, so twenty copy-paste replies don't outrank one real thread.",
+    title: "Behavioural signals",
+    description: "Consistency, longevity, quality-weighted reach and cross-platform presence, measured over time.",
+  },
+  {
+    icon: BarChart3,
+    title: "A reputation you can explain",
+    description: "Reputation is a long-term behavioural record with visible factors. Not a token, not a balance.",
+  },
+  {
+    icon: LineChart,
+    title: "Analytics for contributors",
+    description: "See how your contribution develops across platforms, and where consistency is building or slipping.",
+  },
+  {
+    icon: Users,
+    title: "Ecosystem intelligence for projects",
+    description: "Who contributes, who is emerging, who has gone quiet, and where community health is trending.",
+  },
+  {
+    icon: Lock,
+    title: "Honest data states",
+    description: "Syncing, synced, failed or disconnected are shown as they are. A failed sync never reads as zero.",
   },
   {
     icon: ArrowUpRight,
-    title: "Take your record with you",
-    description: "Export your contribution history or plug it into other tools, DAOs and communities you're part of.",
+    title: "Portable history",
+    description: "Your contribution record belongs to you and carries across the communities you join.",
   },
 ];
 
