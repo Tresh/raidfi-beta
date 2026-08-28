@@ -16,13 +16,13 @@ const Hero = () => {
             transition={{ duration: 0.6 }}>
 
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-card text-xs font-medium text-muted-foreground mb-6 md:mb-8 tracking-wide">
-              PROOF OF CONTRIBUTION
+              CONTRIBUTION INTELLIGENCE FOR WEB3
             </div>
           </motion.div>
 
           <h1 className="md:text-5xl lg:text-6xl mb-5 text-foreground tracking-tight leading-[1.08] text-4xl font-bold">
-            Get credit for the work{" "}
-            <span className="text-gradient">you already do</span>
+            See who actually{" "}
+            <span className="text-gradient">contributes</span> to your ecosystem
           </h1>
 
           <motion.p
@@ -31,9 +31,9 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed font-light">
 
-            You post about crypto projects. RaidFi checks those posts, scores them, and
-            turns them into a track record you keep forever — so projects can see who
-            actually grew them, and pay those people.
+            RaidFi tracks contribution across X, Discord and Telegram, turns it into
+            structured data, and builds a reputation record that shows who consistently
+            adds value — not who posts the most.
           </motion.p>
 
           <motion.div
@@ -59,7 +59,7 @@ const Hero = () => {
           </motion.div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Free to join. No token, no wallet needed to start.
+            No token. No wallet needed to get started.
           </p>
         </div>
       </div>

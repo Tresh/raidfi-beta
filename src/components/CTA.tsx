@@ -19,7 +19,7 @@ const CTA = () => {
 
             <div className="relative z-10">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-5">
-                Start building your record
+                Start measuring real contribution
               </h2>
               <p className="mb-8 sm:mb-10 opacity-80 text-base sm:text-lg font-light max-w-md mx-auto">
                 RaidFi is in early access. Join as a contributor, or bring your project on board.

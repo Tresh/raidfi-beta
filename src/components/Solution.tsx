@@ -3,20 +3,20 @@ import { ArrowRight } from "lucide-react";
 
 const steps = [
   {
-    label: "1. Do the work",
-    desc: "Post about a project on X, finish a task, or bring people in. Nothing new — this is what you already do.",
+    label: "1. Connect",
+    desc: "Link the accounts you already use — X, Discord, Telegram — so your activity can be read in one place.",
   },
   {
-    label: "2. Drop the link",
-    desc: "Paste the link to your post on RaidFi. We confirm the account is yours and read what you actually said.",
+    label: "2. Track",
+    desc: "RaidFi collects your activity and normalises it into contribution events with context, not just counts.",
   },
   {
-    label: "3. Get scored",
-    desc: "We look at reach, engagement and whether it's real work or copy-paste, then award XP for it.",
+    label: "3. Understand",
+    desc: "Signals like consistency, quality and reach turn raw activity into insight you and projects can read.",
   },
   {
-    label: "4. Build your record",
-    desc: "Your XP, rank and history live on one profile that follows you to every project on RaidFi.",
+    label: "4. Build reputation",
+    desc: "Your contribution history compounds into a persistent, explainable reputation that follows you.",
   },
 ];
 
@@ -34,10 +34,10 @@ const Solution = () => {
           >
             <p className="text-xs font-medium text-primary mb-4 tracking-widest uppercase">How it works</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-5 text-foreground">
-              Four steps, start to paid
+              From activity to reputation
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto font-light text-lg">
-              No spreadsheets, no screenshots, no begging a mod in DMs to count your posts.
+              No spreadsheets, no screenshots, no guessing who actually showed up.
             </p>
           </motion.div>
 
