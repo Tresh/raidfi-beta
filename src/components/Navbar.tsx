@@ -15,12 +15,13 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { href: "#how-it-works", label: "How It Works" },
-    { href: "#for-contributors", label: "For Contributors" },
-    { href: "#for-projects", label: "For Projects" },
+    { href: "/", label: "Home" },
     { href: "/whitepaper", label: "Whitepaper" },
-    { href: "/waitlist", label: "Waitlist" },
+    { href: "/contributions", label: "Contribute" },
+    { href: "/explore", label: "Explore" },
+    { href: "/contact", label: "Contact" },
   ];
+
 
   const handleLinkClick = () => setOpen(false);
 
@@ -36,18 +37,19 @@ const Navbar = () => {
           </a>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="/" className="text-sm text-foreground font-medium">
-              Home
-            </a>
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a key={link.href} href={link.href} className="text-sm text-muted-foreground transition-colors">
                 {link.label}
               </a>
             ))}
+            <a href="/login" className="text-sm text-muted-foreground transition-colors">
+              Sign in
+            </a>
             <Button size="sm" asChild className="h-9 px-5 text-xs">
-              <a href="/waitlist">Get Early Access</a>
+              <a href="/waitlist">Request Beta</a>
             </Button>
           </div>
+
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -57,18 +59,19 @@ const Navbar = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-72 [&>button]:hidden">
               <div className="flex flex-col gap-6 mt-8">
-                <a href="/" onClick={handleLinkClick} className="text-foreground text-base font-medium">
-                  Home
-                </a>
                 {navLinks.map((link) => (
                   <a key={link.href} href={link.href} onClick={handleLinkClick}
-                    className="text-foreground/80 hover:text-foreground text-base font-medium">
+                    className="text-foreground text-base font-medium">
                     {link.label}
                   </a>
                 ))}
+                <a href="/login" onClick={handleLinkClick} className="text-foreground text-base font-medium">
+                  Sign in
+                </a>
                 <Button className="mt-4" asChild>
-                  <a href="/waitlist" onClick={handleLinkClick}>Get Early Access</a>
+                  <a href="/waitlist" onClick={handleLinkClick}>Request Beta</a>
                 </Button>
+
               </div>
             </SheetContent>
           </Sheet>
