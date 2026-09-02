@@ -29,6 +29,53 @@ const Settings = () => {
   const [tgLoading, setTgLoading] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const err = validatePassword(newPassword);
+    if (err) {
+      toast({ title: "Weak password", description: err, variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords don't match", description: "Both fields must be identical.", variant: "destructive" });
+      return;
+    }
+    setChangingPw(true);
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+      current_password: currentPassword,
+    } as any);
+    setChangingPw(false);
+    if (error) {
+      toast({ title: "Could not update password", description: error.message, variant: "destructive" });
+      return;
+    }
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    toast({ title: "Password updated", description: "Your new password is active." });
+  };
+
+  const emailReset = async () => {
+    if (!session?.user?.email) return;
+    setSendingReset(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(session.user.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setSendingReset(false);
+    toast({
+      title: error ? "Could not send link" : "Reset link sent",
+      description: error ? error.message : `Check ${session.user.email} for the link.`,
+      variant: error ? "destructive" : undefined,
+    });
+  };
+
 
   const [xHandle, setXHandle] = useState("");
   const [xPostUrl, setXPostUrl] = useState("");
