@@ -66,6 +66,9 @@ const App = () => (
           <Route path="/waitlist/confirmed" element={<WaitlistConfirmed />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
           <Route path="/whitepaper" element={<Whitepaper />} />
           <Route path="/contributions" element={<Contributions />} />
           <Route path="/feed" element={<Feed />} />
