@@ -9,6 +9,8 @@ import { PageHeader, Panel } from "@/components/dashboard/Primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Copy, Loader2, LogOut, Send, Unlink, BadgeCheck } from "lucide-react";
+import PasswordInput from "@/components/auth/PasswordInput";
+import { validatePassword, passwordStrength } from "@/lib/password";
 
 const Settings = () => {
   useSEO({
