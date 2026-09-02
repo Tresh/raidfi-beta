@@ -2,13 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Waitlist from "./pages/Waitlist";
 import WaitlistConfirmed from "./pages/WaitlistConfirmed";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-import Contributions from "./pages/Contributions";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import EmailVerified from "./pages/EmailVerified";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
 import Overview from "./pages/dashboard/Overview";
@@ -63,8 +65,11 @@ const App = () => (
           <Route path="/waitlist/confirmed" element={<WaitlistConfirmed />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
           <Route path="/whitepaper" element={<Whitepaper />} />
-          <Route path="/contributions" element={<Contributions />} />
+          <Route path="/contributions" element={<Navigate to="/dashboard/contributions" replace />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/explore" element={<Feed />} />
           <Route path="/project-request" element={<ProjectRequest />} />

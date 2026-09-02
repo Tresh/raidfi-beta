@@ -9,6 +9,8 @@ import { PageHeader, Panel } from "@/components/dashboard/Primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Copy, Loader2, LogOut, Send, Unlink, BadgeCheck } from "lucide-react";
+import PasswordInput from "@/components/auth/PasswordInput";
+import { validatePassword, passwordStrength } from "@/lib/password";
 
 const Settings = () => {
   useSEO({
@@ -27,6 +29,53 @@ const Settings = () => {
   const [tgLoading, setTgLoading] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const err = validatePassword(newPassword);
+    if (err) {
+      toast({ title: "Weak password", description: err, variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords don't match", description: "Both fields must be identical.", variant: "destructive" });
+      return;
+    }
+    setChangingPw(true);
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+      current_password: currentPassword,
+    } as any);
+    setChangingPw(false);
+    if (error) {
+      toast({ title: "Could not update password", description: error.message, variant: "destructive" });
+      return;
+    }
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    toast({ title: "Password updated", description: "Your new password is active." });
+  };
+
+  const emailReset = async () => {
+    if (!session?.user?.email) return;
+    setSendingReset(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(session.user.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setSendingReset(false);
+    toast({
+      title: error ? "Could not send link" : "Reset link sent",
+      description: error ? error.message : `Check ${session.user.email} for the link.`,
+      variant: error ? "destructive" : undefined,
+    });
+  };
+
 
   const [xHandle, setXHandle] = useState("");
   const [xPostUrl, setXPostUrl] = useState("");
@@ -354,6 +403,58 @@ const Settings = () => {
             <p className="text-xs text-muted-foreground">No referral code on this account yet.</p>
           )}
         </Panel>
+
+        <Panel title="Password" description="Change your password, or get a reset link by email.">
+          <form onSubmit={changePassword} className="space-y-3">
+            <PasswordInput
+              placeholder="Current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="h-10 text-sm"
+              autoComplete="current-password"
+              required
+            />
+            <PasswordInput
+              placeholder="New password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="h-10 text-sm"
+              autoComplete="new-password"
+              required
+            />
+            {newPassword && (
+              <p className="text-[11px] text-muted-foreground">
+                Strength: <span className="text-foreground">{passwordStrength(newPassword).label}</span> —
+                8+ characters with upper and lower case letters and a number.
+              </p>
+            )}
+            <PasswordInput
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="h-10 text-sm"
+              autoComplete="new-password"
+              required
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" className="h-9 text-sm" disabled={changingPw}>
+                {changingPw && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Update password
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 text-sm"
+                onClick={emailReset}
+                disabled={sendingReset}
+              >
+                {sendingReset && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Email me a reset link
+              </Button>
+            </div>
+          </form>
+        </Panel>
+
 
         <Panel title="Public profile" description="Your portable reputation page.">
           {data.profile?.referral_code ? (
