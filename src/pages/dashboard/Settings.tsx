@@ -404,6 +404,58 @@ const Settings = () => {
           )}
         </Panel>
 
+        <Panel title="Password" description="Change your password, or get a reset link by email.">
+          <form onSubmit={changePassword} className="space-y-3">
+            <PasswordInput
+              placeholder="Current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="h-10 text-sm"
+              autoComplete="current-password"
+              required
+            />
+            <PasswordInput
+              placeholder="New password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="h-10 text-sm"
+              autoComplete="new-password"
+              required
+            />
+            {newPassword && (
+              <p className="text-[11px] text-muted-foreground">
+                Strength: <span className="text-foreground">{passwordStrength(newPassword).label}</span> —
+                8+ characters with upper and lower case letters and a number.
+              </p>
+            )}
+            <PasswordInput
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="h-10 text-sm"
+              autoComplete="new-password"
+              required
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" className="h-9 text-sm" disabled={changingPw}>
+                {changingPw && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Update password
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 text-sm"
+                onClick={emailReset}
+                disabled={sendingReset}
+              >
+                {sendingReset && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Email me a reset link
+              </Button>
+            </div>
+          </form>
+        </Panel>
+
+
         <Panel title="Public profile" description="Your portable reputation page.">
           {data.profile?.referral_code ? (
             <a
