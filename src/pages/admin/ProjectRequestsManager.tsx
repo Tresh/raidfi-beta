@@ -57,10 +57,20 @@ const ProjectRequestsManager = () => {
       toast({ title: "Action failed", description: (data as any)?.error ?? error?.message, variant: "destructive" });
       return;
     }
+    const res = data as any;
+    if (action === "approve" && res?.emailed === false) {
+      toast({
+        title: "Approved, but the email failed",
+        description: `Workspace created. Share the code manually: ${res?.code ?? ""}. ${res?.emailError ?? ""}`.trim(),
+        variant: "destructive",
+      });
+      load();
+      return;
+    }
     toast({
       title: action === "approve" ? "Project approved" : "Request rejected",
       description: action === "approve"
-        ? `Workspace created. Access code ${(data as any)?.code ?? ""} emailed to the founder.`
+        ? `Workspace created. Access code ${res?.code ?? ""} emailed to the founder.`
         : "The founder was not notified.",
     });
     load();

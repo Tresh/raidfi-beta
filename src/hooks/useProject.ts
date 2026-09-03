@@ -39,11 +39,21 @@ export function useProject() {
       }
       setEmail(session.user.email ?? null);
 
-      const { data: membership } = await supabase
+      // Link any memberships that were created by email before this account existed.
+      try {
+        await supabase.rpc("claim_project_memberships" as any);
+      } catch {
+        /* non-fatal */
+      }
+
+      const userEmail = (session.user.email ?? "").toLowerCase();
+      const { data: memberships } = await supabase
         .from("project_members" as any)
-        .select("member_role, project_id, projects:project_id(*)")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+        .select("member_role, project_id, user_id, email, projects:project_id(*)")
+        .or(`user_id.eq.${session.user.id},email.eq.${userEmail}`)
+        .limit(5);
+
+      const membership = (memberships ?? []).find((m: any) => m.projects) ?? null;
 
       const proj = (membership as any)?.projects ?? null;
       if (!proj) {
