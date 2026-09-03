@@ -35,7 +35,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "raidfi"
+const SITE_NAME = "RaidFi"
 const SENDER_DOMAIN = "notify.raidfi.site"
 const ROOT_DOMAIN = "raidfi.site"
 const FROM_DOMAIN = "raidfi.site" // Domain shown in From address (may be root or sender subdomain)
