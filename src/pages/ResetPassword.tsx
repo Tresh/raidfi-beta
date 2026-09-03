@@ -11,7 +11,7 @@ import logo from "@/assets/logo.png";
 
 const ResetPassword = () => {
   useSEO({
-    title: "Set a new password — RaidFi",
+    title: "Set a new password - RaidFi",
     description: "Choose a new password for your RaidFi account.",
     path: "/reset-password",
   });
@@ -92,7 +92,7 @@ const ResetPassword = () => {
             />
             {password && (
               <p className="text-[11px] text-muted-foreground">
-                Strength: <span className="text-foreground">{strength.label}</span> — use 8+
+                Strength: <span className="text-foreground">{strength.label}</span> - use 8+
                 characters with upper and lower case letters and a number.
               </p>
             )}

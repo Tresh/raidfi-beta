@@ -27,7 +27,7 @@ const ProjectOverview = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <StatCard label="Mentions" value={totals.mentions} hint="Tracked posts about you (90d)" />
             <StatCard label="Active contributors" value={totals.contributors} accent hint="People creating for you" />
-            <StatCard label="Avg. quality" value={totals.avgQuality || "—"} hint="Reviewed score out of 10" />
+            <StatCard label="Avg. quality" value={totals.avgQuality || "-"} hint="Reviewed score out of 10" />
             <StatCard label="Share of voice" value={`${totals.shareOfVoice}%`} hint="Of all RaidFi contributions" />
           </div>
 
@@ -92,7 +92,7 @@ const ProjectOverview = () => {
                       {mentions.slice(0, visible).map((c) => (
                         <li key={c.id} className="py-3">
                           <p className="text-xs text-foreground line-clamp-2">
-                            {c.post_text?.replace(/&mdash;/g, "—") || c.post_url}
+                            {c.post_text?.replace(/&mdash;/g, "-") || c.post_url}
                           </p>
                           <div className="mt-1 flex items-center justify-between gap-3">
                             <p className="text-[11px] text-muted-foreground truncate">

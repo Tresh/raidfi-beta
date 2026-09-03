@@ -10,7 +10,7 @@ import logo from "@/assets/logo.png";
 
 const ForgotPassword = () => {
   useSEO({
-    title: "Reset your password — RaidFi",
+    title: "Reset your password - RaidFi",
     description: "Request a password reset link for your RaidFi account.",
     path: "/forgot-password",
   });

@@ -37,7 +37,7 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
           <img src={logo} alt="RaidFi" className="w-10 h-10 mx-auto" />
           <h1 className="text-lg font-semibold text-foreground">No project workspace yet</h1>
           <p className="text-sm text-muted-foreground">
-            This account isn't linked to a project. Request project access from the homepage — once approved, your
+            This account isn't linked to a project. Request project access from the homepage - once approved, your
             workspace shows up here.
           </p>
           <a href="/" className="text-sm text-primary underline underline-offset-4">Back to RaidFi</a>

@@ -14,7 +14,7 @@ import { validatePassword, passwordStrength } from "@/lib/password";
 
 const Settings = () => {
   useSEO({
-    title: "Settings — RaidFi",
+    title: "Settings - RaidFi",
     description: "Manage your RaidFi identity, connected platforms and referral link.",
     path: "/dashboard/settings",
   });
@@ -149,7 +149,7 @@ const Settings = () => {
     if (!/^https?:\/\/(www\.)?(twitter|x)\.com\/[^/\s]+\/status\/\d+/i.test(postUrl)) {
       toast({
         title: "That doesn't look like a post link",
-        description: "Paste the direct link to your post, e.g. https://x.com/yourhandle/status/1234567890 — not your profile or a shortened link.",
+        description: "Paste the direct link to your post, e.g. https://x.com/yourhandle/status/1234567890 - not your profile or a shortened link.",
         variant: "destructive",
       });
       return;
@@ -187,7 +187,7 @@ const Settings = () => {
         message = (res as any).error as string;
       }
     } catch {
-      message = "Network problem — check your connection and try again.";
+      message = "Network problem - check your connection and try again.";
     }
     setXVerifying(false);
 
@@ -214,7 +214,7 @@ const Settings = () => {
   const xVerified = Boolean((data.profile as any)?.x_verified);
   const verifiedHandle = (data.profile as any)?.x_username as string | undefined;
   const challenge = data.profile?.referral_code ?? "";
-  const verificationPost = `Verifying my X account for @raidfi_app — building the credibility layer for Web3. ${challenge}`;
+  const verificationPost = `Verifying my X account for @raidfi_app - building the credibility layer for Web3. ${challenge}`;
 
   return (
     <DashboardLayout>
@@ -286,7 +286,7 @@ const Settings = () => {
               </p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 text-sm font-mono tracking-[0.2em] px-3 py-2 rounded-md bg-muted text-foreground text-center">
-                  {tgCode ?? "—"}
+                  {tgCode ?? "-"}
                 </code>
                 <Button
                   variant="outline"
@@ -374,7 +374,7 @@ const Settings = () => {
         <Panel title="Discord" description="Bring your Discord activity into your reputation score.">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              Discord linking is on the way — you'll be able to connect your server activity here.
+              Discord linking is on the way - you'll be able to connect your server activity here.
             </p>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap">
               Coming soon
@@ -395,7 +395,7 @@ const Settings = () => {
               </div>
               <p className="text-[11px] text-muted-foreground">
                 {data.profile?.referral_count ?? 0} referral
-                {(data.profile?.referral_count ?? 0) === 1 ? "" : "s"} so far — you earn +50 XP for each
+                {(data.profile?.referral_count ?? 0) === 1 ? "" : "s"} so far - you earn +50 XP for each
                 one who joins.
               </p>
             </div>
@@ -424,7 +424,7 @@ const Settings = () => {
             />
             {newPassword && (
               <p className="text-[11px] text-muted-foreground">
-                Strength: <span className="text-foreground">{passwordStrength(newPassword).label}</span> —
+                Strength: <span className="text-foreground">{passwordStrength(newPassword).label}</span> -
                 8+ characters with upper and lower case letters and a number.
               </p>
             )}

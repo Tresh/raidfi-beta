@@ -111,7 +111,7 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
       <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
         <div>
           <p className="text-xs font-medium text-foreground">Created with AI</p>
-          <p className="text-[11px] text-muted-foreground">Be transparent — it doesn't reduce your score.</p>
+          <p className="text-[11px] text-muted-foreground">Be transparent - it doesn't reduce your score.</p>
         </div>
         <Switch checked={aiGenerated} onCheckedChange={setAiGenerated} />
       </div>

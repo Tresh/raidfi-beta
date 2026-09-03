@@ -38,7 +38,7 @@ RaidFi is a **contribution intelligence and reputation infrastructure layer** bu
 
 It is not a rewards farming platform. It is not a marketing tool. It is not another engagement scheme.
 
-RaidFi transforms on-chain and off-chain participation into **structured, verifiable contribution data** — and turns that data into **portable reputation**.
+RaidFi transforms on-chain and off-chain participation into **structured, verifiable contribution data** - and turns that data into **portable reputation**.
 
 ---
 
@@ -119,10 +119,10 @@ Reputation in RaidFi is not a score you game. It is a **behavioral credibility r
 
 It factors in:
 
-- **Consistency** — sustained contribution over time
-- **Quality weighting** — not all actions are equal
-- **Verified participation** — on-chain attestation where applicable
-- **Impact patterns** — what actually moved the needle
+- **Consistency** - sustained contribution over time
+- **Quality weighting** - not all actions are equal
+- **Verified participation** - on-chain attestation where applicable
+- **Impact patterns** - what actually moved the needle
 
 Reputation decays for inactivity or abuse. It cannot be inflated through spam. It is wallet-linked and portable.
 
@@ -155,7 +155,7 @@ Teams allow:
 - Performance benchmarking
 - Project-level structured coordination
 
-Over time, teams build **track records** — creating a meta-layer of contribution credibility that goes beyond individual scores.
+Over time, teams build **track records** - creating a meta-layer of contribution credibility that goes beyond individual scores.
 
 ---
 

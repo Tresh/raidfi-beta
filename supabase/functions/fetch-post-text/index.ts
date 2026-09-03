@@ -87,7 +87,7 @@ serve(async (req) => {
       });
     }
 
-    // post_url is optional from the client — always trust the stored one.
+    // post_url is optional from the client - always trust the stored one.
     const post_url = contribRow.post_url ?? payload.post_url;
     if (!post_url) {
       return new Response(JSON.stringify({ error: "Missing post_url" }), {

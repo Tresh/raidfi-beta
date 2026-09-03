@@ -152,7 +152,7 @@ const ContributorsManager = () => {
                           <ExternalLink className="w-3 h-3 opacity-60" />
                         </a>
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">-</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{p.total_points ?? 0}</td>
@@ -160,7 +160,7 @@ const ContributorsManager = () => {
                     <td className="px-4 py-2.5 text-right tabular-nums">{a?.approved ?? 0}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{p.referral_count ?? 0}</td>
                     <td className="px-4 py-2.5 text-right text-[11px] text-muted-foreground">
-                      {a?.last ? new Date(a.last).toLocaleDateString() : "—"}
+                      {a?.last ? new Date(a.last).toLocaleDateString() : "-"}
                     </td>
                   </tr>
                 );

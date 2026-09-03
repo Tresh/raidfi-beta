@@ -27,7 +27,7 @@ const tooltipStyle = {
 
 const Analytics = () => {
   useSEO({
-    title: "Analytics — RaidFi",
+    title: "Analytics - RaidFi",
     description: "Contribution analytics: cadence, quality distribution and performance trends.",
     path: "/dashboard/analytics",
   });
@@ -47,7 +47,7 @@ const Analytics = () => {
     return [...map.values()].sort((a, b) => b.count - a.count);
   }, [data.contributions]);
 
-  const bestWeek = series.reduce((a, b) => (b.xp > a.xp ? b : a), series[0] ?? { xp: 0, label: "—" });
+  const bestWeek = series.reduce((a, b) => (b.xp > a.xp ? b : a), series[0] ?? { xp: 0, label: "-" });
   const last4 = series.slice(-4).reduce((s, w) => s + w.xp, 0);
   const prev4 = series.slice(-8, -4).reduce((s, w) => s + w.xp, 0);
   const delta = prev4 === 0 ? (last4 > 0 ? 100 : 0) : Math.round(((last4 - prev4) / prev4) * 100);

@@ -32,7 +32,7 @@ const ProjectSettings = () => {
   const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
   const postText = `We're done guessing who actually shows up for ${project?.name ?? "us"}.
 
-We're now on @RaidFi — contribution tracking and reputation for our community. Real contribution, measured over time. Not likes. Not follower counts.
+We're now on @RaidFi - contribution tracking and reputation for our community. Real contribution, measured over time. Not likes. Not follower counts.
 
 If you build with us, your record follows you.
 
@@ -211,7 +211,7 @@ ${challenge}`;
               </div>
               <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 space-y-2">
                 <p className="text-[11px] text-muted-foreground">
-                  Post this from that account, then paste the post link below. Edit it however you like — just keep the
+                  Post this from that account, then paste the post link below. Edit it however you like - just keep the
                   last line, that's the part we check.
                 </p>
                 <pre className="text-xs text-foreground whitespace-pre-wrap font-sans leading-relaxed">{postText}</pre>

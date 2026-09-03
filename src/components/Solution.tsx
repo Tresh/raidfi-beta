@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 const steps = [
   {
     label: "1. Connect",
-    desc: "Link the accounts you already use — X, Discord, Telegram — so your activity can be read in one place.",
+    desc: "Link the accounts you already use - X, Discord, Telegram - so your activity can be read in one place.",
   },
   {
     label: "2. Track",

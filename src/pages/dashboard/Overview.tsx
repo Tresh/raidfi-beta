@@ -10,7 +10,7 @@ import { ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 
 const Overview = () => {
   useSEO({
-    title: "Dashboard — RaidFi",
+    title: "Dashboard - RaidFi",
     description: "Your contribution intelligence overview: reputation score, activity and performance.",
     path: "/dashboard",
   });
@@ -45,7 +45,7 @@ const Overview = () => {
             <StatCard label="Total XP" value={data.totalXp.toLocaleString()} hint="All-time" />
             <StatCard
               label="Rank"
-              value={data.rank ? `#${data.rank}` : "—"}
+              value={data.rank ? `#${data.rank}` : "-"}
               hint={data.cohortSize ? `of ${data.cohortSize} contributors` : "Unranked"}
             />
             <StatCard
@@ -132,7 +132,7 @@ const Overview = () => {
                     <li key={c.id} className="py-2.5 first:pt-0 last:pb-0 flex items-start gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="text-xs text-foreground line-clamp-2">
-                          {c.post_text?.replace(/&mdash;/g, "—") || c.post_url}
+                          {c.post_text?.replace(/&mdash;/g, "-") || c.post_url}
                         </p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {new Date(c.created_at).toLocaleDateString()} · {c.content_type}

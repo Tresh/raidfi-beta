@@ -33,7 +33,7 @@ const ValidationForm = ({ userId, userEmail, onComplete }: ValidationFormProps) 
   const CurrentStep = steps[step];
 
   const checkDuplicateHandle = async (handle: string): Promise<boolean> => {
-    // Skip client-side duplicate check — let DB unique constraint handle it
+    // Skip client-side duplicate check - let DB unique constraint handle it
     return false;
   };
 

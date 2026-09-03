@@ -16,7 +16,7 @@ type Mode = "signin" | "signup";
 
 const Login = () => {
   useSEO({
-    title: "Login — RaidFi",
+    title: "Login - RaidFi",
     description: "Sign in to RaidFi to access your contributor dashboard and reputation.",
     path: "/login",
   });
@@ -66,7 +66,7 @@ const Login = () => {
         title: "Could not sign in",
         description:
           error.message.toLowerCase().includes("not confirmed")
-            ? "Verify your email first — check your inbox for the verification link."
+            ? "Verify your email first - check your inbox for the verification link."
             : "Email or password is incorrect.",
         variant: "destructive",
       });
@@ -263,7 +263,7 @@ const Login = () => {
                       <>
                         {password && (
                           <p className="text-[11px] text-muted-foreground mt-2">
-                            Strength: <span className="text-foreground">{strength.label}</span> — 8+
+                            Strength: <span className="text-foreground">{strength.label}</span> - 8+
                             characters, upper and lower case, and a number.
                           </p>
                         )}

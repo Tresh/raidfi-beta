@@ -220,9 +220,9 @@ const TasksManager = () => {
                     {submissions.map(s => (
                       <tr key={s.id} className="border-b border-border/30">
                         <td className="p-2 text-foreground">{s.submission_email}</td>
-                        <td className="p-2 text-foreground">{s.input_value || "—"}</td>
-                        <td className="p-2 text-muted-foreground text-xs">{s.clicked_at ? new Date(s.clicked_at).toLocaleString() : "—"}</td>
-                        <td className="p-2 text-muted-foreground text-xs">{s.verified_at ? new Date(s.verified_at).toLocaleString() : "—"}</td>
+                        <td className="p-2 text-foreground">{s.input_value || "-"}</td>
+                        <td className="p-2 text-muted-foreground text-xs">{s.clicked_at ? new Date(s.clicked_at).toLocaleString() : "-"}</td>
+                        <td className="p-2 text-muted-foreground text-xs">{s.verified_at ? new Date(s.verified_at).toLocaleString() : "-"}</td>
                       </tr>
                     ))}
                   </tbody>

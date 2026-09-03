@@ -11,7 +11,7 @@ import { useSEO } from "@/hooks/useSEO";
 
 const WaitlistConfirmed = () => {
   useSEO({
-    title: "Waitlist Confirmed — RaidFi",
+    title: "Waitlist Confirmed - RaidFi",
     description: "Your RaidFi waitlist spot is confirmed. Complete validation to unlock early access.",
     path: "/waitlist/confirmed",
   });

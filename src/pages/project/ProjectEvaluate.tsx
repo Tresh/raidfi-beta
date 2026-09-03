@@ -54,7 +54,7 @@ const ProjectEvaluate = () => {
     <ProjectLayout>
       <PageHeader
         title="Evaluate"
-        subtitle="Understand how a person — or a group you select — has actually contributed over time."
+        subtitle="Understand how a person - or a group you select - has actually contributed over time."
         action={
           <Select value={periodKey} onValueChange={setPeriodKey}>
             <SelectTrigger className="h-8 w-[148px] text-xs"><SelectValue /></SelectTrigger>
@@ -86,7 +86,7 @@ const ProjectEvaluate = () => {
                   [
                     "Middle of the group",
                     `${summary.medianQuality}/100`,
-                    "Half score above this, half below — less skewed by one standout.",
+                    "Half score above this, half below - less skewed by one standout.",
                   ],
                   [
                     "Contributions that passed review",
@@ -106,7 +106,7 @@ const ProjectEvaluate = () => {
                   [
                     "Came back again",
                     `${summary.returningPct}%`,
-                    "Contributed more than once — a sign of consistency, not a one-off.",
+                    "Contributed more than once - a sign of consistency, not a one-off.",
                   ],
                 ].map(([l, v, hint]) => (
                   <div key={String(l)}>
@@ -133,7 +133,7 @@ const ProjectEvaluate = () => {
                   <ul className="space-y-1">
                     {summary.weak.map((r) => (
                       <li key={r.email} className="text-[12.5px] text-foreground">
-                        {r.display_name} <span className="text-muted-foreground">· quality {r.quality}/100 · last contributed {r.days_since_last ?? "—"} days ago</span>
+                        {r.display_name} <span className="text-muted-foreground">· quality {r.quality}/100 · last contributed {r.days_since_last ?? "-"} days ago</span>
                       </li>
                     ))}
                   </ul>

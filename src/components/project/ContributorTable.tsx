@@ -33,7 +33,7 @@ const TierChip = ({ tier }: { tier?: string }) => {
   };
   return (
     <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full border font-medium ${tone[tier ?? ""] ?? "bg-muted text-muted-foreground border-border"}`}>
-      {tier ?? "—"}
+      {tier ?? "-"}
     </span>
   );
 };
@@ -229,7 +229,7 @@ const ContributorTable = ({
                               @{String(value).replace(/^@/, "")}
                             </a>
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">-</span>
                           )
                         ) : (
                           <span className={def.type === "number" && Number(value) === 0 ? "text-muted-foreground" : "text-foreground"}>

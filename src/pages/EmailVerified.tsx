@@ -7,7 +7,7 @@ import logo from "@/assets/logo.png";
 
 const EmailVerified = () => {
   useSEO({
-    title: "Email verified — RaidFi",
+    title: "Email verified - RaidFi",
     description: "Your RaidFi email address has been verified.",
     path: "/email-verified",
   });

@@ -21,12 +21,12 @@ interface Contribution {
 }
 
 const decodeEntities = (s: string) =>
-  s.replace(/&mdash;/g, "—").replace(/&ndash;/g, "–").replace(/&hellip;/g, "…")
+  s.replace(/&mdash;/g, "-").replace(/&ndash;/g, "–").replace(/&hellip;/g, "…")
    .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 
 const stripMeta = (raw: string) => {
   const t = decodeEntities(raw).trim();
-  const m = t.match(/\s*[—–-]\s*[^\n]+?\(@[^)]+\)[^\n]*$/);
+  const m = t.match(/\s*[-–-]\s*[^\n]+?\(@[^)]+\)[^\n]*$/);
   return m && m.index !== undefined ? t.slice(0, m.index).trim() : t;
 };
 
@@ -42,7 +42,7 @@ const Profile = () => {
 
   const profileName = profile?.name || code || "Contributor";
   useSEO({
-    title: `${profileName} — RaidFi Contributor`,
+    title: `${profileName} - RaidFi Contributor`,
     description: `View ${profileName}'s RaidFi contributions, XP, rank, and reputation in the Web3 social intelligence layer.`,
     path: code ? `/u/${code}` : "/u",
     ogType: "profile",
@@ -135,7 +135,7 @@ const Profile = () => {
                       <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-1">
                         <Hash className="w-3 h-3" /> Rank
                       </div>
-                      <div className="text-2xl font-bold text-foreground">{rank ? `#${rank}` : "—"}</div>
+                      <div className="text-2xl font-bold text-foreground">{rank ? `#${rank}` : "-"}</div>
                     </div>
                   </div>
 
@@ -168,7 +168,7 @@ const Profile = () => {
                 <Card className="border-border/60">
                   <CardContent className="p-4">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">Top score</div>
-                    <div className="text-xl font-bold text-foreground">{stats.topScore || "—"}</div>
+                    <div className="text-xl font-bold text-foreground">{stats.topScore || "-"}</div>
                   </CardContent>
                 </Card>
               </div>

@@ -7,7 +7,7 @@ import type { ActivityRow } from "@/hooks/useProjectData";
 
 export const decodeEntities = (s: string) =>
   s
-    .replace(/&mdash;/g, "—")
+    .replace(/&mdash;/g, "-")
     .replace(/&ndash;/g, "–")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")

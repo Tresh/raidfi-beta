@@ -14,7 +14,7 @@ import { Check, Copy, Loader2 } from "lucide-react";
 
 const Referrals = () => {
   useSEO({
-    title: "Referrals — RaidFi",
+    title: "Referrals - RaidFi",
     description: "Invite contributors and projects to RaidFi and earn XP and revenue share.",
     path: "/dashboard/referrals",
   });

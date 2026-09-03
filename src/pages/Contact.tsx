@@ -23,8 +23,8 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Contact = () => {
   useSEO({
-    title: "Contact — RaidFi",
-    description: "Get in touch with the RaidFi team — partnerships, support, and inquiries.",
+    title: "Contact - RaidFi",
+    description: "Get in touch with the RaidFi team - partnerships, support, and inquiries.",
     path: "/contact",
   });
   const navigate = useNavigate();

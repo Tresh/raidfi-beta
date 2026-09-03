@@ -66,8 +66,8 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Waitlist = () => {
   useSEO({
-    title: "Join the Waitlist — RaidFi",
-    description: "Request early access to RaidFi — the reputation and social intelligence layer for Web3.",
+    title: "Join the Waitlist - RaidFi",
+    description: "Request early access to RaidFi - the reputation and social intelligence layer for Web3.",
     path: "/waitlist",
   });
   const { toast } = useToast();
@@ -398,7 +398,7 @@ const handleXShare = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">Congrats, you joined the waitlist!</h2>
                 <p className="text-primary font-semibold text-lg mb-1">+50 RaidFi XP</p>
-                <p className="text-sm text-muted-foreground mb-8">One last step — share on X to verify and unlock contributions.</p>
+                <p className="text-sm text-muted-foreground mb-8">One last step - share on X to verify and unlock contributions.</p>
                 <Button size="lg" onClick={handleXShare} className="h-12 px-8 text-base">
                   <Twitter className="w-5 h-5 mr-2" /> Share on X to Verify
                 </Button>
@@ -412,7 +412,7 @@ const handleXShare = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">You're in 🎉</h2>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Thanks for sharing on X — your spot is locked in. We'll email you when early access opens.
+                  Thanks for sharing on X - your spot is locked in. We'll email you when early access opens.
                 </p>
 
                 <Button variant="outline" asChild className="h-10 text-sm">

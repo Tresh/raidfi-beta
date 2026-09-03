@@ -31,7 +31,7 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 const decode = (s: string) =>
-  s.replace(/&mdash;/g, "—").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  s.replace(/&mdash;/g, "-").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
 const ProjectContributors = () => {
   const { project } = useProject();
@@ -89,7 +89,7 @@ const ProjectContributors = () => {
     <ProjectLayout>
       <PageHeader
         title="Contributors"
-        subtitle="Everyone posting about your project — their best work first, with the numbers behind it."
+        subtitle="Everyone posting about your project - their best work first, with the numbers behind it."
         action={
           <div className="flex items-center gap-2">
             <Select value={periodKey} onValueChange={setPeriodKey}>
