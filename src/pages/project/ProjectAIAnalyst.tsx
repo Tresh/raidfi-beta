@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import ProjectLayout from "@/components/project/ProjectLayout";
 import { useProject } from "@/hooks/useProject";
 import { rangeForDays, useProjectContributors } from "@/hooks/useProjectData";
@@ -370,7 +372,13 @@ const ProjectAIAnalyst = () => {
                   </div>
                   <div className="min-w-0 flex-1 pt-0.5">
                     <p className="text-[11px] text-muted-foreground mb-1">{m.role === "user" ? "You" : "Analyst"}</p>
-                    <div className="text-[13.5px] leading-relaxed text-foreground whitespace-pre-wrap">{m.content}</div>
+                    {m.role === "assistant" ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-[13.5px] leading-relaxed text-foreground [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="text-[13.5px] leading-relaxed text-foreground whitespace-pre-wrap">{m.content}</div>
+                    )}
                   </div>
                 </div>
               ))}
