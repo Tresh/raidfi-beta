@@ -324,7 +324,7 @@ const AnalyticsPage = () => {
                         <TableCell className="font-medium">{i + 1}</TableCell>
                         <TableCell>
                           <div>
-                            <p className="text-sm text-foreground">{r.name || "—"}</p>
+                            <p className="text-sm text-foreground">{r.name || "-"}</p>
                             <p className="text-xs text-muted-foreground">{r.email}</p>
                           </div>
                         </TableCell>

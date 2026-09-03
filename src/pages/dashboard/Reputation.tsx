@@ -8,7 +8,7 @@ import { Loader2, ShieldCheck } from "lucide-react";
 
 const Reputation = () => {
   useSEO({
-    title: "Reputation — RaidFi",
+    title: "Reputation - RaidFi",
     description: "Your behavior-based RaidFi reputation score and the signals behind it.",
     path: "/dashboard/reputation",
   });

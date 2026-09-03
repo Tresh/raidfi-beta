@@ -17,10 +17,10 @@ const extractHandleFromUrl = (url: string): string | null => {
   return m ? m[1] : null;
 };
 
-// Decode HTML entities the edge fn may have missed (e.g. &mdash;)
+// Decode HTML entities the edge fn may have missed (e.g. -)
 const decodeEntities = (s: string) =>
   s
-    .replace(/&mdash;/g, "—")
+    .replace(/&mdash;/g, "-")
     .replace(/&ndash;/g, "–")
     .replace(/&hellip;/g, "…")
     .replace(/&amp;/g, "&")
@@ -29,10 +29,10 @@ const decodeEntities = (s: string) =>
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
 
-// Split oEmbed-style text into body + trailing "— Name (@handle) Date"
+// Split oEmbed-style text into body + trailing "- Name (@handle) Date"
 const splitPostMeta = (raw: string): { body: string; meta: string | null; author: string | null; handle: string | null } => {
   const text = decodeEntities(raw).trim();
-  const re = /\s*[—–-]\s*([^\n]+?)\s*\(@([^)]+)\)\s*([^\n]*)$/;
+  const re = /\s*[-–-]\s*([^\n]+?)\s*\(@([^)]+)\)\s*([^\n]*)$/;
   const m = text.match(re);
   if (m && m.index !== undefined) {
     const author = m[1].trim();
@@ -183,7 +183,7 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Feed = () => {
   useSEO({
-    title: "Explore — RaidFi",
+    title: "Explore - RaidFi",
     description: "Explore quality Web3 contributions, reputation signals, and projects on RaidFi.",
     path: "/explore",
   });
@@ -241,7 +241,7 @@ const Feed = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Explore — RaidFi", "description": "Quality Web3 contributions and projects on RaidFi.", "url": "https://raidfi.site/explore" }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Explore - RaidFi", "description": "Quality Web3 contributions and projects on RaidFi.", "url": "https://raidfi.site/explore" }) }} />
       <main className="flex-1 pt-16 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
           <div className="sticky top-14 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-background/90 backdrop-blur border-b border-border mb-3">
@@ -323,7 +323,7 @@ const Feed = () => {
                         </div>
                       </div>
 
-                      {/* Content — starts from the left edge */}
+                      {/* Content - starts from the left edge */}
                       <div className="mt-2.5">
                         {hasSavedText ? (
                           <p className="text-[13.5px] leading-snug text-foreground whitespace-pre-wrap break-words">

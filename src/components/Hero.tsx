@@ -33,7 +33,7 @@ const Hero = () => {
 
             RaidFi tracks contribution across X, Discord and Telegram, turns it into
             structured data, and builds a reputation record that shows who consistently
-            adds value — not who posts the most.
+            adds value - not who posts the most.
           </motion.p>
 
           <motion.div

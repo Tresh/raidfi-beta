@@ -29,7 +29,7 @@ interface Row {
 
 const Feedback = () => {
   useSEO({
-    title: "Feedback & Reports — RaidFi",
+    title: "Feedback & Reports - RaidFi",
     description: "Send feedback, report a bug or flag an issue to the RaidFi team.",
     path: "/dashboard/feedback",
   });
@@ -77,7 +77,7 @@ const Feedback = () => {
       toast({ title: "Could not send", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Sent", description: "Thanks — the team will look into it." });
+    toast({ title: "Sent", description: "Thanks - the team will look into it." });
     setSubject("");
     setMessage("");
     load();

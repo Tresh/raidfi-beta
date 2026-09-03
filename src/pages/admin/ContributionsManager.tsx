@@ -230,7 +230,7 @@ const ContributionsManager = () => {
                             {score > 10 && <Star className="w-3 h-3 fill-current" />}
                             {score}
                           </span>
-                        ) : <span className="text-xs text-muted-foreground">—</span>}
+                        ) : <span className="text-xs text-muted-foreground">-</span>}
                       </td>
                       <td className="p-3 hidden md:table-cell">
                         <Switch checked={!!r.published_to_feed} onCheckedChange={() => togglePublish(r)} />
@@ -331,7 +331,7 @@ const ContributionsManager = () => {
                       });
                     }}>Save score</Button>
                 </div>
-                {selected.ai_score != null && <p className="text-[11px] text-muted-foreground">AI score: {selected.ai_score}{selected.ai_feedback ? ` — ${selected.ai_feedback}` : ""}</p>}
+                {selected.ai_score != null && <p className="text-[11px] text-muted-foreground">AI score: {selected.ai_score}{selected.ai_feedback ? ` - ${selected.ai_feedback}` : ""}</p>}
               </div>
 
               {/* Post text */}

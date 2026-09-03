@@ -17,7 +17,7 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Whitepaper = () => {
   useSEO({
-    title: "Whitepaper — RaidFi",
+    title: "Whitepaper - RaidFi",
     description: "RaidFi whitepaper: the architecture, mechanics, and vision behind the Web3 reputation and social intelligence layer.",
     path: "/whitepaper",
   });

@@ -61,7 +61,7 @@ async function reply(chatId: number, text: string, buttons: Btn[][] = [], replyT
 function isPrivate(chatType: string) { return chatType === "private"; }
 function isGroup(chatType: string) { return chatType === "group" || chatType === "supergroup"; }
 
-const HELP = `<b>RaidFi bot — quick reference</b>
+const HELP = `<b>RaidFi bot - quick reference</b>
 
 <b>Get started</b>
 /start · welcome + linking help
@@ -84,13 +84,13 @@ const HELP = `<b>RaidFi bot — quick reference</b>
 
 <i>Group commands only work in the official RaidFi group. Personal stuff stays in DM so your email isn't shared publicly.</i>`;
 
-const START_DM = `Hey — welcome to RaidFi 👋
+const START_DM = `Hey - welcome to RaidFi 👋
 
 I'm the bot that keeps you in the loop: submit posts, check your XP, see open tasks, and get pinged when new ones drop. No dashboard needed.
 
 To use me, first link your RaidFi account (you need to be on the waitlist).
 
-<b>Fastest — code from the site</b>
+<b>Fastest - code from the site</b>
 Grab your Telegram code at <a href="${SITE_ORIGIN}/contributions">raidfi.site/dashboard/contributions</a>, then send:
 <code>/link YOURCODE</code>
 
@@ -138,13 +138,13 @@ async function handle(update: any, supabase: any) {
     }
     if (DM_ONLY.has(cmd)) {
       await reply(chatId,
-        `🤫 That's a personal command — please DM me instead.`,
+        `🤫 That's a personal command - please DM me instead.`,
         [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
         msgId);
       return;
     }
     if (!GROUP_ALLOWED.has(cmd)) {
-      // Unknown / not-allowed in group — stay quiet
+      // Unknown / not-allowed in group - stay quiet
       return;
     }
   }
@@ -284,7 +284,7 @@ async function handle(update: any, supabase: any) {
     case "whoami": {
       if (!(await requireLink())) return;
       await reply(chatId,
-        `👤 <b>${escapeHtml(link.email)}</b>\nTelegram: @${escapeHtml(fromUsername || "—")}\nTask DMs: ${link.dm_subscribed ? "on 🔔" : "off 🔕"}`,
+        `👤 <b>${escapeHtml(link.email)}</b>\nTelegram: @${escapeHtml(fromUsername || "-")}\nTask DMs: ${link.dm_subscribed ? "on 🔔" : "off 🔕"}`,
         [], msgId);
       return;
     }
@@ -308,7 +308,7 @@ async function handle(update: any, supabase: any) {
       const { data: lb } = await supabase.rpc("get_leaderboard", { _period: "all" });
       const idx = (lb || []).findIndex((r: any) => r.email?.includes(link.email.split("@")[0].slice(0, 2)));
       const myEntry = (lb || []).find((r: any) => r.email === link.email) || (lb || [])[idx];
-      const rank = myEntry?.overall_rank ?? "—";
+      const rank = myEntry?.overall_rank ?? "-";
       const { count: contribCount } = await supabase
         .from("contributions")
         .select("id", { count: "exact", head: true })
@@ -328,9 +328,9 @@ async function handle(update: any, supabase: any) {
       const lines = top.map((r: any, i: number) => {
         const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
         const name = escapeHtml(r.display_name || r.email);
-        return `${medal} <b>${name}</b> — ${r.total_xp} XP`;
+        return `${medal} <b>${name}</b> - ${r.total_xp} XP`;
       });
-      await reply(chatId, `📊 <b>RaidFi Leaderboard — Top 10</b>\n\n${lines.join("\n")}`,
+      await reply(chatId, `📊 <b>RaidFi Leaderboard - Top 10</b>\n\n${lines.join("\n")}`,
         [[{ text: "🌐 Full Leaderboard", url: `${SITE_ORIGIN}/dashboard/contributions` }]], msgId);
       return;
     }
@@ -345,7 +345,7 @@ async function handle(update: any, supabase: any) {
         .limit(5);
       if (!tasks?.length) { await reply(chatId, `No open tasks right now. Check back soon.`, [], msgId); return; }
       const lines = (tasks as any[]).map((t) =>
-        `${t.is_pinned ? "📌" : "•"} <b>${escapeHtml(t.label)}</b> — +${t.points} XP${t.description ? `\n   <i>${escapeHtml(t.description.slice(0, 120))}</i>` : ""}`
+        `${t.is_pinned ? "📌" : "•"} <b>${escapeHtml(t.label)}</b> - +${t.points} XP${t.description ? `\n   <i>${escapeHtml(t.description.slice(0, 120))}</i>` : ""}`
       );
       await reply(chatId,
         `📝 <b>Open Contribute Tasks</b>\n\n${lines.join("\n\n")}`,
@@ -361,7 +361,7 @@ async function handle(update: any, supabase: any) {
         return;
       }
 
-      // Ensure a profile row exists so contributions link to a real user —
+      // Ensure a profile row exists so contributions link to a real user -
       // that's what makes "View Contributor" appear on the live feed.
       const { data: existingProfile } = await supabase
         .from("profiles").select("user_id").eq("email", link.email).maybeSingle();
@@ -401,7 +401,7 @@ async function handle(update: any, supabase: any) {
         return;
       }
 
-      await reply(chatId, `Got it — your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
+      await reply(chatId, `Got it - your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
       return;
     }
 

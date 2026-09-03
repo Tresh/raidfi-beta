@@ -409,20 +409,20 @@ const ProjectAIAnalyst = () => {
                 </Button>
               </div>
               <p className="text-[10.5px] text-muted-foreground mt-1.5 text-center">
-                Answers come from your own provider and can be wrong — check the numbers before acting.
+                Answers come from your own provider and can be wrong - check the numbers before acting.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Right sidebar — desktop */}
+        {/* Right sidebar - desktop */}
         {sidebar && (
           <aside className="hidden lg:flex w-[300px] shrink-0 border-l border-border bg-card flex-col">
             {panelBody}
           </aside>
         )}
 
-        {/* Right panel — mobile */}
+        {/* Right panel - mobile */}
         <Sheet open={mobilePanel} onOpenChange={setMobilePanel}>
           <SheetContent side="right" className="w-[300px] sm:w-[340px] p-0 lg:hidden">
             <div className="h-full flex flex-col bg-card">{panelBody}</div>

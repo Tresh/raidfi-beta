@@ -170,7 +170,7 @@ serve(async (req) => {
 
       const snippet = contrib.post_text
         ? `"${escapeHtml(truncate(contrib.post_text.replace(/\s+/g, " ").trim(), 220))}"`
-        : "<i>Content unavailable — open the post to view.</i>";
+        : "<i>Content unavailable - open the post to view.</i>";
 
       const status = contrib.status === "approved"
         ? `Approved${contrib.manual_score ?? contrib.ai_score ? ` · +${contrib.manual_score ?? contrib.ai_score} XP` : ""}`

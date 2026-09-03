@@ -61,7 +61,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a content quality analyzer for the RaidFi community — a web3/crypto community platform.
+    const systemPrompt = `You are a content quality analyzer for the RaidFi community - a web3/crypto community platform.
 
 Analyze the following tweet/post and score it. You must call the "score_post" function with your analysis.
 

@@ -56,7 +56,7 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Contributions = () => {
   useSEO({
-    title: "Contribute — RaidFi",
+    title: "Contribute - RaidFi",
     description: "Track your XP, complete tasks, refer friends, and grow your RaidFi reputation.",
     path: "/contributions",
   });
@@ -115,7 +115,7 @@ const Contributions = () => {
   const [tgLoading, setTgLoading] = useState(false);
   const [tgCopied, setTgCopied] = useState(false);
 
-  // How-it-works modal — auto-open first time
+  // How-it-works modal - auto-open first time
   const [howOpen, setHowOpen] = useState(false);
   useEffect(() => {
     if (!session?.user) return;
@@ -240,7 +240,7 @@ const Contributions = () => {
         return;
       }
 
-      // Profile exists but still has no referral_code — generate one client-side
+      // Profile exists but still has no referral_code - generate one client-side
       if (data && !(data as any).referral_code) {
         const genCode = () => Math.random().toString(36).slice(2, 10).toUpperCase();
         let code = genCode();
@@ -740,7 +740,7 @@ const Contributions = () => {
                           <p className="text-[10px] text-muted-foreground">XP</p>
                         </div>
                         <div className="p-3 rounded-lg bg-muted text-center">
-                          <p className="text-lg font-bold text-foreground">{userRank ? `#${userRank}` : "—"}</p>
+                          <p className="text-lg font-bold text-foreground">{userRank ? `#${userRank}` : "-"}</p>
                           <p className="text-[10px] text-muted-foreground">Rank</p>
                         </div>
                         <div className="p-3 rounded-lg bg-muted text-center">
@@ -767,7 +767,7 @@ const Contributions = () => {
                           </Button>
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-2">
-                          Share this link — you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist through it.
+                          Share this link - you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist through it.
                         </p>
                       </CardContent>
                     </Card>
@@ -1021,7 +1021,7 @@ const Contributions = () => {
         </div>
       </main>
 
-      {/* Floating help button — only when signed in */}
+      {/* Floating help button - only when signed in */}
       {session && (
         <button
           onClick={() => setHowOpen(true)}
@@ -1042,7 +1042,7 @@ const Contributions = () => {
               How RaidFi Contributions Work
             </DialogTitle>
             <DialogDescription>
-              A quick tour — takes less than a minute.
+              A quick tour - takes less than a minute.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 text-sm">
@@ -1064,7 +1064,7 @@ const Contributions = () => {
               <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">3</div>
               <div>
                 <p className="font-medium text-foreground">Refer friends</p>
-                <p className="text-xs text-muted-foreground">Share your referral link — you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist.</p>
+                <p className="text-xs text-muted-foreground">Share your referral link - you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist.</p>
               </div>
             </div>
             <div className="flex gap-3">

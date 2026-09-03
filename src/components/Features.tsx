@@ -13,7 +13,7 @@ const features = [
   {
     icon: Shield,
     title: "Contribution events, not counts",
-    description: "Every event keeps its source, type, timestamp and context — raw data stays separate from insight.",
+    description: "Every event keeps its source, type, timestamp and context - raw data stays separate from insight.",
   },
   {
     icon: Zap,

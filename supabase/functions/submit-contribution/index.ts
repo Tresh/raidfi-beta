@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       return json({ error: "Verify your X account in Settings before submitting contributions." }, 403);
     }
 
-    // Ownership check — only posts from the contributor's verified account.
+    // Ownership check - only posts from the contributor's verified account.
     const oembed = await fetch(
       `https://publish.twitter.com/oembed?url=${encodeURIComponent(postUrl)}&omit_script=1&dnt=1`,
     );

@@ -49,7 +49,7 @@ const AdminLogin = () => {
       if (error) {
         throw new Error(
           error.message.toLowerCase().includes("not confirmed")
-            ? "Verify your email first — check your inbox for the verification link."
+            ? "Verify your email first - check your inbox for the verification link."
             : "Email or password is incorrect."
         );
       }

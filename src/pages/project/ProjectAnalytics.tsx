@@ -138,7 +138,7 @@ const ProjectAnalytics = () => {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <StatCard label="Approval rate" value={`${approvalRate}%`} hint={`${totals.approved} of ${totals.mentions} reviewed posts`} />
-            <StatCard label="Avg quality" value={totals.avgQuality || "—"} hint="Reviewed score out of 10" />
+            <StatCard label="Avg quality" value={totals.avgQuality || "-"} hint="Reviewed score out of 10" />
             <StatCard label="Active vs dormant" value={`${activeNow} / ${dormant}`} hint="Active = posted in last 14 days" />
             <StatCard label="Top-5 concentration" value={`${concentration}%`} hint={`${postsPerContributor} posts per contributor · ${aiShare}% AI-assisted`} />
           </div>
@@ -174,7 +174,7 @@ const ProjectAnalytics = () => {
               </div>
               <p className="text-[11px] text-muted-foreground mt-3">
                 Rising quality with flat volume means your brief is landing. Rising volume with falling quality usually
-                means the incentive is attracting farmers — tighten the reputation floor on your next campaign.
+                means the incentive is attracting farmers - tighten the reputation floor on your next campaign.
               </p>
             </Panel>
 

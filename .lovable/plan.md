@@ -1,9 +1,9 @@
 ## Bug fixes (already applied)
 
-- **Waitlist blank screen** — the X share URL was malformed (`https://x.com{encoded}`), so on mobile the redirect navigated away to a broken page before the next step could render. Fixed the URL to `https://x.com/intent/tweet?text=…` and now advance the step *before* the mobile redirect so users return to the share screen.
-- **Referral code missing for new contributors** — the old code called `update({ referral_code: undefined })` which did nothing. Now: if a profile is missing a code we copy the one from their waitlist signup; if no profile exists yet we create it and pre-fill the referral code from the waitlist row so the link they already shared keeps working.
+- **Waitlist blank screen** - the X share URL was malformed (`https://x.com{encoded}`), so on mobile the redirect navigated away to a broken page before the next step could render. Fixed the URL to `https://x.com/intent/tweet?text=…` and now advance the step *before* the mobile redirect so users return to the share screen.
+- **Referral code missing for new contributors** - the old code called `update({ referral_code: undefined })` which did nothing. Now: if a profile is missing a code we copy the one from their waitlist signup; if no profile exists yet we create it and pre-fill the referral code from the waitlist row so the link they already shared keeps working.
 
-## Telegram bot — what we'll build
+## Telegram bot - what we'll build
 
 ### 1. Database
 
@@ -24,18 +24,18 @@ All tables: RLS on, admin-only read, service role full access.
 
 ### 2. Edge functions
 
-- `telegram-webhook` (public, `verify_jwt = false`) — receives Telegram updates, verifies the secret token header, routes commands.
-- `telegram-link-code` (authed) — called from the Contributions page to mint a one-time code the user types into the bot.
-- `notify-telegram` (existing) — extended so new tasks also DM every linked + subscribed user, in addition to the existing group post.
+- `telegram-webhook` (public, `verify_jwt = false`) - receives Telegram updates, verifies the secret token header, routes commands.
+- `telegram-link-code` (authed) - called from the Contributions page to mint a one-time code the user types into the bot.
+- `notify-telegram` (existing) - extended so new tasks also DM every linked + subscribed user, in addition to the existing group post.
 
 ### 3. Auth gate (waitlist-first)
 
 Every command except `/start` and `/help` requires a linked account. `/start` shows two link options:
 
-- **Option A — One-time code from the site**: user opens RaidFi → Contributions → copies an 8-char code → sends `/link CODE123` in DM. Most secure, no email typing in chat.
-- **Option B — Email OTP**: user sends `/link you@example.com`, bot checks they're on the waitlist (via `check_email_exists`), sends a 6-digit code via the existing OTP email, user replies with `/verify 123456`.
+- **Option A - One-time code from the site**: user opens RaidFi → Contributions → copies an 8-char code → sends `/link CODE123` in DM. Most secure, no email typing in chat.
+- **Option B - Email OTP**: user sends `/link you@example.com`, bot checks they're on the waitlist (via `check_email_exists`), sends a 6-digit code via the existing OTP email, user replies with `/verify 123456`.
 
-If the email isn't on the waitlist, the bot replies with the waitlist link and stops — no account is linked.
+If the email isn't on the waitlist, the bot replies with the waitlist link and stops - no account is linked.
 
 ### 4. Slash commands
 

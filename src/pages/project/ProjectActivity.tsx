@@ -50,7 +50,7 @@ const ProjectActivity = () => {
     <ProjectLayout>
       <PageHeader
         title="Activity"
-        subtitle="What actually happened around your project — posts, people and momentum."
+        subtitle="What actually happened around your project - posts, people and momentum."
         action={
           <Select value={periodKey} onValueChange={setPeriodKey}>
             <SelectTrigger className="h-8 w-[148px] text-xs"><SelectValue /></SelectTrigger>
@@ -65,7 +65,7 @@ const ProjectActivity = () => {
         <Stat label="Posts" value={current?.contributions ?? 0} delta={pct(current?.contributions, previous?.contributions)} />
         <Stat label="Active contributors" value={current?.contributors ?? 0} delta={pct(current?.contributors, previous?.contributors)} />
         <Stat label="Approved" value={current?.approved ?? 0} delta={pct(current?.approved, previous?.approved)} />
-        <Stat label="Avg quality" value={current?.avg_score ? Math.round(current.avg_score) : "—"} delta={pct(current?.avg_score, previous?.avg_score)} />
+        <Stat label="Avg quality" value={current?.avg_score ? Math.round(current.avg_score) : "-"} delta={pct(current?.avg_score, previous?.avg_score)} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-3">

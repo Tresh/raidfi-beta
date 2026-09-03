@@ -1,6 +1,6 @@
 // Shared field catalogue + filter/rank/formula engine for the Project workspace.
 // Every field here maps to data the backend actually returns from
-// public.project_contributor_analytics — nothing is invented.
+// public.project_contributor_analytics - nothing is invented.
 
 export interface ContributorRow {
   email: string;
@@ -247,7 +247,7 @@ export const OBJECTIVES: Objective[] = [
   {
     key: "educators",
     label: "Educators",
-    blurb: "Depth and quality over raw volume — threads and explainers.",
+    blurb: "Depth and quality over raw volume - threads and explainers.",
     weights: { depth: 0.35, quality: 0.35, consistency: 0.2, reliability: 0.1 },
   },
   {
@@ -441,7 +441,7 @@ export function toCSV(rows: Record<string, unknown>[], columns: string[]): strin
 }
 
 export function formatValue(value: unknown, type: FieldType): string {
-  if (value == null || value === "") return "—";
+  if (value == null || value === "") return "-";
   if (type === "percent") return `${Number(value).toFixed(0)}%`;
   if (type === "date") return new Date(String(value)).toLocaleDateString();
   if (type === "boolean") return value ? "Yes" : "No";

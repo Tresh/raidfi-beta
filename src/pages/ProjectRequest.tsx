@@ -31,7 +31,7 @@ const compressLogo = (file: File): Promise<string> => new Promise((resolve, reje
 });
 
 const ProjectRequest = () => {
-  useSEO({ title: "Project & Partnership Request — RaidFi", description: "Request a RaidFi project workspace, listing, partnership, or community service.", path: "/project-request" });
+  useSEO({ title: "Project & Partnership Request - RaidFi", description: "Request a RaidFi project workspace, listing, partnership, or community service.", path: "/project-request" });
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -72,7 +72,7 @@ const ProjectRequest = () => {
 
   return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 pt-24 pb-16"><div className="container max-w-2xl px-5">
     {done ? <div className="py-20 text-center"><CheckCircle2 className="w-10 h-10 text-primary mx-auto mb-4" /><h1 className="text-2xl font-semibold">Request received</h1><p className="text-sm text-muted-foreground mt-2">We’ll review the fit and continue the conversation by email.</p><Button asChild variant="outline" className="mt-6"><a href="/">Back home</a></Button></div> : <>
-      <header className="mb-7"><p className="text-xs font-medium text-primary mb-2">PROJECTS & COMMUNITIES</p><h1 className="text-3xl font-bold">Tell us what you want to build</h1><p className="text-sm text-muted-foreground mt-2 max-w-xl">Request a listing, partnership, project workspace or community intelligence service. Keep it brief—we’ll collect deeper details together later.</p></header>
+      <header className="mb-7"><p className="text-xs font-medium text-primary mb-2">PROJECTS & COMMUNITIES</p><h1 className="text-3xl font-bold">Tell us what you want to build</h1><p className="text-sm text-muted-foreground mt-2 max-w-xl">Request a listing, partnership, project workspace or community intelligence service. Keep it brief-we’ll collect deeper details together later.</p></header>
       <form onSubmit={submit} className="space-y-6">
         <section className="space-y-3"><h2 className="text-sm font-semibold">What are you interested in?</h2><div className="grid sm:grid-cols-2 gap-2">{SERVICES.map((service) => <label key={service} className="flex items-center gap-2 border border-border rounded-lg p-3 text-sm"><Checkbox checked={services.includes(service)} onCheckedChange={() => toggleService(service)} />{service}</label>)}</div></section>
         <section className="grid sm:grid-cols-2 gap-4"><div><Label>Project name</Label><Input value={form.project_name} onChange={(e) => set("project_name", e.target.value)} required /></div><div><Label>Your name</Label><Input value={form.founder_name} onChange={(e) => set("founder_name", e.target.value)} required /></div><div><Label>Work email</Label><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required /></div><div><Label>Website</Label><Input placeholder="https://" value={form.website} onChange={(e) => set("website", e.target.value)} /></div><div><Label>Project X account</Label><Input placeholder="@project" value={form.x_handle} onChange={(e) => set("x_handle", e.target.value)} /></div><div><Label>Telegram group</Label><Input placeholder="t.me/community" value={form.telegram} onChange={(e) => set("telegram", e.target.value)} /></div></section>

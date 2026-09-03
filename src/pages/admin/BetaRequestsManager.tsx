@@ -70,7 +70,7 @@ const BetaRequestsManager = () => {
     toast({
       title: action === "approve" ? "Approved" : "Rejected",
       description: action === "approve"
-        ? `Code ${(data as any)?.code} sent${(data as any)?.emailed ? "" : " (email failed — copy it manually)"}.`
+        ? `Code ${(data as any)?.code} sent${(data as any)?.emailed ? "" : " (email failed - copy it manually)"}.`
         : "The request was rejected.",
     });
     load();
@@ -89,7 +89,7 @@ const BetaRequestsManager = () => {
     setBulkBusy(false);
     toast({
       title: `${ok} ${action === "approve" ? "approved" : "rejected"}`,
-      description: failed ? `${failed} failed — retry those individually.` : "All codes emailed.",
+      description: failed ? `${failed} failed - retry those individually.` : "All codes emailed.",
       variant: failed ? "destructive" : undefined,
     });
     load();
@@ -205,7 +205,7 @@ const BetaRequestsManager = () => {
             <Textarea
               value={issueEmails}
               onChange={(e) => setIssueEmails(e.target.value)}
-              placeholder="Paste emails — one per line, or comma separated"
+              placeholder="Paste emails - one per line, or comma separated"
               rows={4}
               className="text-xs"
             />
