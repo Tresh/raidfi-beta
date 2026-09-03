@@ -91,7 +91,7 @@ I'm the bot that keeps you in the loop: submit posts, check your XP, see open ta
 To use me, first link your RaidFi account (you need to be on the waitlist).
 
 <b>Fastest — code from the site</b>
-Grab your Telegram code at <a href="${SITE_ORIGIN}/contributions">raidfi.site/contributions</a>, then send:
+Grab your Telegram code at <a href="${SITE_ORIGIN}/contributions">raidfi.site/dashboard/contributions</a>, then send:
 <code>/link YOURCODE</code>
 
 <b>Or use your email</b>
@@ -316,7 +316,7 @@ async function handle(update: any, supabase: any) {
         .eq("status", "approved");
       await reply(chatId,
         `🏆 <b>Your RaidFi Stats</b>\n\n💎 XP: <b>${score?.total_xp ?? 0}</b>\n📈 Rank: <b>#${rank}</b>\n✅ Approved contributions: <b>${contribCount ?? 0}</b>`,
-        [[{ text: "📊 Open Dashboard", url: `${SITE_ORIGIN}/contributions` }]],
+        [[{ text: "📊 Open Dashboard", url: `${SITE_ORIGIN}/dashboard/contributions` }]],
         msgId);
       return;
     }
@@ -331,7 +331,7 @@ async function handle(update: any, supabase: any) {
         return `${medal} <b>${name}</b> — ${r.total_xp} XP`;
       });
       await reply(chatId, `📊 <b>RaidFi Leaderboard — Top 10</b>\n\n${lines.join("\n")}`,
-        [[{ text: "🌐 Full Leaderboard", url: `${SITE_ORIGIN}/contributions` }]], msgId);
+        [[{ text: "🌐 Full Leaderboard", url: `${SITE_ORIGIN}/dashboard/contributions` }]], msgId);
       return;
     }
 
@@ -349,7 +349,7 @@ async function handle(update: any, supabase: any) {
       );
       await reply(chatId,
         `📝 <b>Open Contribute Tasks</b>\n\n${lines.join("\n\n")}`,
-        [[{ text: "✅ Do Tasks", url: `${SITE_ORIGIN}/contributions` }]], msgId);
+        [[{ text: "✅ Do Tasks", url: `${SITE_ORIGIN}/dashboard/contributions` }]], msgId);
       return;
     }
 
