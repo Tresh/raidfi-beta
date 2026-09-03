@@ -40,7 +40,11 @@ export function useProject() {
       setEmail(session.user.email ?? null);
 
       // Link any memberships that were created by email before this account existed.
-      await supabase.rpc("claim_project_memberships" as any).catch(() => null);
+      try {
+        await supabase.rpc("claim_project_memberships" as any);
+      } catch {
+        /* non-fatal */
+      }
 
       const userEmail = (session.user.email ?? "").toLowerCase();
       const { data: memberships } = await supabase
