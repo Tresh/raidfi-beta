@@ -99,6 +99,24 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
         className="h-10 text-sm"
       />
 
+      <div>
+        <select
+          value={projectId}
+          onChange={(e) => setProjectId(e.target.value)}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+        >
+          <option value="">No specific project (RaidFi general)</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        <p className="text-[11px] text-muted-foreground mt-1">
+          Pick the project this contribution supports so it shows in their workspace.
+        </p>
+      </div>
+
+
+
       <div className="grid grid-cols-2 gap-2">
         <select
           value={contentType}
