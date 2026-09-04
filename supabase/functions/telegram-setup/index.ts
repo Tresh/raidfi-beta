@@ -51,7 +51,15 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization") ?? "";
     const bootstrap = authHeader === `Bearer ${serviceKey}`;
 
-    if (!bootstrap) {
+    const body = await req.json().catch(() => ({}));
+    const action = String(body.action ?? "status");
+
+    // `register` is safe to call unauthenticated: both the webhook URL and the
+    // secret token are derived server-side, so a caller can only (re)install the
+    // canonical webhook - never point the bot somewhere else.
+    const selfHeal = action === "register";
+
+    if (!bootstrap && !selfHeal) {
       if (!authHeader.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
       const { data: userRes } = await admin.auth.getUser(authHeader.replace("Bearer ", ""));
       const user = userRes?.user;
@@ -61,8 +69,6 @@ Deno.serve(async (req) => {
       if (!isAdmin) return json({ error: "Admin access required" }, 403);
     }
 
-    const body = await req.json().catch(() => ({}));
-    const action = String(body.action ?? "status");
 
     const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
     if (!TELEGRAM_API_KEY) return json({ error: "Telegram connection is not configured" }, 400);
