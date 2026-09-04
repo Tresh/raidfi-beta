@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     // `register` is safe to call unauthenticated: both the webhook URL and the
     // secret token are derived server-side, so a caller can only (re)install the
     // canonical webhook - never point the bot somewhere else.
-    const selfHeal = action === "register";
+    const selfHeal = action === "register" || action === "selftest";
 
     if (!bootstrap && !selfHeal) {
       if (!authHeader.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       const secret = await deriveSecret(TELEGRAM_API_KEY);
       const url = `${supabaseUrl}/functions/v1/telegram-webhook`;
       const updateId = Math.floor(Date.now() / 1000);
-      const chatId = Number(body.chat_id ?? 0);
+      const chatId = 0; // synthetic - never messages a real chat
       const payload = {
         update_id: updateId,
         message: {
