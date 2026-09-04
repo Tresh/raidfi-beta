@@ -17,6 +17,8 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
   const [contentType, setContentType] = useState("post");
   const [mediaType, setMediaType] = useState<"text" | "image">("text");
   const [aiGenerated, setAiGenerated] = useState(false);
+  const [projectId, setProjectId] = useState<string>("");
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [types, setTypes] = useState<{ value: string; label: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,6 +29,13 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
       .eq("is_active", true)
       .order("sort_order")
       .then(({ data }) => setTypes((data as any) ?? []));
+
+    supabase
+      .from("projects" as any)
+      .select("id,name")
+      .eq("status", "active")
+      .order("name")
+      .then(({ data }) => setProjects((data as any) ?? []));
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -44,9 +53,11 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
         content_type: contentType,
         media_type: mediaType,
         ai_generated: aiGenerated,
+        project_id: projectId || null,
         origin: window.location.origin,
       },
     });
+
 
     let message: string | null = null;
     if (error) {
@@ -87,6 +98,24 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
         onChange={(e) => setPostUrl(e.target.value)}
         className="h-10 text-sm"
       />
+
+      <div>
+        <select
+          value={projectId}
+          onChange={(e) => setProjectId(e.target.value)}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+        >
+          <option value="">No specific project (RaidFi general)</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        <p className="text-[11px] text-muted-foreground mt-1">
+          Pick the project this contribution supports so it shows in their workspace.
+        </p>
+      </div>
+
+
 
       <div className="grid grid-cols-2 gap-2">
         <select

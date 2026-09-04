@@ -39,12 +39,25 @@ Deno.serve(async (req) => {
     const aiGenerated = body.ai_generated === true;
     const mediaType = body.media_type === "image" ? "image" : "text";
     const origin = String(body.origin ?? siteOrigin);
+    const projectIdRaw = String(body.project_id ?? "").trim();
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const projectId = UUID_RE.test(projectIdRaw) ? projectIdRaw : null;
 
     if (!TWEET_URL_REGEX.test(postUrl)) {
       return json({ error: "Paste a direct link to an X post." }, 400);
     }
 
     const admin = createClient(supabaseUrl, serviceKey);
+
+    // Validate the selected project (optional - contributions can be general).
+    let resolvedProjectId: string | null = null;
+    if (projectId) {
+      const { data: proj } = await admin
+        .from("projects").select("id,status").eq("id", projectId).maybeSingle();
+      if (!proj) return json({ error: "That project no longer exists." }, 400);
+      if (proj.status !== "active") return json({ error: "That project is not accepting contributions right now." }, 400);
+      resolvedProjectId = proj.id;
+    }
 
     // Identify the submitting contributor.
     let email: string | null = null;
@@ -109,6 +122,7 @@ Deno.serve(async (req) => {
       content_type: contentType,
       ai_generated: aiGenerated,
       media_type: mediaType,
+      project_id: resolvedProjectId,
       status: "pending",
       published_to_feed: true,
     });

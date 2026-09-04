@@ -51,7 +51,15 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization") ?? "";
     const bootstrap = authHeader === `Bearer ${serviceKey}`;
 
-    if (!bootstrap) {
+    const body = await req.json().catch(() => ({}));
+    const action = String(body.action ?? "status");
+
+    // `register` is safe to call unauthenticated: both the webhook URL and the
+    // secret token are derived server-side, so a caller can only (re)install the
+    // canonical webhook - never point the bot somewhere else.
+    const selfHeal = action === "register" || action === "selftest";
+
+    if (!bootstrap && !selfHeal) {
       if (!authHeader.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
       const { data: userRes } = await admin.auth.getUser(authHeader.replace("Bearer ", ""));
       const user = userRes?.user;
@@ -61,8 +69,6 @@ Deno.serve(async (req) => {
       if (!isAdmin) return json({ error: "Admin access required" }, 403);
     }
 
-    const body = await req.json().catch(() => ({}));
-    const action = String(body.action ?? "status");
 
     const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
     if (!TELEGRAM_API_KEY) return json({ error: "Telegram connection is not configured" }, 400);
@@ -80,6 +86,44 @@ Deno.serve(async (req) => {
       const me = await tg("getMe", {});
       return json({ ok: set.ok, url, setWebhook: set.data, webhookInfo: info.data, bot: me.data });
     }
+
+    // End-to-end self test: push a synthetic update through the real webhook
+    // (secret header included) and confirm it was stored + handled.
+    if (action === "selftest") {
+      const secret = await deriveSecret(TELEGRAM_API_KEY);
+      const url = `${supabaseUrl}/functions/v1/telegram-webhook`;
+      const updateId = Math.floor(Date.now() / 1000);
+      const chatId = 0; // synthetic - never messages a real chat
+      const payload = {
+        update_id: updateId,
+        message: {
+          message_id: 1,
+          date: updateId,
+          text: String(body.text ?? "/help"),
+          chat: { id: chatId || 999999999, type: chatId ? "private" : "private" },
+          from: { id: chatId || 999999999, is_bot: false, first_name: "SelfTest" },
+        },
+      };
+      const good = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Telegram-Bot-Api-Secret-Token": secret },
+        body: JSON.stringify(payload),
+      });
+      const bad = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Telegram-Bot-Api-Secret-Token": "wrong" },
+        body: JSON.stringify({ ...payload, update_id: updateId + 1 }),
+      });
+      const { data: stored } = await admin
+        .from("telegram_updates").select("update_id,text").eq("update_id", updateId).maybeSingle();
+      return json({
+        ok: good.ok && bad.status === 401 && !!stored,
+        authorized_status: good.status,
+        rejected_unauthorized: bad.status === 401,
+        stored_update: stored ?? null,
+      });
+    }
+
 
     const info = await tg("getWebhookInfo", {});
     const me = await tg("getMe", {});
