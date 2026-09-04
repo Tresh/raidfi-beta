@@ -117,9 +117,40 @@ async function handle(update: any, supabase: any) {
 
   // Parse command, strip bot suffix in groups
   const m = text.match(/^\/(\w+)(?:@\w+)?(?:\s+(.+))?$/s);
-  if (!m) return;
+  if (!m) {
+    // "Drop a link" behaviour: a plain X post link, no command needed.
+    const found = text.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i);
+    if (!found) return;
+    const droppedUrl = found[0];
+
+    if (isGroup(chatType)) {
+      const { data: s } = await supabase
+        .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
+      const official = s?.telegram_chat_id ? String(s.telegram_chat_id) : null;
+      if (!official || String(chatId) !== official) return;
+    }
+
+    const { data: dropLink } = await supabase
+      .from("telegram_links").select("*").eq("telegram_user_id", fromId).maybeSingle();
+    if (!dropLink) {
+      await reply(chatId,
+        `🔗 Nice post! Link your RaidFi account and I'll track it automatically next time.`,
+        [[{ text: "💬 Link account", url: `https://t.me/raidficontributionbot?start=link` }]],
+        msgId);
+      return;
+    }
+
+    const out = await submitPost(supabase, dropLink.email, droppedUrl);
+    if (out.error) {
+      await reply(chatId, `⚠️ ${escapeHtml(out.error)}`, [], msgId);
+    } else {
+      await reply(chatId, `✅ Tracked - your post is in review.`, [], msgId);
+    }
+    return;
+  }
   const cmd = m[1].toLowerCase();
   const arg = (m[2] || "").trim();
+
 
   // ---- Chat-type gating ----
   // Commands allowed in groups (only in the OFFICIAL RaidFi group):
