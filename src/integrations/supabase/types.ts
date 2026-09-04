@@ -312,6 +312,7 @@ export type Database = {
           post_fetched_at: string | null
           post_text: string | null
           post_url: string
+          project_id: string | null
           published_to_feed: boolean
           status: string
           user_email: string
@@ -333,6 +334,7 @@ export type Database = {
           post_fetched_at?: string | null
           post_text?: string | null
           post_url: string
+          project_id?: string | null
           published_to_feed?: boolean
           status?: string
           user_email: string
@@ -354,12 +356,21 @@ export type Database = {
           post_fetched_at?: string | null
           post_text?: string | null
           post_url?: string
+          project_id?: string | null
           published_to_feed?: boolean
           status?: string
           user_email?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_send_log: {
         Row: {
@@ -1392,13 +1403,24 @@ export type Database = {
           post_author: string | null
           post_text: string | null
           post_url: string | null
+          project_id: string | null
+          project_name: string | null
+          project_slug: string | null
           published_to_feed: boolean | null
           referral_code: string | null
           status: string | null
           user_id: string | null
           x_username: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leaderboard_public: {
         Row: {
