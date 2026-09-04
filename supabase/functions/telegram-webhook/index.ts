@@ -103,6 +103,39 @@ const START_GROUP = `Hey, I'm the RaidFi bot 👋
 I post new contribute tasks here and answer /tasks, /leaderboard and /whitepaper.
 For anything personal, DM me → @raidficontributionbot`;
 
+// Shared submission path used by /submit and by plain "dropped" links.
+async function submitPost(supabase: any, email: string, url: string): Promise<{ error?: string }> {
+  // Ensure a profile row exists so contributions link to a real user.
+  const { data: existingProfile } = await supabase
+    .from("profiles").select("user_id").eq("email", email).maybeSingle();
+  if (!existingProfile?.user_id) {
+    const { data: usersList } = await supabase.auth.admin.listUsers();
+    const authUser = usersList?.users?.find(
+      (u: any) => (u.email || "").toLowerCase() === email.toLowerCase()
+    );
+    if (authUser) {
+      const { data: wl } = await supabase.from("waitlist_submissions")
+        .select("referral_code").eq("email", email).maybeSingle();
+      const payload: any = { user_id: authUser.id, email, waitlist_completed: true };
+      if ((wl as any)?.referral_code) payload.referral_code = (wl as any).referral_code;
+      await supabase.from("profiles").upsert(payload, { onConflict: "user_id" });
+    }
+  }
+
+  const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/submit-contribution`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      apikey: `${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+    },
+    body: JSON.stringify({ post_url: url, user_email: email, content_type: "post", origin: SITE_ORIGIN }),
+  });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok || out?.error) return { error: out?.error || "Couldn't submit that post." };
+  return {};
+}
+
 async function handle(update: any, supabase: any) {
   const message = update.message;
   if (!message?.text) return;
@@ -392,42 +425,9 @@ async function handle(update: any, supabase: any) {
         return;
       }
 
-      // Ensure a profile row exists so contributions link to a real user -
-      // that's what makes "View Contributor" appear on the live feed.
-      const { data: existingProfile } = await supabase
-        .from("profiles").select("user_id").eq("email", link.email).maybeSingle();
-      if (!existingProfile?.user_id) {
-        const { data: usersList } = await supabase.auth.admin.listUsers();
-        const authUser = usersList?.users?.find(
-          (u: any) => (u.email || "").toLowerCase() === link.email.toLowerCase()
-        );
-        if (authUser) {
-          const { data: wl } = await supabase.from("waitlist_submissions")
-            .select("referral_code").eq("email", link.email).maybeSingle();
-          const payload: any = { user_id: authUser.id, email: link.email, waitlist_completed: true };
-          if ((wl as any)?.referral_code) payload.referral_code = (wl as any).referral_code;
-          await supabase.from("profiles").upsert(payload, { onConflict: "user_id" });
-        }
-      }
-
-      // Exactly the same pipeline the website uses.
-      const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/submit-contribution`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-          apikey: `${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-        },
-        body: JSON.stringify({
-          post_url: url,
-          user_email: link.email,
-          content_type: "post",
-          origin: SITE_ORIGIN,
-        }),
-      });
-      const out = await res.json().catch(() => ({}));
-      if (!res.ok || out?.error) {
-        await reply(chatId, `${escapeHtml(out?.error || "Couldn't submit that post.")}`,
+      const out = await submitPost(supabase, link.email, url);
+      if (out.error) {
+        await reply(chatId, `${escapeHtml(out.error)}`,
           [[{ text: "Open Settings", url: `${SITE_ORIGIN}/dashboard/settings` }]], msgId);
         return;
       }
@@ -435,7 +435,6 @@ async function handle(update: any, supabase: any) {
       await reply(chatId, `Got it - your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
       return;
     }
-
 
     case "whitepaper": {
       const { data: wp } = await supabase.from("whitepaper_live").select("version,updated_at").eq("id", "live").maybeSingle();
