@@ -17,6 +17,8 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
   const [contentType, setContentType] = useState("post");
   const [mediaType, setMediaType] = useState<"text" | "image">("text");
   const [aiGenerated, setAiGenerated] = useState(false);
+  const [projectId, setProjectId] = useState<string>("");
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [types, setTypes] = useState<{ value: string; label: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,6 +29,13 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
       .eq("is_active", true)
       .order("sort_order")
       .then(({ data }) => setTypes((data as any) ?? []));
+
+    supabase
+      .from("projects" as any)
+      .select("id,name")
+      .eq("status", "active")
+      .order("name")
+      .then(({ data }) => setProjects((data as any) ?? []));
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -44,9 +53,11 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
         content_type: contentType,
         media_type: mediaType,
         ai_generated: aiGenerated,
+        project_id: projectId || null,
         origin: window.location.origin,
       },
     });
+
 
     let message: string | null = null;
     if (error) {
