@@ -59,6 +59,9 @@ interface Contribution {
   user_id?: string | null;
   referral_code?: string | null;
   author_name?: string | null;
+  project_id?: string | null;
+  project_name?: string | null;
+  project_slug?: string | null;
 }
 
 const FeedImage = ({ postUrl }: { postUrl: string }) => {
@@ -193,16 +196,19 @@ const Feed = () => {
   const [page, setPage] = useState(0);
   const [tab, setTab] = useState<"contributions" | "projects">("contributions");
   const [projects, setProjects] = useState<any[]>([]);
+  const [projectFilter, setProjectFilter] = useState<string>("all");
   const PAGE_SIZE = 20;
 
-  const fetchContributions = useCallback(async (pageNum: number, append = false) => {
+  const fetchContributions = useCallback(async (pageNum: number, append = false, project = "all") => {
     const from = pageNum * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    const { data } = await supabase
+    let query = supabase
       .from("contributions_feed" as any)
-      .select("id,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author,user_id,referral_code,author_name")
+      .select("id,post_url,points_earned,created_at,status,content_type,manual_score,ai_score,ai_feedback,post_text,post_author,user_id,referral_code,author_name,project_id,project_name,project_slug")
       .eq("published_to_feed", true)
-      .neq("status", "rejected")
+      .neq("status", "rejected");
+    if (project !== "all") query = query.eq("project_id", project);
+    const { data } = await query
       .order("created_at", { ascending: false })
       .range(from, to);
     if (data) {
@@ -222,9 +228,14 @@ const Feed = () => {
   }, []);
 
   useEffect(() => {
-    fetchContributions(0);
+    setLoading(true);
+    setPage(0);
+    fetchContributions(0, false, projectFilter);
+  }, [fetchContributions, projectFilter]);
+
+  useEffect(() => {
     supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score").eq("status", "active").order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
-  }, [fetchContributions]);
+  }, []);
 
   const formatRelative = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
@@ -261,13 +272,33 @@ const Feed = () => {
             </div>
           </div>
 
+          {tab === "contributions" && projects.length > 0 && (
+            <div className="flex gap-1.5 overflow-x-auto pb-3 -mx-1 px-1">
+              <button
+                onClick={() => setProjectFilter("all")}
+                className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-medium border transition-colors ${projectFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+              >
+                All projects
+              </button>
+              {projects.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setProjectFilter(p.id)}
+                  className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-medium border transition-colors ${projectFilter === p.id ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           {tab === "projects" ? (
             <div className="grid sm:grid-cols-2 gap-3">
               {projects.length ? projects.map((project) => (
-                <Card key={project.id}><CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3"><div><h2 className="text-sm font-semibold">{project.name}</h2><p className="text-[11px] text-muted-foreground">{project.verification} · Trust {project.trust_score}</p></div><FolderKanban className="w-4 h-4 text-primary" /></div>
+                <Card key={project.id} className="hover:border-primary/40 transition-colors"><CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3"><div><Link to={`/p/${project.slug}`} className="text-sm font-semibold hover:underline">{project.name}</Link><p className="text-[11px] text-muted-foreground">{project.verification} · Trust {project.trust_score}</p></div><FolderKanban className="w-4 h-4 text-primary" /></div>
                   {project.description && <p className="text-xs text-muted-foreground mt-3 line-clamp-3">{project.description}</p>}
-                  <div className="mt-3 flex gap-3 text-xs">{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">Website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
+                  <div className="mt-3 flex gap-3 text-xs"><Link to={`/p/${project.slug}`} className="text-primary font-medium">View project</Link>{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">Website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
                 </CardContent></Card>
               )) : <p className="text-sm text-muted-foreground py-10 text-center col-span-2">Project listings will appear here after verification.</p>}
             </div>
@@ -318,6 +349,11 @@ const Feed = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
+                          {c.project_slug && (
+                            <Link to={`/p/${c.project_slug}`} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 truncate max-w-[90px]">
+                              {c.project_name}
+                            </Link>
+                          )}
                           <TypeBadge type={c.content_type} />
                           <StatusBadge status={c.status} score={score} />
                         </div>
@@ -366,7 +402,7 @@ const Feed = () => {
               })}
               {hasMore && (
                 <div className="text-center pt-4">
-                  <Button variant="outline" size="sm" onClick={() => { const np = page + 1; setPage(np); fetchContributions(np, true); }}>
+                  <Button variant="outline" size="sm" onClick={() => { const np = page + 1; setPage(np); fetchContributions(np, true, projectFilter); }}>
                     Load More
                   </Button>
                 </div>
