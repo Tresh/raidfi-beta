@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ const STATUSES = ["active", "paused", "archived"];
 const TIERS = ["unverified", "basic", "verified", "partner"];
 
 const ProjectsManager = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [rows, setRows] = useState<ProjectRow[]>([]);
   const [members, setMembers] = useState<MemberRow[]>([]);
@@ -211,7 +213,7 @@ const ProjectsManager = () => {
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => setEditing(r)}>Manage</Button>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/admin/manage-projects/${r.id}`)}>Manage</Button>
                 </div>
               </div>
             </div>
