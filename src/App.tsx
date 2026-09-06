@@ -50,6 +50,8 @@ import ProjectSettings from "./pages/project/ProjectSettings";
 import Whitepaper from "./pages/Whitepaper";
 import NotFound from "./pages/NotFound";
 import ProjectRequest from "./pages/ProjectRequest";
+import ProjectDetail from "./pages/ProjectDetail";
+import AdminProjectDetail from "./pages/admin/ProjectDetail";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +76,7 @@ const App = () => (
           <Route path="/explore" element={<Feed />} />
           <Route path="/project-request" element={<ProjectRequest />} />
           <Route path="/u/:code" element={<Profile />} />
+          <Route path="/p/:slug" element={<ProjectDetail />} />
           {/* Contributor dashboard (MVP) */}
           <Route path="/dashboard" element={<Overview />} />
           <Route path="/dashboard/contributions" element={<DashContributions />} />
@@ -109,6 +112,7 @@ const App = () => (
           <Route path="/admin/beta" element={<AdminLayout requiredPermission="beta"><BetaRequestsManager /></AdminLayout>} />
           <Route path="/admin/projects" element={<AdminLayout requiredPermission="projects"><ProjectRequestsManager /></AdminLayout>} />
           <Route path="/admin/manage-projects" element={<AdminLayout requiredPermission="manage-projects"><ProjectsManager /></AdminLayout>} />
+          <Route path="/admin/manage-projects/:id" element={<AdminLayout requiredPermission="manage-projects"><AdminProjectDetail /></AdminLayout>} />
           <Route path="/admin/contributors" element={<AdminLayout requiredPermission="contributors"><ContributorsManager /></AdminLayout>} />
           <Route path="/admin/reports" element={<AdminLayout requiredPermission="reports"><ReportsManager /></AdminLayout>} />
 

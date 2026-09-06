@@ -91,7 +91,7 @@ I'm the bot that keeps you in the loop: submit posts, check your XP, see open ta
 To use me, first link your RaidFi account (you need to be on the waitlist).
 
 <b>Fastest - code from the site</b>
-Grab your Telegram code at <a href="${SITE_ORIGIN}/contributions">raidfi.site/dashboard/contributions</a>, then send:
+Grab your Telegram code at <a href="${SITE_ORIGIN}/dashboard/contributions">raidfi.site/dashboard/contributions</a>, then send:
 <code>/link YOURCODE</code>
 
 <b>Or use your email</b>
@@ -294,7 +294,7 @@ async function handle(update: any, supabase: any) {
         .eq("code", code)
         .maybeSingle();
       if (!row || row.used || new Date(row.expires_at).getTime() < Date.now()) {
-        await reply(chatId, `❌ Invalid or expired code. Generate a fresh one in <a href="${SITE_ORIGIN}/contributions">Contributions</a>.`, [], msgId);
+        await reply(chatId, `❌ Invalid or expired code. Generate a fresh one in <a href="${SITE_ORIGIN}/dashboard/contributions">Contributions</a>.`, [], msgId);
         return;
       }
       await supabase.from("telegram_links").upsert({
