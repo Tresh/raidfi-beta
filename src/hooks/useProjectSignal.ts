@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProjectRecord } from "@/hooks/useProject";
 
@@ -15,6 +15,8 @@ export interface SignalContribution {
   content_type: string;
   ai_generated?: boolean | null;
   created_at: string;
+  x_username?: string | null;
+  display_name?: string | null;
 }
 
 export interface ContributorSignal {
@@ -39,81 +41,96 @@ const keywords = (project: ProjectRecord | null) => {
 };
 
 /**
- * Project-scoped signal: which contributions actually mention this project,
- * who is driving them, and how that compares to the wider ecosystem.
+ * Project-scoped signal. Reads only through authorization-checked RPCs so a
+ * project admin sees every contribution attributed to their project - whether
+ * the contributor picked the project on submission or simply named it in the post.
  */
 export function useProjectSignal(project: ProjectRecord | null) {
   const [loading, setLoading] = useState(true);
-  const [all, setAll] = useState<SignalContribution[]>([]);
+  const [mentions, setMentions] = useState<SignalContribution[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [prevStats, setPrevStats] = useState<any>(null);
   const [board, setBoard] = useState<any[]>([]);
-  const [names, setNames] = useState<Record<string, string>>({});
-  const [handles, setHandles] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
-      const [{ data: contributions }, { data: leaderboard }, { data: profiles }] = await Promise.all([
-        supabase
-          .from("contributions")
-          .select("id,user_email,post_url,post_text,post_author,status,points_earned,manual_score,ai_score,content_type,ai_generated,created_at")
-          .gte("created_at", since)
-          .order("created_at", { ascending: false })
-          .limit(1000),
-        supabase.rpc("get_leaderboard", { _period: "all" }),
-        supabase.from("profiles").select("email,name,x_username"),
-      ]);
-      if (cancelled) return;
-      setAll(((contributions as any) ?? []) as SignalContribution[]);
-      setBoard((leaderboard as any) ?? []);
-      const map: Record<string, string> = {};
-      const handleMap: Record<string, string> = {};
-      for (const p of (profiles as any[]) ?? []) {
-        if (!p.email) continue;
-        const key = p.email.toLowerCase();
-        map[key] = p.name ?? "";
-        if (p.x_username) handleMap[key] = String(p.x_username).replace(/^@/, "");
-      }
-      setNames(map);
-      setHandles(handleMap);
-      setLoading(false);
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    if (!project?.id) return;
+    setLoading(true);
+    const now = Date.now();
+    const iso = (ms: number) => new Date(ms).toISOString();
+
+    const [activity, current, previous, leaderboard] = await Promise.all([
+      supabase.rpc("project_activity" as any, {
+        _project_id: project.id,
+        _from: iso(now - 90 * 86_400_000),
+        _to: iso(now),
+        _only_project: true,
+        _limit: 200,
+        _offset: 0,
+      } as any),
+      supabase.rpc("project_period_stats" as any, {
+        _project_id: project.id,
+        _from: iso(now - 90 * 86_400_000),
+        _to: iso(now),
+      } as any),
+      supabase.rpc("project_period_stats" as any, {
+        _project_id: project.id,
+        _from: iso(now - 60 * 86_400_000),
+        _to: iso(now - 30 * 86_400_000),
+      } as any),
+      supabase.rpc("get_leaderboard", { _period: "all" }),
+    ]);
+
+    setMentions(
+      ((activity.data as any[]) ?? []).map((r) => ({
+        id: r.id,
+        user_email: r.email,
+        post_url: r.post_url,
+        post_text: r.post_text,
+        post_author: r.x_username ?? null,
+        status: r.status,
+        points_earned: r.points_earned ?? 0,
+        manual_score: r.score ?? null,
+        ai_score: null,
+        content_type: r.content_type,
+        ai_generated: r.ai_generated,
+        created_at: r.created_at,
+        x_username: r.x_username,
+        display_name: r.display_name,
+      })),
+    );
+    setStats((current.data as any) ?? null);
+    setPrevStats((previous.data as any) ?? null);
+    setBoard((leaderboard.data as any[]) ?? []);
+    setLoading(false);
   }, [project?.id]);
 
-  const terms = useMemo(() => keywords(project), [project?.id]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const mentions = useMemo(() => {
-    if (!terms.length) return [] as SignalContribution[];
-    return all.filter((c) => {
-      const haystack = `${c.post_text ?? ""} ${c.post_url}`.toLowerCase();
-      return terms.some((t) => haystack.includes(t));
-    });
-  }, [all, terms]);
+  const terms = useMemo(() => keywords(project), [project?.id]);
 
   const contributors = useMemo<ContributorSignal[]>(() => {
     const map = new Map<string, ContributorSignal>();
     for (const c of mentions) {
       const email = (c.user_email ?? "").toLowerCase();
       if (!email) continue;
-      const score = c.manual_score ?? c.ai_score ?? 0;
-      const existing = map.get(email) ?? {
-        email,
-        displayName: handles[email]
-          ? `@${handles[email]}`
-          : names[email] || email.replace(/^(.{2}).*(@.*)$/, "$1***$2"),
-        mentions: 0,
-        approved: 0,
-        xpFromProject: 0,
-        avgQuality: 0,
-        lastActive: c.created_at,
-        totalXp: 0,
-        globalRank: null,
-        xHandle: handles[email] ?? null,
-      };
+      const score = c.manual_score ?? 0;
+      const handle = c.x_username ? String(c.x_username).replace(/^@/, "") : null;
+      const existing =
+        map.get(email) ??
+        ({
+          email,
+          displayName: handle ? `@${handle}` : c.display_name || email.replace(/^(.{2}).*(@.*)$/, "$1***$2"),
+          mentions: 0,
+          approved: 0,
+          xpFromProject: 0,
+          avgQuality: 0,
+          lastActive: c.created_at,
+          totalXp: 0,
+          globalRank: null,
+          xHandle: handle,
+        } as ContributorSignal);
       existing.mentions += 1;
       if (c.status === "approved") {
         existing.approved += 1;
@@ -125,53 +142,56 @@ export function useProjectSignal(project: ProjectRecord | null) {
     }
     for (const row of board) {
       const email = (row.email ?? "").toLowerCase();
-      const entry = [...map.values()].find(
-        (v) => v.email === email || v.displayName === row.display_name,
-      );
+      const entry = [...map.values()].find((v) => v.email === email);
       if (entry) {
         entry.totalXp = row.total_xp ?? 0;
         entry.globalRank = row.overall_rank ?? null;
-        if (row.display_name && !entry.xHandle) entry.displayName = row.display_name;
       }
     }
     return [...map.values()].sort((a, b) => b.xpFromProject - a.xpFromProject || b.mentions - a.mentions);
-  }, [mentions, board, names, handles]);
+  }, [mentions, board]);
 
   const totals = useMemo(() => {
-    const approved = mentions.filter((c) => c.status === "approved");
-    const quality =
-      mentions.reduce((s, c) => s + (c.manual_score ?? c.ai_score ?? 0), 0) / (mentions.length || 1);
-    const last30 = mentions.filter(
-      (c) => Date.now() - new Date(c.created_at).getTime() < 30 * 86_400_000,
-    ).length;
-    const prev30 = mentions.filter((c) => {
-      const age = Date.now() - new Date(c.created_at).getTime();
-      return age >= 30 * 86_400_000 && age < 60 * 86_400_000;
-    }).length;
+    const total = Number(stats?.contributions ?? 0);
+    const eco = Number(stats?.ecosystem_contributions ?? 0);
+    const last30 = mentions.filter((c) => Date.now() - new Date(c.created_at).getTime() < 30 * 86_400_000).length;
+    const prev30 = Number(prevStats?.contributions ?? 0);
     return {
-      mentions: mentions.length,
-      approved: approved.length,
-      contributors: contributors.length,
-      xp: approved.reduce((s, c) => s + (c.points_earned ?? 0), 0),
-      avgQuality: Number(quality.toFixed(1)),
-      shareOfVoice: all.length ? Math.round((mentions.length / all.length) * 100) : 0,
+      mentions: total,
+      approved: Number(stats?.accepted ?? 0),
+      pending: Number(stats?.pending ?? 0),
+      contributors: Number(stats?.contributors ?? 0),
+      xp: Number(stats?.xp ?? 0),
+      avgQuality: Number(stats?.avg_quality ?? 0),
+      shareOfVoice: eco ? Math.round((total / eco) * 100) : 0,
       last30,
       prev30,
       momentum: prev30 === 0 ? (last30 > 0 ? 100 : 0) : Math.round(((last30 - prev30) / prev30) * 100),
     };
-  }, [mentions, contributors, all]);
+  }, [stats, prevStats, mentions]);
 
   /** Prefer the contributor's X identity over any email representation. */
   const authorLabel = useMemo(
-    () => (c: { user_email?: string | null; post_author?: string | null }) => {
-      const email = (c.user_email ?? "").toLowerCase();
-      if (handles[email]) return `@${handles[email]}`;
-      if (c.post_author) return c.post_author.startsWith("@") ? c.post_author : `@${c.post_author}`;
-      if (names[email]) return names[email];
-      return email ? email.replace(/^(.{2}).*(@.*)$/, "$1***$2") : "Unknown";
-    },
-    [handles, names],
+    () =>
+      (c: { user_email?: string | null; post_author?: string | null; x_username?: string | null; display_name?: string | null }) => {
+        const handle = c.x_username ?? c.post_author;
+        if (handle) return String(handle).startsWith("@") ? String(handle) : `@${handle}`;
+        if (c.display_name) return c.display_name;
+        const email = (c.user_email ?? "").toLowerCase();
+        return email ? email.replace(/^(.{2}).*(@.*)$/, "$1***$2") : "Unknown";
+      },
+    [],
   );
 
-  return { loading, mentions, contributors, totals, ecosystemCount: all.length, terms, board, handles, authorLabel };
+  return {
+    loading,
+    mentions,
+    contributors,
+    totals,
+    ecosystemCount: Number(stats?.ecosystem_contributions ?? 0),
+    terms,
+    board,
+    authorLabel,
+    reload: load,
+  };
 }
