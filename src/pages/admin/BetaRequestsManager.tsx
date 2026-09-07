@@ -95,6 +95,33 @@ const BetaRequestsManager = () => {
     load();
   };
 
+  const issueToEmails = async (emails: string[], role: string) => {
+    let ok = 0;
+    let failed = 0;
+    let skipped = 0;
+    for (const email of emails) {
+      const already = rows.find(
+        (r) => r.email.toLowerCase() === email && (r.status === "approved" || r.status === "redeemed"),
+      );
+      if (already) { skipped += 1; continue; }
+      const existing = rows.find((r) => r.email.toLowerCase() === email && r.status === "pending");
+      let id = existing?.id;
+      if (!id) {
+        const { data, error } = await supabase
+          .from("beta_requests" as any)
+          .insert({ email, requested_role: role, reason: "Issued directly by admin" } as any)
+          .select("id")
+          .maybeSingle();
+        if (error || !data) { failed += 1; continue; }
+        id = (data as any).id;
+      }
+      const { data: res, error: fnErr } = await approveOne(id!, "approve");
+      if (fnErr || (res as any)?.error) failed += 1;
+      else ok += 1;
+    }
+    return { ok, failed, skipped };
+  };
+
   const issueCodes = async () => {
     const emails = Array.from(
       new Set(
@@ -109,30 +136,40 @@ const BetaRequestsManager = () => {
       return;
     }
     setBulkBusy(true);
-    let ok = 0;
-    let failed = 0;
-    for (const email of emails) {
-      const existing = rows.find((r) => r.email.toLowerCase() === email && r.status === "pending");
-      let id = existing?.id;
-      if (!id) {
-        const { data, error } = await supabase
-          .from("beta_requests" as any)
-          .insert({ email, requested_role: issueRole, reason: "Issued directly by admin" } as any)
-          .select("id")
-          .maybeSingle();
-        if (error || !data) { failed += 1; continue; }
-        id = (data as any).id;
-      }
-      const { data: res, error: fnErr } = await approveOne(id!, "approve");
-      if (fnErr || (res as any)?.error) failed += 1;
-      else ok += 1;
-    }
+    const { ok, failed, skipped } = await issueToEmails(emails, issueRole);
     setBulkBusy(false);
     setIssueEmails("");
     setIssueOpen(false);
     toast({
       title: `${ok} code${ok === 1 ? "" : "s"} issued`,
-      description: failed ? `${failed} failed.` : "Emails sent to every address.",
+      description: [failed ? `${failed} failed.` : "", skipped ? `${skipped} already had a code.` : ""].filter(Boolean).join(" ") || "Emails sent to every address.",
+      variant: failed ? "destructive" : undefined,
+    });
+    load();
+  };
+
+  const inviteWaitlist = async () => {
+    setBulkBusy(true);
+    const { data, error } = await supabase.from("waitlist_submissions").select("email");
+    if (error) {
+      setBulkBusy(false);
+      toast({ title: "Couldn't load waitlist", description: error.message, variant: "destructive" });
+      return;
+    }
+    const emails = Array.from(
+      new Set((data ?? []).map((r: any) => String(r.email).trim().toLowerCase()).filter(Boolean)),
+    );
+    if (emails.length === 0) {
+      setBulkBusy(false);
+      toast({ title: "Nothing to send", description: "No waitlist signups found." });
+      return;
+    }
+    const { ok, failed, skipped } = await issueToEmails(emails, "user");
+    setBulkBusy(false);
+    setWaitlistConfirm(false);
+    toast({
+      title: `${ok} waitlist invite${ok === 1 ? "" : "s"} sent`,
+      description: [failed ? `${failed} failed.` : "", skipped ? `${skipped} already had a code.` : ""].filter(Boolean).join(" ") || "Every waitlist signup now has a code.",
       variant: failed ? "destructive" : undefined,
     });
     load();
