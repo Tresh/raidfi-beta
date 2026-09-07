@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Copy, Check, Zap } from "lucide-react";
+import { Loader2, Copy, Check, Zap, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader, StatusPill } from "@/components/dashboard/Primitives";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 
 type Row = {
@@ -40,6 +41,7 @@ const BetaRequestsManager = () => {
   const [issueOpen, setIssueOpen] = useState(false);
   const [issueEmails, setIssueEmails] = useState("");
   const [issueRole, setIssueRole] = useState("user");
+  const [waitlistConfirm, setWaitlistConfirm] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -214,7 +216,7 @@ const BetaRequestsManager = () => {
 
       <div className="bg-card border border-border rounded-lg p-3 mb-4">
         <div className="flex flex-wrap items-center gap-2">
-          {tab === "pending" && list.length > 0 && (
+          {list.length > 0 && (
             <>
               <label className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Checkbox
@@ -225,16 +227,22 @@ const BetaRequestsManager = () => {
               </label>
               <Button size="sm" disabled={bulkBusy || selected.length === 0} onClick={() => bulkAct("approve")}>
                 {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
-                Approve selected
+                {tab === "approved" || tab === "redeemed" ? "Re-issue selected" : "Approve selected"}
               </Button>
               <Button size="sm" variant="outline" disabled={bulkBusy || selected.length === 0} onClick={() => bulkAct("reject")}>
                 Reject selected
               </Button>
             </>
           )}
-          <Button size="sm" variant="outline" className="ml-auto" onClick={() => setIssueOpen((o) => !o)}>
-            <Zap className="w-3.5 h-3.5 mr-1.5" /> Issue codes directly
-          </Button>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => setIssueOpen((o) => !o)}>
+              <Zap className="w-3.5 h-3.5 mr-1.5" /> Issue codes directly
+            </Button>
+            <Button size="sm" disabled={bulkBusy} onClick={() => setWaitlistConfirm(true)}>
+              {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+              <Users className="w-3.5 h-3.5 mr-1.5" /> Send codes to all waitlist signups
+            </Button>
+          </div>
         </div>
 
         {issueOpen && (
@@ -280,7 +288,7 @@ const BetaRequestsManager = () => {
             <div key={r.id} className="bg-card border border-border rounded-lg p-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="min-w-0 flex items-start gap-2.5">
-                  {r.status === "pending" && (
+                  {(
                     <Checkbox
                       className="mt-0.5"
                       checked={selected.includes(r.id)}
@@ -334,6 +342,14 @@ const BetaRequestsManager = () => {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={waitlistConfirm}
+        onOpenChange={setWaitlistConfirm}
+        title="Send beta codes to every waitlist signup"
+        description="Every waitlist email that doesn't already have a code will get an approved access code emailed to them, using the expiry and max-uses set above. This can't be undone."
+        confirmLabel="Send codes"
+        onConfirm={inviteWaitlist}
+      />
     </div>
   );
 };
