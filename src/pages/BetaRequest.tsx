@@ -1,0 +1,165 @@
+import { useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/useSEO";
+
+const ROLES = [
+  { value: "contributor", label: "Contributor" },
+  { value: "community_manager", label: "Community manager" },
+  { value: "founder", label: "Founder" },
+  { value: "builder", label: "Builder" },
+  { value: "researcher", label: "Researcher / analyst" },
+  { value: "other", label: "Other" },
+];
+
+const PLATFORMS = ["X", "Discord", "Telegram"];
+
+const emailOk = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
+
+const BetaRequest = () => {
+  useSEO({
+    title: "Request Beta Access - RaidFi",
+    description:
+      "RaidFi is contribution intelligence and reputation infrastructure for Web3. Request access to the private beta.",
+    path: "/beta",
+  });
+  const { toast } = useToast();
+  const [sending, setSending] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [xHandle, setXHandle] = useState("");
+  const [roles, setRoles] = useState<string[]>(["contributor"]);
+  const [platforms, setPlatforms] = useState<string[]>(["X"]);
+  const [reason, setReason] = useState("");
+
+  const toggle = (list: string[], setList: (v: string[]) => void, value: string) =>
+    setList(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!name.trim() || !emailOk(email)) {
+      toast({ title: "Check your details", description: "Add your name and a valid email address.", variant: "destructive" });
+      return;
+    }
+    if (roles.length === 0) {
+      toast({ title: "Pick at least one role", description: "Tell us how you'd use RaidFi.", variant: "destructive" });
+      return;
+    }
+    setSending(true);
+    const notes = [
+      reason.trim(),
+      roles.length ? `Roles: ${roles.join(", ")}` : "",
+      platforms.length ? `Platforms: ${platforms.join(", ")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const { error } = await supabase.from("beta_requests").insert({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      x_handle: xHandle.trim().replace(/^@/, "") || null,
+      requested_role: roles[0] === "founder" ? "project_admin" : "user",
+      reason: notes || null,
+    } as any);
+    setSending(false);
+    if (error) {
+      toast({ title: "Couldn't send request", description: error.message, variant: "destructive" });
+      return;
+    }
+    setDone(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="container mx-auto px-6 pt-28 pb-20 max-w-xl">
+        {done ? (
+          <div className="text-center space-y-4 py-12">
+            <CheckCircle2 className="w-10 h-10 text-primary mx-auto" />
+            <h1 className="text-2xl font-bold text-foreground">Request received</h1>
+            <p className="text-sm text-muted-foreground">
+              We review beta requests in batches. If you're approved we'll email you an access code
+              and the date it expires.
+            </p>
+            <Button variant="outline" asChild><a href="/">Back to home</a></Button>
+          </div>
+        ) : (
+          <>
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Request beta access</h1>
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                RaidFi turns community activity into structured contribution data and a lasting
+                reputation record. The beta is invite-only while we tune how contribution is measured.
+              </p>
+            </header>
+
+            <form onSubmit={submit} className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="beta-name">Name</Label>
+                <Input id="beta-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="beta-email">Email</Label>
+                <Input id="beta-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="beta-x">X handle</Label>
+                <Input id="beta-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>How would you use RaidFi? (select all that apply)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {ROLES.map((role) => (
+                    <label key={role.value} className="flex items-center gap-2 text-sm text-muted-foreground border border-border rounded-lg px-3 py-2 cursor-pointer hover:text-foreground transition-colors">
+                      <Checkbox checked={roles.includes(role.value)} onCheckedChange={() => toggle(roles, setRoles, role.value)} />
+                      {role.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Where are you active? (select all that apply)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {PLATFORMS.map((platform) => (
+                    <label key={platform} className="flex items-center gap-2 text-sm text-muted-foreground border border-border rounded-lg px-3 py-2 cursor-pointer hover:text-foreground transition-colors">
+                      <Checkbox checked={platforms.includes(platform)} onCheckedChange={() => toggle(platforms, setPlatforms, platform)} />
+                      {platform}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="beta-why">What would you use it for?</Label>
+                <Textarea id="beta-why" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="A sentence or two about your work in Web3" />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={sending}>
+                {sending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Request beta access
+              </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                Representing a project?{" "}
+                <a href="/project-request" className="text-primary underline underline-offset-4">Open the project form</a>
+              </p>
+            </form>
+          </>
+        )}
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default BetaRequest;

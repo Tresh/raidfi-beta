@@ -78,7 +78,7 @@ const ForContributors = () => {
             className="text-center"
           >
             <Button size="lg" asChild className="h-11 px-7 text-sm">
-              <a href="/waitlist" className="group">
+              <a href="/beta" className="group">
                 Start Building Your Reputation
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
