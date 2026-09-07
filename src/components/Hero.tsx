@@ -43,8 +43,8 @@ const Hero = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mx-0">
 
             <Button size="lg" asChild className="h-11 px-7 text-sm w-full sm:w-auto">
-              <a href="/waitlist" className="group">
-                Join as a contributor
+              <a href="/beta" className="group">
+                Request beta access
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
             </Button>

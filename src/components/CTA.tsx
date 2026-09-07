@@ -26,7 +26,7 @@ const CTA = () => {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                 <Button size="lg" variant="secondary" asChild className="h-11 px-7 text-sm w-full sm:w-auto">
-                  <a href="/waitlist" className="group inline-flex items-center justify-center">
+                  <a href="/beta" className="group inline-flex items-center justify-center">
                     Join as a contributor
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </a>

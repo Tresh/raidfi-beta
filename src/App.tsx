@@ -4,8 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import Waitlist from "./pages/Waitlist";
-import WaitlistConfirmed from "./pages/WaitlistConfirmed";
+import BetaRequest from "./pages/BetaRequest";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -63,8 +62,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/waitlist" element={<Waitlist />} />
-          <Route path="/waitlist/confirmed" element={<WaitlistConfirmed />} />
+          <Route path="/beta" element={<BetaRequest />} />
+          <Route path="/waitlist" element={<Navigate to="/beta" replace />} />
+          <Route path="/waitlist/confirmed" element={<Navigate to="/beta" replace />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
