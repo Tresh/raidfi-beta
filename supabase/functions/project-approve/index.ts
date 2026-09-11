@@ -149,32 +149,19 @@ Deno.serve(async (req) => {
       .update({ status: "approved", reviewed_at: new Date().toISOString() })
       .eq("id", requestId);
 
-    let emailed = false;
-    let emailError: string | null = null;
-    try {
-      const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${serviceKey}`,
-          apikey: serviceKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          templateName: "beta-access",
-          recipientEmail: request.email,
-          templateData: {
-            code,
-            name: request.founder_name ?? "",
-            appUrl: "https://raidfi.site",
-            expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-          },
-        }),
-      });
-      emailed = res.ok;
-      if (!res.ok) emailError = await res.text();
-    } catch (e) {
-      emailError = e instanceof Error ? e.message : "Unknown email error";
-    }
+    const { sendResendEmail, betaAccessEmailHtml } = await import("../_shared/resend-email.ts");
+    const result = await sendResendEmail({
+      to: request.email,
+      subject: `Your RaidFi project workspace is ready — ${request.project_name}`,
+      html: betaAccessEmailHtml({
+        code,
+        name: request.founder_name ?? "",
+        appUrl: "https://beta.raidfi.site",
+        expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+      }),
+    });
+    const emailed = result.sent;
+    const emailError = result.error ?? null;
 
     return json({ ok: true, status: "approved", code, project_id: project?.id, emailed, emailError });
   } catch (e) {
