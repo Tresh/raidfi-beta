@@ -86,36 +86,24 @@ Deno.serve(async (req) => {
       .eq("id", requestId);
     if (updErr) return json({ error: updErr.message }, 500);
 
-    let emailed = false;
-    let emailError: string | null = null;
-    try {
-      const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${serviceKey}`,
-          apikey: serviceKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          templateName: "beta-access",
-          recipientEmail: request.email,
-          templateData: {
-            code,
-            name: request.name ?? "",
-            appUrl: "https://raidfi.site",
-            expiresAt: expiresAt.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-          },
-        }),
-      });
-      emailed = res.ok;
-      if (!res.ok) emailError = await res.text();
-    } catch (e) {
-      emailError = e instanceof Error ? e.message : "Unknown email error";
-    }
+    const { sendResendEmail, betaAccessEmailHtml } = await import("../_shared/resend-email.ts");
+    const expiresLabel = expiresAt.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const result = await sendResendEmail({
+      to: request.email,
+      subject: "Your RaidFi beta access code",
+      html: betaAccessEmailHtml({
+        code,
+        name: request.name ?? "",
+        appUrl: "https://beta.raidfi.site",
+        expiresAt: expiresLabel,
+      }),
+    });
+    const emailed = result.sent;
+    const emailError = result.error ?? null;
 
     return json({ ok: true, status: "approved", code, expires_at: expiresAt.toISOString(), max_uses: maxUses, emailed, emailError });
   } catch (e) {
