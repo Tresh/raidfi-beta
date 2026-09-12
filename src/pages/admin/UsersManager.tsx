@@ -82,11 +82,49 @@ const UsersManager = () => {
 
     const normalized = raw.trim().toLowerCase();
 
-    const { data: profile } = await supabase
+    let { data: profiles } = await supabase
       .from("profiles")
       .select("*")
       .ilike("email", normalized)
-      .maybeSingle();
+      .limit(1);
+
+    let profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
+    if (!profile) {
+      // Fallback search in waitlist_submissions
+      const { data: waitlist } = await supabase
+        .from("waitlist_submissions")
+        .select("*")
+        .ilike("email", normalized)
+        .limit(1);
+
+      if (waitlist && waitlist.length > 0) {
+        const w = waitlist[0];
+        if (w.user_id) {
+          const { data: pById } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("user_id", w.user_id)
+            .limit(1);
+          if (pById && pById.length > 0) {
+            profile = pById[0];
+          }
+        }
+
+        if (!profile) {
+          profile = {
+            id: w.id,
+            user_id: w.user_id || w.id,
+            email: w.email,
+            name: null,
+            total_points: w.points || 0,
+            referral_count: 0,
+            waitlist_completed: true,
+            created_at: w.created_at,
+          };
+        }
+      }
+    }
 
     if (!profile) {
       toast({ title: "Not found", description: "No user profile found with that email.", variant: "destructive" });
