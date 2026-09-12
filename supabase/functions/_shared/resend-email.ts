@@ -67,7 +67,7 @@ export function betaAccessEmailHtml(params: {
     </p>
     <a href="${appUrl}/beta-access" style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 28px;border-radius:8px;">Redeem your code</a>
     <p style="font-size:12px;color:#6b7482;margin:32px 0 0;">
-      RaidFi — contribution tracking and reputation infrastructure for Web3.<br/>
+      RaidFi - contribution tracking and reputation infrastructure for Web3.<br/>
       If you didn't request access, you can ignore this email.
     </p>
   </div>
