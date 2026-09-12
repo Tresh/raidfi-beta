@@ -11,15 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 
-const ROLES = [
-  { value: "contributor", label: "Contributor" },
-  { value: "community_manager", label: "Community manager" },
-  { value: "founder", label: "Founder" },
-  { value: "builder", label: "Builder" },
-  { value: "researcher", label: "Researcher / analyst" },
-  { value: "other", label: "Other" },
-];
-
 const PLATFORMS = ["X", "Discord", "Telegram"];
 
 const emailOk = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
@@ -51,14 +42,9 @@ const BetaRequest = () => {
       toast({ title: "Check your details", description: "Add your name and a valid email address.", variant: "destructive" });
       return;
     }
-    if (roles.length === 0) {
-      toast({ title: "Pick at least one role", description: "Tell us how you'd use RaidFi.", variant: "destructive" });
-      return;
-    }
     setSending(true);
     const notes = [
       reason.trim(),
-      roles.length ? `Roles: ${roles.join(", ")}` : "",
       platforms.length ? `Platforms: ${platforms.join(", ")}` : "",
     ]
       .filter(Boolean)
