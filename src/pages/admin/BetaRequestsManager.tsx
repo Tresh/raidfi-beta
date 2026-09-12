@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Copy, Check, Zap, Users } from "lucide-react";
+import { Loader2, Copy, Check, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader, StatusPill } from "@/components/dashboard/Primitives";
-import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 
 type Row = {
@@ -40,8 +39,6 @@ const BetaRequestsManager = () => {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [issueEmails, setIssueEmails] = useState("");
-  const [issueRole, setIssueRole] = useState("user");
-  const [waitlistConfirm, setWaitlistConfirm] = useState(false);
 
   const load = async () => {
     setLoading(true);
