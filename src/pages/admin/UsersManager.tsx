@@ -71,14 +71,16 @@ const UsersManager = () => {
 
   useEffect(() => { loadStaff(); }, [loadStaff]);
 
-  const handleSearch = async () => {
-    if (!searchEmail.trim()) return;
+  const handleSearch = async (emailOverride?: string) => {
+    const raw = emailOverride ?? searchEmail;
+    if (!raw.trim()) return;
+    if (emailOverride) setSearchEmail(emailOverride);
     setSearching(true);
     setUserResult(null);
     setUserRoles([]);
     setUserPermissions([]);
 
-    const normalized = searchEmail.trim().toLowerCase();
+    const normalized = raw.trim().toLowerCase();
 
     const { data: profile } = await supabase
       .from("profiles")
@@ -132,6 +134,7 @@ const UsersManager = () => {
         .select("*")
         .eq("user_id", userResult.user_id);
       setUserRoles(roles || []);
+      loadStaff();
     }
     setAddingRole(false);
   };
