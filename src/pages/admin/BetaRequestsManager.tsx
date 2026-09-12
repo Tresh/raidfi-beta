@@ -100,15 +100,15 @@ const BetaRequestsManager = () => {
     let skipped = 0;
     for (const email of emails) {
       const already = rows.find(
-        (r) => r.email.toLowerCase() === email && (r.status === "approved" || r.status === "redeemed"),
+        (r) => r.email.toLowerCase() === email && ((r.status || "pending") === "approved" || (r.status || "pending") === "redeemed"),
       );
       if (already) { skipped += 1; continue; }
-      const existing = rows.find((r) => r.email.toLowerCase() === email && r.status === "pending");
+      const existing = rows.find((r) => r.email.toLowerCase() === email && (r.status || "pending") === "pending");
       let id = existing?.id;
       if (!id) {
         const { data, error } = await supabase
           .from("beta_requests" as any)
-          .insert({ email, requested_role: role, reason: "Issued directly by admin" } as any)
+          .insert({ email, requested_role: role, reason: "Issued directly by admin", status: "pending" } as any)
           .select("id")
           .maybeSingle();
         if (error || !data) { failed += 1; continue; }
@@ -153,7 +153,7 @@ const BetaRequestsManager = () => {
     setTimeout(() => setCopied(null), 1500);
   };
 
-  const list = rows.filter((r) => r.status === tab);
+  const list = rows.filter((r) => (r.status || "pending") === tab);
   const allSelected = list.length > 0 && selected.length === list.length;
 
 
@@ -173,7 +173,7 @@ const BetaRequestsManager = () => {
               tab === t ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t} ({rows.filter((r) => r.status === t).length})
+            {t} ({rows.filter((r) => (r.status || "pending") === t).length})
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
@@ -266,7 +266,7 @@ const BetaRequestsManager = () => {
                   </div>
                 </div>
 
-                <StatusPill status={r.status} />
+                <StatusPill status={r.status || "pending"} />
               </div>
 
               {r.reason && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{r.reason}</p>}
@@ -284,7 +284,7 @@ const BetaRequestsManager = () => {
                 </div>
               )}
 
-              {r.status === "pending" && (
+              {(r.status || "pending") === "pending" && (
                 <div className="mt-3 flex gap-2">
                   <Button size="sm" disabled={busy === r.id} onClick={() => act(r.id, "approve")}>
                     {busy === r.id && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}Approve & email code
