@@ -40,6 +40,37 @@ const UsersManager = () => {
   const isModerator = userRoles.some(r => r.role === "moderator");
   const isTargetAdmin = userRoles.some(r => r.role === "admin");
 
+  const [staff, setStaff] = useState<{ user_id: string; role: string; name: string | null; email: string }[]>([]);
+  const [staffLoading, setStaffLoading] = useState(true);
+
+  const loadStaff = useCallback(async () => {
+    setStaffLoading(true);
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .in("role", ["admin", "moderator", "super_admin"] as any);
+    const ids = Array.from(new Set((roles ?? []).map((r: any) => r.user_id)));
+    let profileMap: Record<string, any> = {};
+    if (ids.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name, email")
+        .in("user_id", ids);
+      profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.user_id, p]));
+    }
+    setStaff(
+      (roles ?? []).map((r: any) => ({
+        user_id: r.user_id,
+        role: r.role,
+        name: profileMap[r.user_id]?.name ?? null,
+        email: profileMap[r.user_id]?.email ?? "Unknown email",
+      })),
+    );
+    setStaffLoading(false);
+  }, []);
+
+  useEffect(() => { loadStaff(); }, [loadStaff]);
+
   const handleSearch = async () => {
     if (!searchEmail.trim()) return;
     setSearching(true);
