@@ -117,17 +117,6 @@ const BetaRequest = () => {
                 <Input id="beta-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
               </div>
 
-              <div className="space-y-2">
-                <Label>How would you use RaidFi? (select all that apply)</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {ROLES.map((role) => (
-                    <label key={role.value} className="flex items-center gap-2 text-sm text-muted-foreground border border-border rounded-lg px-3 py-2 cursor-pointer hover:text-foreground transition-colors">
-                      <Checkbox checked={roles.includes(role.value)} onCheckedChange={() => toggle(roles, setRoles, role.value)} />
-                      {role.label}
-                    </label>
-                  ))}
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <Label>Where are you active? (select all that apply)</Label>
