@@ -14,6 +14,7 @@ interface WhitepaperData {
 
 
 import { useSEO } from "@/hooks/useSEO";
+import { BASE_URL } from "@/lib/constants";
 
 const Whitepaper = () => {
   useSEO({
@@ -81,7 +82,7 @@ const Whitepaper = () => {
           <p className="text-center text-muted-foreground py-20">Whitepaper not available.</p>
         ) : (
           <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Article", "headline": "RaidFi Whitepaper", "author": { "@type": "Organization", "name": "RaidFi" }, "publisher": { "@type": "Organization", "name": "RaidFi" }, "description": "RaidFi whitepaper: the architecture, mechanics, and vision behind the Web3 reputation and social intelligence layer.", "url": "https://raidfi.site/whitepaper" }) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Article", "headline": "RaidFi Whitepaper", "author": { "@type": "Organization", "name": "RaidFi" }, "publisher": { "@type": "Organization", "name": "RaidFi" }, "description": "RaidFi whitepaper: the architecture, mechanics, and vision behind the Web3 reputation and social intelligence layer.", "url": `${BASE_URL}/whitepaper` }) }} />
             <article className="prose prose-invert max-w-none whitepaper-content">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}

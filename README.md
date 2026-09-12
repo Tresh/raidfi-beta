@@ -26,7 +26,7 @@
 
 ---
 
-[→ Join the Waitlist](https://raidfi.site) · [→ Read the Whitepaper](#whitepaper) · [→ Follow Updates](https://x.com/raidfi_app)
+[→ Join the Waitlist](https://beta.raidfi.site) · [→ Read the Whitepaper](#whitepaper) · [→ Follow Updates](https://x.com/raidfi_app)
 
 </div>
 
