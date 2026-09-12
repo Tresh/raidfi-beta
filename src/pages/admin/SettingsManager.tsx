@@ -18,6 +18,16 @@ interface Settings {
   scoring_delay_hours: number;
 }
 
+const DEFAULT_SETTINGS: Settings = {
+  id: "global",
+  auto_publish_contributions: false,
+  telegram_enabled: false,
+  telegram_chat_id: null,
+  telegram_notify_feed: false,
+  telegram_notify_tasks: false,
+  scoring_delay_hours: 24,
+};
+
 interface TypeRow {
   id: string;
   value: string;
@@ -52,7 +62,7 @@ const SettingsManager = () => {
       supabase.from("content_types" as any).select("*").order("sort_order"),
       supabase.from("task_action_types" as any).select("*").order("sort_order"),
     ]);
-    setSettings((s as any) || null);
+    setSettings((s as any) || DEFAULT_SETTINGS);
     setContentTypes((ct as any) || []);
     setActionTypes((at as any) || []);
     setLoading(false);
@@ -65,7 +75,8 @@ const SettingsManager = () => {
     setSavingSettings(true);
     const { error } = await supabase
       .from("admin_settings" as any)
-      .update({
+      .upsert({
+        id: "global",
         auto_publish_contributions: settings.auto_publish_contributions,
         telegram_enabled: settings.telegram_enabled,
         telegram_chat_id: settings.telegram_chat_id?.trim() || null,
@@ -73,8 +84,7 @@ const SettingsManager = () => {
         telegram_notify_tasks: settings.telegram_notify_tasks,
         scoring_delay_hours: settings.scoring_delay_hours,
         updated_at: new Date().toISOString(),
-      } as any)
-      .eq("id", "global");
+      } as any, { onConflict: "id" });
     setSavingSettings(false);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else toast({ title: "Saved" });
