@@ -29,7 +29,7 @@ const BetaRequest = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
-  const [roles, setRoles] = useState<string[]>(["contributor"]);
+  
   const [platforms, setPlatforms] = useState<string[]>(["X"]);
   const [reason, setReason] = useState("");
 
@@ -54,7 +54,7 @@ const BetaRequest = () => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       x_handle: xHandle.trim().replace(/^@/, "") || null,
-      requested_role: roles[0] === "founder" ? "project_admin" : "user",
+      requested_role: "user",
       reason: notes || null,
     } as any);
     setSending(false);
