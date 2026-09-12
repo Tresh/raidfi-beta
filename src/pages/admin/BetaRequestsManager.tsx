@@ -135,7 +135,7 @@ const BetaRequestsManager = () => {
       return;
     }
     setBulkBusy(true);
-    const { ok, failed, skipped } = await issueToEmails(emails, issueRole);
+    const { ok, failed, skipped } = await issueToEmails(emails, "user");
     setBulkBusy(false);
     setIssueEmails("");
     setIssueOpen(false);
