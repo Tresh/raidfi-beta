@@ -150,6 +150,7 @@ const UsersManager = () => {
         await supabase.from("moderator_permissions" as any).delete().eq("user_id", userResult.user_id);
         setUserPermissions([]);
       }
+      loadStaff();
       toast({ title: "Role removed", description: `${roleName} role removed.` });
     }
   };
