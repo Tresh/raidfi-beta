@@ -69,7 +69,7 @@ export const BetaAccessEmail = ({
   code = 'RAIDXXXX',
   expiresAt = '',
   name = '',
-  appUrl = 'https://raidfi.site',
+  appUrl = 'https://beta.raidfi.site',
 }: BetaAccessProps) => (
   <Html>
     <Head />
@@ -110,6 +110,6 @@ export const template = {
     code: 'RAID7K2Q',
     expiresAt: 'August 30, 2026',
     name: 'Alex',
-    appUrl: 'https://raidfi.site',
+    appUrl: 'https://beta.raidfi.site',
   },
 } satisfies TemplateEntry

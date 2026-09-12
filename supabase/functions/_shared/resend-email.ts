@@ -1,6 +1,6 @@
 // Shared sender for transactional email via the Resend connector gateway.
 // RESEND_API_KEY is injected by the linked Resend connection; LOVABLE_API_KEY is
-// the project's managed key. Sends from the verified beta.raidfi.site domain.
+import { DEFAULT_FROM_EMAIL } from "./config.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
@@ -29,7 +29,7 @@ export async function sendResendEmail(params: {
       "X-Connection-Api-Key": resendKey,
     },
     body: JSON.stringify({
-      from: params.from ?? "RaidFi <beta@beta.raidfi.site>",
+      from: params.from ?? DEFAULT_FROM_EMAIL,
       to: [params.to],
       subject: params.subject,
       html: params.html,

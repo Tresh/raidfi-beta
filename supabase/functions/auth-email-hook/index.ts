@@ -34,11 +34,10 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
+import { ROOT_DOMAIN, SENDER_DOMAIN, FROM_DOMAIN } from "../_shared/config.ts"
+
 // Configuration
 const SITE_NAME = "RaidFi"
-const SENDER_DOMAIN = "notify.raidfi.site"
-const ROOT_DOMAIN = "raidfi.site"
-const FROM_DOMAIN = "raidfi.site" // Domain shown in From address (may be root or sender subdomain)
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.

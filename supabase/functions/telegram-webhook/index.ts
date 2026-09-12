@@ -4,7 +4,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-const SITE_ORIGIN = Deno.env.get("SITE_ORIGIN") || "https://raidfi.site";
+import { SITE_ORIGIN, ROOT_DOMAIN } from "../_shared/config.ts";
 
 const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/i;
 
@@ -91,7 +91,7 @@ I'm the bot that keeps you in the loop: submit posts, check your XP, see open ta
 To use me, first link your RaidFi account (you need to be on the waitlist).
 
 <b>Fastest - code from the site</b>
-Grab your Telegram code at <a href="${SITE_ORIGIN}/dashboard/contributions">raidfi.site/dashboard/contributions</a>, then send:
+Grab your Telegram code at <a href="${SITE_ORIGIN}/dashboard/contributions">${ROOT_DOMAIN}/dashboard/contributions</a>, then send:
 <code>/link YOURCODE</code>
 
 <b>Or use your email</b>

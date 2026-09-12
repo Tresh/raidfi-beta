@@ -1,6 +1,7 @@
 // Admin-only: approve or reject a beta access request. Approving mints a code,
 // sets an expiry and emails the requester.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SITE_ORIGIN } from "../_shared/config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,7 +99,7 @@ Deno.serve(async (req) => {
       html: betaAccessEmailHtml({
         code,
         name: request.name ?? "",
-        appUrl: "https://beta.raidfi.site",
+        appUrl: SITE_ORIGIN,
         expiresAt: expiresLabel,
       }),
     });

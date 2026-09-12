@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://raidfi.site/sitemap.xml
+Sitemap: https://beta.raidfi.site/sitemap.xml

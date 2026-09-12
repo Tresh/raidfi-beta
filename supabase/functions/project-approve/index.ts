@@ -1,6 +1,7 @@
 // Admin-only: approve or reject a project access request. Approving creates the
 // project workspace and emails the founder a beta access code.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SITE_ORIGIN } from "../_shared/config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -152,11 +153,11 @@ Deno.serve(async (req) => {
     const { sendResendEmail, betaAccessEmailHtml } = await import("../_shared/resend-email.ts");
     const result = await sendResendEmail({
       to: request.email,
-      subject: `Your RaidFi project workspace is ready — ${request.project_name}`,
+      subject: `Your RaidFi project workspace is ready - ${request.project_name}`,
       html: betaAccessEmailHtml({
         code,
         name: request.founder_name ?? "",
-        appUrl: "https://beta.raidfi.site",
+        appUrl: SITE_ORIGIN,
         expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
       }),
     });
