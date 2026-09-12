@@ -150,33 +150,6 @@ const BetaRequestsManager = () => {
     load();
   };
 
-  const inviteWaitlist = async () => {
-    setBulkBusy(true);
-    const { data, error } = await supabase.from("waitlist_submissions").select("email");
-    if (error) {
-      setBulkBusy(false);
-      toast({ title: "Couldn't load waitlist", description: error.message, variant: "destructive" });
-      return;
-    }
-    const emails = Array.from(
-      new Set((data ?? []).map((r: any) => String(r.email).trim().toLowerCase()).filter(Boolean)),
-    );
-    if (emails.length === 0) {
-      setBulkBusy(false);
-      toast({ title: "Nothing to send", description: "No waitlist signups found." });
-      return;
-    }
-    const { ok, failed, skipped } = await issueToEmails(emails, "user");
-    setBulkBusy(false);
-    setWaitlistConfirm(false);
-    toast({
-      title: `${ok} waitlist invite${ok === 1 ? "" : "s"} sent`,
-      description: [failed ? `${failed} failed.` : "", skipped ? `${skipped} already had a code.` : ""].filter(Boolean).join(" ") || "Every waitlist signup now has a code.",
-      variant: failed ? "destructive" : undefined,
-    });
-    load();
-  };
-
   const copy = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopied(code);
@@ -238,10 +211,6 @@ const BetaRequestsManager = () => {
             <Button size="sm" variant="outline" onClick={() => setIssueOpen((o) => !o)}>
               <Zap className="w-3.5 h-3.5 mr-1.5" /> Issue codes directly
             </Button>
-            <Button size="sm" disabled={bulkBusy} onClick={() => setWaitlistConfirm(true)}>
-              {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
-              <Users className="w-3.5 h-3.5 mr-1.5" /> Send codes to all waitlist signups
-            </Button>
           </div>
         </div>
 
@@ -255,15 +224,6 @@ const BetaRequestsManager = () => {
               className="text-xs"
             />
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">Role</span>
-              <select
-                value={issueRole}
-                onChange={(e) => setIssueRole(e.target.value)}
-                className="h-8 rounded-md border border-border bg-background text-xs px-2 text-foreground"
-              >
-                <option value="user">Contributor</option>
-                <option value="project_admin">Project admin</option>
-              </select>
               <Button size="sm" disabled={bulkBusy} onClick={issueCodes}>
                 {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 Create & email codes
@@ -304,8 +264,7 @@ const BetaRequestsManager = () => {
                   </p>
 
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {r.requested_role?.replace("_", " ")}
-                    {r.x_handle ? ` · @${r.x_handle}` : ""} · {new Date(r.created_at).toLocaleDateString()}
+                    {r.x_handle ? `@${r.x_handle} · ` : ""}{new Date(r.created_at).toLocaleDateString()}
                   </p>
                   </div>
                 </div>
