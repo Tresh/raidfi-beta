@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Copy, Check, Zap, Users } from "lucide-react";
+import { Loader2, Copy, Check, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader, StatusPill } from "@/components/dashboard/Primitives";
-import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 
 type Row = {
@@ -40,8 +39,6 @@ const BetaRequestsManager = () => {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [issueEmails, setIssueEmails] = useState("");
-  const [issueRole, setIssueRole] = useState("user");
-  const [waitlistConfirm, setWaitlistConfirm] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -138,40 +135,13 @@ const BetaRequestsManager = () => {
       return;
     }
     setBulkBusy(true);
-    const { ok, failed, skipped } = await issueToEmails(emails, issueRole);
+    const { ok, failed, skipped } = await issueToEmails(emails, "user");
     setBulkBusy(false);
     setIssueEmails("");
     setIssueOpen(false);
     toast({
       title: `${ok} code${ok === 1 ? "" : "s"} issued`,
       description: [failed ? `${failed} failed.` : "", skipped ? `${skipped} already had a code.` : ""].filter(Boolean).join(" ") || "Emails sent to every address.",
-      variant: failed ? "destructive" : undefined,
-    });
-    load();
-  };
-
-  const inviteWaitlist = async () => {
-    setBulkBusy(true);
-    const { data, error } = await supabase.from("waitlist_submissions").select("email");
-    if (error) {
-      setBulkBusy(false);
-      toast({ title: "Couldn't load waitlist", description: error.message, variant: "destructive" });
-      return;
-    }
-    const emails = Array.from(
-      new Set((data ?? []).map((r: any) => String(r.email).trim().toLowerCase()).filter(Boolean)),
-    );
-    if (emails.length === 0) {
-      setBulkBusy(false);
-      toast({ title: "Nothing to send", description: "No waitlist signups found." });
-      return;
-    }
-    const { ok, failed, skipped } = await issueToEmails(emails, "user");
-    setBulkBusy(false);
-    setWaitlistConfirm(false);
-    toast({
-      title: `${ok} waitlist invite${ok === 1 ? "" : "s"} sent`,
-      description: [failed ? `${failed} failed.` : "", skipped ? `${skipped} already had a code.` : ""].filter(Boolean).join(" ") || "Every waitlist signup now has a code.",
       variant: failed ? "destructive" : undefined,
     });
     load();
@@ -238,10 +208,6 @@ const BetaRequestsManager = () => {
             <Button size="sm" variant="outline" onClick={() => setIssueOpen((o) => !o)}>
               <Zap className="w-3.5 h-3.5 mr-1.5" /> Issue codes directly
             </Button>
-            <Button size="sm" disabled={bulkBusy} onClick={() => setWaitlistConfirm(true)}>
-              {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
-              <Users className="w-3.5 h-3.5 mr-1.5" /> Send codes to all waitlist signups
-            </Button>
           </div>
         </div>
 
@@ -255,15 +221,6 @@ const BetaRequestsManager = () => {
               className="text-xs"
             />
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">Role</span>
-              <select
-                value={issueRole}
-                onChange={(e) => setIssueRole(e.target.value)}
-                className="h-8 rounded-md border border-border bg-background text-xs px-2 text-foreground"
-              >
-                <option value="user">Contributor</option>
-                <option value="project_admin">Project admin</option>
-              </select>
               <Button size="sm" disabled={bulkBusy} onClick={issueCodes}>
                 {bulkBusy && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 Create & email codes
@@ -304,8 +261,7 @@ const BetaRequestsManager = () => {
                   </p>
 
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {r.requested_role?.replace("_", " ")}
-                    {r.x_handle ? ` · @${r.x_handle}` : ""} · {new Date(r.created_at).toLocaleDateString()}
+                    {r.x_handle ? `@${r.x_handle} · ` : ""}{new Date(r.created_at).toLocaleDateString()}
                   </p>
                   </div>
                 </div>
@@ -342,14 +298,6 @@ const BetaRequestsManager = () => {
           ))}
         </div>
       )}
-      <ConfirmDialog
-        open={waitlistConfirm}
-        onOpenChange={setWaitlistConfirm}
-        title="Send beta codes to every waitlist signup"
-        description="Every waitlist email that doesn't already have a code will get an approved access code emailed to them, using the expiry and max-uses set above. This can't be undone."
-        confirmLabel="Send codes"
-        onConfirm={inviteWaitlist}
-      />
     </div>
   );
 };

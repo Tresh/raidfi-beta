@@ -11,15 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 
-const ROLES = [
-  { value: "contributor", label: "Contributor" },
-  { value: "community_manager", label: "Community manager" },
-  { value: "founder", label: "Founder" },
-  { value: "builder", label: "Builder" },
-  { value: "researcher", label: "Researcher / analyst" },
-  { value: "other", label: "Other" },
-];
-
 const PLATFORMS = ["X", "Discord", "Telegram"];
 
 const emailOk = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
@@ -38,7 +29,7 @@ const BetaRequest = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
-  const [roles, setRoles] = useState<string[]>(["contributor"]);
+  
   const [platforms, setPlatforms] = useState<string[]>(["X"]);
   const [reason, setReason] = useState("");
 
@@ -51,14 +42,9 @@ const BetaRequest = () => {
       toast({ title: "Check your details", description: "Add your name and a valid email address.", variant: "destructive" });
       return;
     }
-    if (roles.length === 0) {
-      toast({ title: "Pick at least one role", description: "Tell us how you'd use RaidFi.", variant: "destructive" });
-      return;
-    }
     setSending(true);
     const notes = [
       reason.trim(),
-      roles.length ? `Roles: ${roles.join(", ")}` : "",
       platforms.length ? `Platforms: ${platforms.join(", ")}` : "",
     ]
       .filter(Boolean)
@@ -68,7 +54,7 @@ const BetaRequest = () => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       x_handle: xHandle.trim().replace(/^@/, "") || null,
-      requested_role: roles[0] === "founder" ? "project_admin" : "user",
+      requested_role: "user",
       reason: notes || null,
     } as any);
     setSending(false);
@@ -117,17 +103,6 @@ const BetaRequest = () => {
                 <Input id="beta-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
               </div>
 
-              <div className="space-y-2">
-                <Label>How would you use RaidFi? (select all that apply)</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {ROLES.map((role) => (
-                    <label key={role.value} className="flex items-center gap-2 text-sm text-muted-foreground border border-border rounded-lg px-3 py-2 cursor-pointer hover:text-foreground transition-colors">
-                      <Checkbox checked={roles.includes(role.value)} onCheckedChange={() => toggle(roles, setRoles, role.value)} />
-                      {role.label}
-                    </label>
-                  ))}
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <Label>Where are you active? (select all that apply)</Label>

@@ -4,20 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-const ROLES = [
-  { value: "contributor", label: "Contributor" },
-  { value: "community_manager", label: "Community Manager" },
-  { value: "founder", label: "Founder" },
-  { value: "builder", label: "Builder" },
-  { value: "other", label: "Other" },
-];
 
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
 
@@ -36,7 +25,6 @@ const RequestAccessDialog = ({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
-  const [role, setRole] = useState("contributor");
   const [reason, setReason] = useState("");
 
   const close = (v: boolean) => {
@@ -55,7 +43,7 @@ const RequestAccessDialog = ({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       x_handle: xHandle.trim().replace(/^@/, "") || null,
-      requested_role: role,
+      requested_role: "user",
       reason: reason.trim() || null,
     } as any);
     setSending(false);
@@ -96,20 +84,9 @@ const RequestAccessDialog = ({
                     <Label htmlFor="ra-email">Email</Label>
                     <Input id="ra-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="ra-x">X handle</Label>
-                      <Input id="ra-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Role</Label>
-                      <Select value={role} onValueChange={setRole}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ra-x">X handle</Label>
+                    <Input id="ra-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="ra-why">Why do you want access?</Label>
