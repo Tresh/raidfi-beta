@@ -56,6 +56,7 @@ const BetaRequest = () => {
       x_handle: xHandle.trim().replace(/^@/, "") || null,
       requested_role: "user",
       reason: notes || null,
+      status: "pending",
     } as any);
     setSending(false);
     if (error) {
