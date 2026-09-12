@@ -205,11 +205,43 @@ const UsersManager = () => {
               className="pl-9 h-10 text-sm"
             />
           </div>
-          <Button onClick={handleSearch} disabled={searching} size="sm" className="h-10 px-4">
+          <Button onClick={() => handleSearch()} disabled={searching} size="sm" className="h-10 px-4">
             {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
           </Button>
         </div>
       </div>
+
+      {/* Admins & moderators */}
+      <div className="bg-card border border-border rounded-xl p-4 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-foreground">Admins & moderators</h2>
+          <span className="text-xs text-muted-foreground">{staff.length} total</span>
+        </div>
+        {staffLoading ? (
+          <div className="py-6 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+        ) : staff.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-2">No admins or moderators yet.</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {staff.map((s) => (
+              <button
+                key={`${s.user_id}-${s.role}`}
+                onClick={() => handleSearch(s.email)}
+                className="w-full flex items-center justify-between gap-3 py-2.5 text-left hover:opacity-80 transition-opacity"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm text-foreground truncate">{s.name || s.email}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{s.email}</p>
+                </div>
+                <span className="text-[11px] px-2 py-0.5 rounded-full border border-border text-muted-foreground shrink-0">
+                  {s.role.replace("_", " ")}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
 
       {userResult && (
         <div className="space-y-4">
