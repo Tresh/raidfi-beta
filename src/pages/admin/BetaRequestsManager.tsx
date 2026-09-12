@@ -301,14 +301,6 @@ const BetaRequestsManager = () => {
           ))}
         </div>
       )}
-      <ConfirmDialog
-        open={waitlistConfirm}
-        onOpenChange={setWaitlistConfirm}
-        title="Send beta codes to every waitlist signup"
-        description="Every waitlist email that doesn't already have a code will get an approved access code emailed to them, using the expiry and max-uses set above. This can't be undone."
-        confirmLabel="Send codes"
-        onConfirm={inviteWaitlist}
-      />
     </div>
   );
 };
