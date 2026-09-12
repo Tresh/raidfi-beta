@@ -73,18 +73,34 @@ const SettingsManager = () => {
   const saveSettings = async () => {
     if (!settings) return;
     setSavingSettings(true);
-    const { error } = await supabase
+    const payload = {
+      id: "global",
+      auto_publish_contributions: settings.auto_publish_contributions,
+      telegram_enabled: settings.telegram_enabled,
+      telegram_chat_id: settings.telegram_chat_id?.trim() || null,
+      telegram_notify_feed: settings.telegram_notify_feed,
+      telegram_notify_tasks: settings.telegram_notify_tasks,
+      scoring_delay_hours: settings.scoring_delay_hours,
+      updated_at: new Date().toISOString(),
+    };
+
+    // First try update (UPDATE policy applies)
+    const { data: updated, error: updateError } = await supabase
       .from("admin_settings" as any)
-      .upsert({
-        id: "global",
-        auto_publish_contributions: settings.auto_publish_contributions,
-        telegram_enabled: settings.telegram_enabled,
-        telegram_chat_id: settings.telegram_chat_id?.trim() || null,
-        telegram_notify_feed: settings.telegram_notify_feed,
-        telegram_notify_tasks: settings.telegram_notify_tasks,
-        scoring_delay_hours: settings.scoring_delay_hours,
-        updated_at: new Date().toISOString(),
-      } as any, { onConflict: "id" });
+      .update(payload as any)
+      .eq("id", "global")
+      .select();
+
+    let error = updateError;
+
+    // If no row was updated (row doesn't exist yet), fall back to insert/upsert
+    if (!updateError && (!updated || updated.length === 0)) {
+      const { error: upsertError } = await supabase
+        .from("admin_settings" as any)
+        .upsert(payload as any, { onConflict: "id" });
+      error = upsertError;
+    }
+
     setSavingSettings(false);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else toast({ title: "Saved" });
