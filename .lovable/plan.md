@@ -1,84 +1,49 @@
-## Bug fixes (already applied)
+# RaidFi interface, Telegram, and wording fixes
 
-- **Waitlist blank screen** - the X share URL was malformed (`https://x.com{encoded}`), so on mobile the redirect navigated away to a broken page before the next step could render. Fixed the URL to `https://x.com/intent/tweet?text=…` and now advance the step *before* the mobile redirect so users return to the share screen.
-- **Referral code missing for new contributors** - the old code called `update({ referral_code: undefined })` which did nothing. Now: if a profile is missing a code we copy the one from their waitlist signup; if no profile exists yet we create it and pre-fill the referral code from the waitlist row so the link they already shared keeps working.
+## What will change
 
-## Telegram bot - what we'll build
+### 1. AI Analyst header
+- Remove the second header inside the AI page.
+- Extend the project workspace header so the AI Analyst page shows “AI Analyst” centered, with connection status directly underneath.
+- Keep the project menu button on the left and place the chats/settings sidebar button on the far right.
+- Preserve the full-height chat area and make the right panel open as a mobile drawer.
 
-### 1. Database
+### 2. Contributors mobile layout
+- Remove the Contributors description under the page title.
+- Reflow the date range and Save controls below the title on narrow screens.
+- Make tabs, search, criteria, shortlist controls, and table actions fit without clipping.
+- Keep the full data table horizontally scrollable while preserving its desktop layout.
 
-New table `telegram_links` that connects a Telegram user to a RaidFi account:
+### 3. RaidFi email branding
+- Audit auth and approval email sender names, subjects, and visible template branding.
+- Replace any remaining “RaidFi Launch” branding with “RaidFi”; keep wording such as “RaidFi launched tomorrow” only where “launched” is ordinary sentence text, not a brand name.
+- Redeploy only the email functions whose branding changes.
 
-- `telegram_user_id` (primary key)
-- `telegram_chat_id`, `telegram_username`, `first_name`
-- `email` (the linked RaidFi account, lowercase)
-- `linked_at`, `dm_subscribed` (default true)
+### 4. Telegram project-aware submissions
+- Add a short-lived pending Telegram submission record so `/submit <X link>` can ask which active project the post is for using inline project buttons.
+- Handle Telegram callback selections, pass the selected `project_id` into the shared contribution submission flow, and confirm the chosen project.
+- In a connected project group, infer the project from that group automatically when someone drops an X link.
+- Allow bot commands and dropped links in configured project groups, not only the main RaidFi group.
+- Route new contribution notifications to the main enabled RaidFi group and the selected project’s connected group, without duplicate sends.
+- Await/report notification delivery safely so a successful contribution is not silently lost before Telegram posting completes.
+- Deploy the Telegram webhook and notification functions, re-register the webhook for callback updates, and verify webhook status plus signed delivery.
 
-New table `telegram_link_codes` for the one-time-code flow:
+### 5. Project form
+- Remove both Telegram fields and the Telegram connection section from the public project request form.
+- Stop sending Telegram values from that form; project owners can configure Telegram later from project settings.
 
-- `code` (8 chars), `email`, `expires_at` (15 min), `used`
+### 6. Dashboard notifications
+- Replace the bell’s Explore link with a real popover.
+- Show the signed-in contributor’s latest contribution/activity updates, with a clear empty state and links only where relevant.
 
-New table `telegram_updates` for idempotent webhook storage (stores `update_id`, raw payload).
+### 7. Remove public waitlist wording
+- Replace every public “Join the waitlist” action/message with “Request Beta Access” and point it to `/beta`.
+- Update Telegram onboarding and access-denied messages to refer to beta access, not joining a waitlist.
+- Update referral links and visible referral copy to use the beta page.
+- Keep legacy waitlist database/admin records intact so existing access and historical data continue working.
 
-All tables: RLS on, admin-only read, service role full access.
-
-### 2. Edge functions
-
-- `telegram-webhook` (public, `verify_jwt = false`) - receives Telegram updates, verifies the secret token header, routes commands.
-- `telegram-link-code` (authed) - called from the Contributions page to mint a one-time code the user types into the bot.
-- `notify-telegram` (existing) - extended so new tasks also DM every linked + subscribed user, in addition to the existing group post.
-
-### 3. Auth gate (waitlist-first)
-
-Every command except `/start` and `/help` requires a linked account. `/start` shows two link options:
-
-- **Option A - One-time code from the site**: user opens RaidFi → Contributions → copies an 8-char code → sends `/link CODE123` in DM. Most secure, no email typing in chat.
-- **Option B - Email OTP**: user sends `/link you@example.com`, bot checks they're on the waitlist (via `check_email_exists`), sends a 6-digit code via the existing OTP email, user replies with `/verify 123456`.
-
-If the email isn't on the waitlist, the bot replies with the waitlist link and stops - no account is linked.
-
-### 4. Slash commands
-
-Work in DM and in the group. Group replies are short; DM replies are richer.
-
-| Command | What it does |
-|---|---|
-| `/start` | Welcome + link instructions |
-| `/link <code\|email>` | Begin account linking (code or email OTP) |
-| `/verify <otp>` | Complete email-OTP linking |
-| `/whoami` | Show linked email + RaidFi XP |
-| `/tasks` | List active contribute tasks with points + "Do task" button to the site |
-| `/submit <x-url>` | Submit a contribution. Validates Tweet URL, inserts into `contributions`, triggers `fetch-post-text` + `notify-admin-contribution` |
-| `/mypoints` | Total XP, overall rank, contributions count |
-| `/leaderboard` | Top 10 from `get_leaderboard` |
-| `/whitepaper` | Link to whitepaper + version |
-| `/unsubscribe` / `/subscribe` | Toggle task DM notifications |
-| `/help` | Command list |
-
-### 5. Task delivery (both DM + group)
-
-When an admin saves a task in `ContributeTasksManager`, `notify-telegram` will:
-
-1. Post the existing rich card to the configured group (current behavior).
-2. Fan out a DM to every row in `telegram_links` where `dm_subscribed = true`, with a "Do task" button to the contributions page.
-
-Failed sends (user blocked the bot, etc.) are logged but don't break the broadcast.
-
-### 6. Webhook setup
-
-After deploy, register the webhook from the sandbox:
-
-```
-POST https://connector-gateway.lovable.dev/telegram/setWebhook
-  url = https://<project>.supabase.co/functions/v1/telegram-webhook
-  secret_token = sha256("telegram-webhook:" + TELEGRAM_API_KEY)
-  allowed_updates = ["message"]
-```
-
-The same derivation runs inside the webhook so we can verify `X-Telegram-Bot-Api-Secret-Token` without storing another secret.
-
----
-
-## Open question before I build
-
-For account linking, do you want me to ship **both** options (one-time code *and* email OTP), or only one of them? Shipping both is small extra work; let me know and I'll start implementing.
+## Technical details
+- Add one locked-down public table for pending Telegram submission choices, with service-role access and automatic expiry handling.
+- Reuse the existing `projects.telegram_group_id`, `projects.telegram_bot_added`, and `contributions.project_id` fields; no parallel project system.
+- Use the existing contribution submission function as the single source of truth for X ownership checks, inserts, media fetching, and notifications.
+- Validate the affected pages at mobile and desktop widths, then run focused tests and a production build.
