@@ -1,0 +1,4 @@
+## 2025-09-13 - JSON-LD Script Tag Injection (XSS) Prevention
+**Vulnerability:** Inline `<script type="application/ld+json">` tags created with `dangerouslySetInnerHTML` contained dynamic user values (e.g. `displayName`, `code`) via `JSON.stringify(...)`. An attacker controlling profile display names containing `</script><script>...` could break out of the script tag and execute arbitrary JS in the visitor's browser context.
+**Learning:** `JSON.stringify` escapes standard JSON characters (like quotes and backslashes) but does not escape HTML tag delimiters like `<`. Inside inline HTML `<script>` tags, browser HTML parsers prioritize closing `</script>` tags over JavaScript string contexts.
+**Prevention:** Always sanitize or escape `<` characters (e.g., replacing `<` with `\u003c`) when rendering `JSON.stringify` output within `dangerouslySetInnerHTML` inside `<script>` tags.
