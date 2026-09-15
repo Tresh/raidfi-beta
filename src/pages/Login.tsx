@@ -142,7 +142,7 @@ const Login = () => {
       if (!emailExists) {
         toast({
           title: "No access yet",
-          description: "Join the waitlist or enter a beta access code to create an account.",
+          description: "Request beta access or enter a beta access code to create an account.",
           variant: "destructive",
         });
         setLoading(false);
@@ -327,8 +327,8 @@ const Login = () => {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     No access yet?{" "}
-                    <a href="/waitlist" className="text-primary hover:underline">
-                      Join the waitlist
+                    <a href="/beta" className="text-primary hover:underline">
+                      Request beta access
                     </a>
                   </p>
                 </form>

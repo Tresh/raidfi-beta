@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import ContributeFab from "@/components/dashboard/ContributeFab";
+import NotificationsBell from "@/components/dashboard/NotificationsBell";
 import logo from "/logo.png";
 
 const navItems = [
@@ -133,13 +134,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             Contribution intelligence workspace
           </div>
           <div className="flex items-center gap-2.5">
-            <a
-              href="/explore"
-              aria-label="Notifications"
-              className="relative w-8 h-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground"
-            >
-              <Bell className="w-4 h-4" />
-            </a>
+            <NotificationsBell email={email} />
             <span className="hidden sm:block text-xs text-muted-foreground truncate max-w-[200px]">
               {email}
             </span>

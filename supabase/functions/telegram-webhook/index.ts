@@ -104,7 +104,7 @@ I post new contribute tasks here and answer /tasks, /leaderboard and /whitepaper
 For anything personal, DM me → @raidficontributionbot`;
 
 // Shared submission path used by /submit and by plain "dropped" links.
-async function submitPost(supabase: any, email: string, url: string): Promise<{ error?: string }> {
+async function submitPost(supabase: any, email: string, url: string, projectId?: string | null): Promise<{ error?: string }> {
   // Ensure a profile row exists so contributions link to a real user.
   const { data: existingProfile } = await supabase
     .from("profiles").select("user_id").eq("email", email).maybeSingle();
@@ -129,11 +129,80 @@ async function submitPost(supabase: any, email: string, url: string): Promise<{ 
       Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
       apikey: `${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
     },
-    body: JSON.stringify({ post_url: url, user_email: email, content_type: "post", origin: SITE_ORIGIN }),
+    body: JSON.stringify({
+      post_url: url,
+      user_email: email,
+      content_type: "post",
+      origin: SITE_ORIGIN,
+      ...(projectId ? { project_id: projectId } : {}),
+    }),
   });
   const out = await res.json().catch(() => ({}));
   if (!res.ok || out?.error) return { error: out?.error || "Couldn't submit that post." };
   return {};
+}
+
+// Returns the project connected to this Telegram group, if any.
+async function projectForChat(supabase: any, chatId: number) {
+  const { data } = await supabase
+    .from("projects").select("id,name")
+    .eq("telegram_group_id", String(chatId))
+    .eq("status", "active")
+    .maybeSingle();
+  return data ?? null;
+}
+
+// Ask which project a post belongs to, using inline buttons.
+async function askProject(
+  supabase: any, chatId: number, msgId: number, email: string, telegramUserId: number, url: string,
+): Promise<boolean> {
+  const { data: projects } = await supabase
+    .from("projects").select("id,name").eq("status", "active").order("name").limit(8);
+  if (!projects?.length) return false;
+
+  const token = crypto.randomUUID().slice(0, 8);
+  await supabase.from("telegram_pending_submissions").insert({
+    token, telegram_user_id: telegramUserId, chat_id: chatId, message_id: msgId, post_url: url, email,
+  });
+
+  const buttons: Btn[][] = (projects as any[]).map((p) => [
+    { text: p.name, callback_data: `p:${token}:${p.id}` },
+  ]);
+  buttons.push([{ text: "No specific project", callback_data: `p:${token}:none` }]);
+
+  await reply(chatId, `Which project is this post about?`, buttons, msgId);
+  return true;
+}
+
+async function handleCallback(cb: any, supabase: any) {
+  const data: string = cb.data ?? "";
+  const chatId: number = cb.message?.chat?.id;
+  const answer = (text: string) => tg("answerCallbackQuery", { callback_query_id: cb.id, text });
+  if (!data.startsWith("p:") || !chatId) { await answer(""); return; }
+
+  const [, token, choice] = data.split(":");
+  const { data: pending } = await supabase
+    .from("telegram_pending_submissions").select("*").eq("token", token).maybeSingle();
+  if (!pending) { await answer("This request expired. Send the link again."); return; }
+  if (pending.telegram_user_id !== cb.from?.id) { await answer("Not your submission."); return; }
+
+  await supabase.from("telegram_pending_submissions").delete().eq("token", token);
+
+  const projectId = choice === "none" ? null : choice;
+  const out = await submitPost(supabase, pending.email, pending.post_url, projectId);
+  await answer(out.error ? "Could not submit" : "Submitted");
+
+  if (out.error) {
+    await reply(chatId, `⚠️ ${escapeHtml(out.error)}`, [], pending.message_id ?? undefined);
+    return;
+  }
+
+  let label = "no specific project";
+  if (projectId) {
+    const { data: p } = await supabase.from("projects").select("name").eq("id", projectId).maybeSingle();
+    label = p?.name ? escapeHtml(p.name) : "your project";
+  }
+  await reply(chatId, `✅ Tracked for <b>${label}</b> - your post is in review.`, [], pending.message_id ?? undefined);
 }
 
 async function handle(update: any, supabase: any) {
