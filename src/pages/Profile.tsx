@@ -109,7 +109,7 @@ const Profile = () => {
             <Card><CardContent className="py-12 text-center text-muted-foreground">Profile not found.</CardContent></Card>
           ) : (
             <>
-              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": { "@type": "Person", "name": displayName, "description": `${displayName}'s RaidFi contributions, XP, rank, and reputation in the Web3 social intelligence layer.` }, "url": `${BASE_URL}/u/${code}` }) }} />
+              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": { "@type": "Person", "name": displayName, "description": `${displayName}'s RaidFi contributions, XP, rank, and reputation in the Web3 social intelligence layer.` }, "url": `${BASE_URL}/u/${code}` }).replace(/</g, "\\u003c") }} />
               {/* Header card with gradient banner */}
               <Card className="mb-4 overflow-hidden border-border/60">
                 <div className="h-24 bg-gradient-to-br from-primary/30 via-primary/10 to-transparent" />
