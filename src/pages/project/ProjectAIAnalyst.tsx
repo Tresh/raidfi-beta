@@ -314,11 +314,11 @@ const ProjectAIAnalyst = () => {
       <div className="h-full flex min-w-0">
         {/* Chat column */}
         <section className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 shrink-0 border-b border-border px-4 sm:px-6 flex items-center gap-3">
+          <header className="h-14 shrink-0 border-b border-border px-4 sm:px-6 grid grid-cols-[2rem_1fr_2rem] items-center">
             <div className="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 text-center">
               <h1 className="text-sm font-semibold text-foreground truncate">AI Analyst</h1>
               <p className="text-[11px] text-muted-foreground truncate">
                 {connected ? `${config.model} · ${rows.length} contributors in scope` : "Not connected"}
@@ -326,7 +326,7 @@ const ProjectAIAnalyst = () => {
             </div>
             <button
               onClick={() => (isMobile ? setMobilePanel(true) : setSidebar((s) => !s))}
-              className="ml-auto text-muted-foreground hover:text-foreground"
+              className="justify-self-end text-muted-foreground hover:text-foreground"
               aria-label="Toggle panel"
             >
               {sidebar && !isMobile ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}

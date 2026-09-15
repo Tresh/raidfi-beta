@@ -87,35 +87,32 @@ const ProjectContributors = () => {
 
   return (
     <ProjectLayout>
-      <PageHeader
-        title="Contributors"
-        subtitle="Everyone posting about your project - their best work first, with the numbers behind it."
-        action={
-          <div className="flex items-center gap-2">
-            <Select value={periodKey} onValueChange={setPeriodKey}>
-              <SelectTrigger className="h-8 w-[148px] text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {PERIODS.map((p) => <SelectItem key={p.key} value={p.key} className="text-xs">{p.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={saveSearch}>
-              <Save className="w-3.5 h-3.5" /> Save
-            </Button>
-          </div>
-        }
-      />
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-foreground">Contributors</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Select value={periodKey} onValueChange={setPeriodKey}>
+            <SelectTrigger className="h-8 flex-1 min-w-[140px] sm:flex-none sm:w-[148px] text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {PERIODS.map((p) => <SelectItem key={p.key} value={p.key} className="text-xs">{p.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 shrink-0" onClick={saveSearch}>
+            <Save className="w-3.5 h-3.5" /> Save
+          </Button>
+        </div>
+      </div>
 
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-xs text-destructive">{error}</div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <div className="inline-flex rounded-full border border-border p-0.5">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+        <div className="inline-flex w-full sm:w-auto rounded-full border border-border p-0.5 overflow-x-auto">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`text-[11.5px] px-3 h-7 rounded-full transition-colors ${
+              className={`text-[11.5px] px-3 h-7 rounded-full transition-colors whitespace-nowrap flex-1 sm:flex-none ${
                 tab === t.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -123,7 +120,7 @@ const ProjectContributors = () => {
             </button>
           ))}
         </div>
-        <div className="relative flex-1 min-w-[180px]">
+        <div className="relative w-full sm:flex-1 sm:min-w-[180px]">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name or @handle" className="pl-8 h-8 text-xs" />
         </div>
