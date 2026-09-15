@@ -37,7 +37,7 @@ const ProjectRequest = () => {
   const [done, setDone] = useState(false);
   const [services, setServices] = useState<string[]>([SERVICES[0]]);
   const [logo, setLogo] = useState<string | null>(null);
-  const [form, setForm] = useState({ project_name: "", founder_name: "", email: "", website: "", x_handle: "", telegram: "", telegram_group_id: "", goal: "", expectations: "", estimated_budget: "", investment_ready: "unsure" });
+  const [form, setForm] = useState({ project_name: "", founder_name: "", email: "", website: "", x_handle: "", goal: "", expectations: "", estimated_budget: "", investment_ready: "unsure" });
   const set = (key: string, value: string) => setForm((current) => ({ ...current, [key]: value }));
   const toggleService = (value: string) => setServices((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
 
@@ -53,8 +53,8 @@ const ProjectRequest = () => {
       email: form.email.trim().toLowerCase(),
       x_handle: form.x_handle.replace(/^@/, "") || null,
       website: form.website || null,
-      telegram: form.telegram || null,
-      telegram_group_id: form.telegram_group_id || null,
+      telegram: null,
+      telegram_group_id: null,
       request_types: services.map((item) => item.toLowerCase().replace(/\s+/g, "_")),
       why: form.goal || null,
       goal: form.goal || null,
