@@ -121,7 +121,7 @@ const UsersManager = () => {
             referral_count: 0,
             waitlist_completed: true,
             created_at: w.created_at,
-          };
+          } as any;
         }
       }
     }

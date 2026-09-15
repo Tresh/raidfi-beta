@@ -46,7 +46,7 @@ const Referrals = () => {
   }, [session?.user?.email]);
 
   const referralUrl = data.profile?.referral_code
-    ? `${window.location.origin}/waitlist?ref=${data.profile.referral_code}`
+    ? `${window.location.origin}/beta?ref=${data.profile.referral_code}`
     : null;
 
   const copy = (value: string, key: string) => {

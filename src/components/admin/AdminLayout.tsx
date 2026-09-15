@@ -77,7 +77,11 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
               </p>
             </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+            className="lg:hidden text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -107,7 +111,13 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
 
       <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-foreground"><Menu className="w-5 h-5" /></button>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+            className="lg:hidden text-foreground hover:text-primary p-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
             {isModerator && (

@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Save, Plus, Eye, History, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import DOMPurify from "dompurify";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface WhitepaperRow {
   id: string;
@@ -64,22 +65,64 @@ const WhitepaperManager = () => {
     setShowHistory(false);
   };
 
+  const handleCreateNewVersion = () => {
+    setWhitepaper(null);
+    setContent("# New Whitepaper Version\n\nWrite your content here...");
+    setVersion("1.0.0");
+    setShowHistory(false);
+  };
+
   const handleSave = async () => {
-    if (!whitepaper) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("whitepaper" as any)
-      .update({ content, version, updated_at: new Date().toISOString() } as any)
-      .eq("id", whitepaper.id);
-    
-    if (error) {
-      toast({ title: "Error saving", description: error.message, variant: "destructive" });
+    const now = new Date().toISOString();
+    let currentId = whitepaper?.id;
+    let saveError = null;
+
+    if (currentId) {
+      const { error } = await (supabase as any)
+        .from("whitepaper")
+        .update({ content, version, updated_at: now, is_published: true })
+        .eq("id", currentId);
+      saveError = error;
     } else {
-      toast({ title: "Whitepaper saved" });
-      const updated = { ...whitepaper, content, version, updated_at: new Date().toISOString() };
-      setWhitepaper(updated);
-      setAllVersions(prev => prev.map(v => v.id === updated.id ? updated : v));
+      const { data, error } = await (supabase as any)
+        .from("whitepaper")
+        .insert({ content, version, created_at: now, updated_at: now, is_published: true })
+        .select()
+        .single();
+      saveError = error;
+      if (data) {
+        currentId = data.id;
+      }
     }
+
+    if (saveError) {
+      toast({ title: "Error saving whitepaper", description: saveError.message, variant: "destructive" });
+      setSaving(false);
+      return;
+    }
+
+    // Sync to whitepaper_live table so the context updates across the site & telegram bot
+    const { error: liveError } = await (supabase as any)
+      .from("whitepaper_live")
+      .upsert({
+        id: "live",
+        content,
+        version,
+        updated_at: now,
+        source_whitepaper_id: currentId || null,
+      });
+
+    // Also trigger refresh_whitepaper_live RPC if present
+    await (supabase as any).rpc("refresh_whitepaper_live").catch(() => {});
+
+    if (liveError) {
+      toast({ title: "Saved to database, but failed updating live context", description: liveError.message, variant: "destructive" });
+    } else {
+      toast({ title: "Whitepaper saved & published to live context" });
+    }
+
+    await fetchData();
     setSaving(false);
   };
 
@@ -196,6 +239,9 @@ const WhitepaperManager = () => {
           <p className="text-muted-foreground text-sm mt-1">Edit whitepaper content and manage changelogs</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleCreateNewVersion}>
+            <Plus className="w-4 h-4 mr-1" /> New Version
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
             <History className="w-4 h-4 mr-1" /> History
           </Button>
@@ -222,8 +268,10 @@ const WhitepaperManager = () => {
               />
             </div>
             {preview ? (
-              <div className="prose prose-invert max-w-none p-4 border border-border rounded-lg min-h-[500px] overflow-auto">
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content.replace(/\n/g, '<br/>')) }} />
+              <div className="prose prose-invert max-w-none p-4 border border-border rounded-lg min-h-[500px] overflow-auto whitepaper-content">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {content}
+                </ReactMarkdown>
               </div>
             ) : (
               <textarea
