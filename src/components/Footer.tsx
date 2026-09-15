@@ -22,13 +22,32 @@ const Footer = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <a href="https://x.com/raidfi_app" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a
+                href="https://x.com/raidfi_app"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow RaidFi on X (formerly Twitter)"
+                title="Follow on X"
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="https://t.me/raidfi_community" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a
+                href="https://t.me/raidfi_community"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Join RaidFi Telegram community"
+                title="Join Telegram"
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
                 <Send className="w-5 h-5" />
               </a>
-              <a href="mailto:hello.raidfi@gmail.com" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a
+                href="mailto:hello.raidfi@gmail.com"
+                aria-label="Send email to RaidFi"
+                title="Email Us"
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
                 <Mail className="w-5 h-5" />
               </a>
             </div>
