@@ -53,7 +53,7 @@ const Navbar = () => {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <button className="p-2 text-foreground" aria-label="Open menu">
+              <button className="p-2 text-foreground rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Open menu">
                 <Menu className="w-5 h-5" />
               </button>
             </SheetTrigger>

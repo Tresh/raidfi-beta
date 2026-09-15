@@ -208,7 +208,7 @@ const Settings = () => {
   };
 
   const referralUrl = data.profile?.referral_code
-    ? `${window.location.origin}/waitlist?ref=${data.profile.referral_code}`
+    ? `${window.location.origin}/beta?ref=${data.profile.referral_code}`
     : null;
 
   const xVerified = Boolean((data.profile as any)?.x_verified);

@@ -1064,6 +1064,39 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_pending_submissions: {
+        Row: {
+          chat_id: number
+          created_at: string
+          email: string
+          expires_at: string
+          message_id: number | null
+          post_url: string
+          telegram_user_id: number
+          token: string
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          email: string
+          expires_at?: string
+          message_id?: number | null
+          post_url: string
+          telegram_user_id: number
+          token: string
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          email?: string
+          expires_at?: string
+          message_id?: number | null
+          post_url?: string
+          telegram_user_id?: number
+          token?: string
+        }
+        Relationships: []
+      }
       telegram_updates: {
         Row: {
           chat_id: number | null
