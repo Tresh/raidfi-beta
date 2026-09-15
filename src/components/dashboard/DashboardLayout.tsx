@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import ContributeFab from "@/components/dashboard/ContributeFab";
+import NotificationsBell from "@/components/dashboard/NotificationsBell";
 import logo from "/logo.png";
 
 const navItems = [
