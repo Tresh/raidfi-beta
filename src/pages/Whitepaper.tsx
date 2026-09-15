@@ -15,6 +15,7 @@ interface WhitepaperData {
 
 import { useSEO } from "@/hooks/useSEO";
 import { BASE_URL } from "@/lib/constants";
+import { sanitizeUrl } from "@/lib/utils";
 
 const Whitepaper = () => {
   useSEO({
@@ -94,7 +95,7 @@ const Whitepaper = () => {
                           className="text-primary hover:underline cursor-pointer" {...props}>{children}</a>
                       );
                     }
-                    return <a href={href} {...props}>{children}</a>;
+                    return <a href={sanitizeUrl(href)} {...props}>{children}</a>;
                   },
                   h2: ({ children, ...props }) => {
                     const text = typeof children === 'string' ? children : Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '';
