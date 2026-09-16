@@ -14,8 +14,8 @@ import { useSEO } from "@/hooks/useSEO";
 
 const Index = () => {
   useSEO({
-    title: "RaidFi - Contribution Intelligence & Reputation for Web3",
-    description: "RaidFi turns community activity across X, Discord and Telegram into contribution data, behavioural insight, and reputation that compounds over time.",
+    title: "RaidFi - See Who Actually Contributes to Your Ecosystem",
+    description: "RaidFi turns community activity across X, Discord and Telegram into contribution data and a reputation record that shows who consistently adds value.",
     path: "/",
   });
   return (

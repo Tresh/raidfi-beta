@@ -64,22 +64,31 @@ serve(async (req) => {
   }
 
   try {
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const authClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(authHeader.replace("Bearer ", ""));
-    if (claimsErr || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    // Internal server-to-server call (e.g. submit-contribution) skips user auth.
+    const internal = authHeader === `Bearer ${serviceKey}`;
+    let callerId: string | null = null;
+
+    if (!internal) {
+      const authClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } },
+      );
+      const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(authHeader.replace("Bearer ", ""));
+      if (claimsErr || !claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      callerId = claimsData.claims.sub as string;
     }
 
     const payload = await req.json();
@@ -87,13 +96,13 @@ serve(async (req) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      serviceKey,
     );
 
     // For raw/test sends, require admin
-    if (kind === "test" || (!contribution_id && !task_id && rawText)) {
+    if (!internal && (kind === "test" || (!contribution_id && !task_id && rawText))) {
       const { data: isAdmin } = await supabase.rpc("has_role", {
-        _user_id: claimsData.claims.sub,
+        _user_id: callerId,
         _role: "admin",
       });
       if (!isAdmin) {
@@ -142,7 +151,7 @@ serve(async (req) => {
       for (let i = 0; i < 4; i++) {
         const { data } = await supabase
           .from("contributions")
-          .select("id,user_email,user_id,post_url,content_type,post_text,post_author,manual_score,ai_score,status")
+          .select("id,user_email,user_id,post_url,content_type,post_text,post_author,manual_score,ai_score,status,project_id")
           .eq("id", contribution_id)
           .maybeSingle();
         contrib = data;
@@ -190,8 +199,34 @@ serve(async (req) => {
         buttons.push({ text: "View contributor", url: `${baseOrigin}/u/${profile.referral_code}` });
       }
 
+      // Project's own group, when the post is tied to a project with a connected group.
+      let project: any = null;
+      if (contrib.project_id) {
+        const { data: p } = await supabase
+          .from("projects").select("id,name,slug,telegram_group_id")
+          .eq("id", contrib.project_id).maybeSingle();
+        project = p;
+        if (p?.name) lines.splice(2, 0, `Project: <b>${escapeHtml(p.name)}</b>`);
+      }
+
       const result = await sendTelegram(settings.telegram_chat_id, lines.join("\n"), buttons);
-      return new Response(JSON.stringify({ ok: true, result: result.result }), {
+
+      let projectGroup: "sent" | "failed" | "none" = "none";
+      if (project?.telegram_group_id && String(project.telegram_group_id) !== String(settings.telegram_chat_id)) {
+        const projectButtons = [...buttons];
+        if (project.slug) {
+          projectButtons.push({ text: "Project page", url: `${baseOrigin}/p/${project.slug}` });
+        }
+        try {
+          await sendTelegram(String(project.telegram_group_id), lines.join("\n"), projectButtons);
+          projectGroup = "sent";
+        } catch (e) {
+          projectGroup = "failed";
+          console.error("project group send failed", project.id, e instanceof Error ? e.message : e);
+        }
+      }
+
+      return new Response(JSON.stringify({ ok: true, result: result.result, projectGroup }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
