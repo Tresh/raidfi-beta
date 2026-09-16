@@ -217,6 +217,9 @@ async function handle(update: any, supabase: any) {
   const text: string = message.text.trim();
   const msgId: number = message.message_id;
 
+  // Which project (if any) owns this group chat?
+  const groupProject = isGroup(chatType) ? await projectForChat(supabase, chatId) : null;
+
   // Parse command, strip bot suffix in groups
   const m = text.match(/^\/(\w+)(?:@\w+)?(?:\s+(.+))?$/s);
   if (!m) {
@@ -225,11 +228,14 @@ async function handle(update: any, supabase: any) {
     if (!found) return;
     const droppedUrl = found[0];
 
+    let dropProjectId: string | null = null;
     if (isGroup(chatType)) {
       const { data: s } = await supabase
         .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
       const official = s?.telegram_chat_id ? String(s.telegram_chat_id) : null;
-      if (!official || String(chatId) !== official) return;
+      const isOfficial = official && String(chatId) === official;
+      if (!isOfficial && !groupProject) return;
+      dropProjectId = groupProject?.id ?? null;
     }
 
     const { data: dropLink } = await supabase
@@ -242,11 +248,21 @@ async function handle(update: any, supabase: any) {
       return;
     }
 
-    const out = await submitPost(supabase, dropLink.email, droppedUrl);
+    // In a project group the project is obvious; elsewhere, ask.
+    if (!dropProjectId) {
+      const asked = await askProject(supabase, chatId, msgId, dropLink.email, fromId, droppedUrl);
+      if (asked) return;
+    }
+
+    const out = await submitPost(supabase, dropLink.email, droppedUrl, dropProjectId);
     if (out.error) {
       await reply(chatId, `⚠️ ${escapeHtml(out.error)}`, [], msgId);
     } else {
-      await reply(chatId, `✅ Tracked - your post is in review.`, [], msgId);
+      await reply(chatId,
+        dropProjectId
+          ? `✅ Tracked for <b>${escapeHtml(groupProject!.name)}</b> - your post is in review.`
+          : `✅ Tracked - your post is in review.`,
+        [], msgId);
     }
     return;
   }
@@ -255,8 +271,8 @@ async function handle(update: any, supabase: any) {
 
 
   // ---- Chat-type gating ----
-  // Commands allowed in groups (only in the OFFICIAL RaidFi group):
-  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper"]);
+  // Commands allowed in groups (official RaidFi group or a project's own group):
+  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper", "give", "points"]);
   // Commands that ONLY work in DM (private chat):
   const DM_ONLY = new Set(["link", "verify", "whoami", "mypoints", "submit", "subscribe", "unsubscribe"]);
 
@@ -265,8 +281,9 @@ async function handle(update: any, supabase: any) {
     const { data: settings } = await supabase
       .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
     const officialId = settings?.telegram_chat_id ? String(settings.telegram_chat_id) : null;
-    if (!officialId || String(chatId) !== officialId) {
-      // Silently ignore in unauthorized groups
+    const isOfficial = !!officialId && String(chatId) === officialId;
+    if (!isOfficial && !groupProject) {
+      // Silently ignore in unrecognised groups
       return;
     }
     if (DM_ONLY.has(cmd)) {
@@ -280,6 +297,14 @@ async function handle(update: any, supabase: any) {
       // Unknown / not-allowed in group - stay quiet
       return;
     }
+  }
+
+  if (cmd === "give" || cmd === "points") {
+    await handleGive({
+      supabase, chatId, msgId, fromId, chatType, arg,
+      groupProject, replyToFrom: message.reply_to_message?.from ?? null,
+    });
+    return;
   }
 
   // Look up existing link by Telegram user id
