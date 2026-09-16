@@ -152,6 +152,130 @@ async function projectForChat(supabase: any, chatId: number) {
   return data ?? null;
 }
 
+// Resolve the RaidFi email behind a Telegram user id.
+async function emailForTelegramUser(supabase: any, telegramUserId: number): Promise<string | null> {
+  const { data } = await supabase
+    .from("telegram_links").select("email").eq("telegram_user_id", telegramUserId).maybeSingle();
+  return data?.email ?? null;
+}
+
+// Can this Telegram user hand out points here?
+async function canGrantPoints(supabase: any, email: string, projectId: string | null) {
+  const { data: profile } = await supabase
+    .from("profiles").select("user_id").ilike("email", email).maybeSingle();
+  if (profile?.user_id) {
+    const { data: staff } = await supabase.rpc("is_super_or_admin", { _user_id: profile.user_id });
+    if (staff) return true;
+  }
+  if (!projectId) return false;
+  const { data: member } = await supabase
+    .from("project_members").select("member_role,user_id,email")
+    .eq("project_id", projectId).ilike("email", email).maybeSingle();
+  return !!member && ["project_admin", "owner"].includes(member.member_role);
+}
+
+// /give @user 50 reason  |  /give you@mail.com 50 reason  |  reply + /give 50 reason
+async function handleGive(ctx: {
+  supabase: any; chatId: number; msgId: number; fromId: number; chatType: string; arg: string;
+  groupProject: { id: string; name: string } | null; replyToFrom: any;
+}) {
+  const { supabase, chatId, msgId, fromId, arg, groupProject, replyToFrom } = ctx;
+  const projectId = groupProject?.id ?? null;
+
+  const usage = `<b>Give points</b>\n<code>/give @username 50 played the quiz</code>\n<code>/give someone@mail.com 50 reason</code>\nOr reply to their message with <code>/give 50 reason</code>.`;
+
+  const granterEmail = await emailForTelegramUser(supabase, fromId);
+  if (!granterEmail) {
+    await reply(chatId, `🔒 Link your RaidFi account first (DM me /start) before giving points.`, [], msgId);
+    return;
+  }
+  const allowed = await canGrantPoints(supabase, granterEmail, projectId);
+  if (!allowed) {
+    await reply(chatId, `⛔ Only RaidFi admins${groupProject ? ` or ${escapeHtml(groupProject.name)} admins` : ""} can give points here.`, [], msgId);
+    return;
+  }
+
+  const parts = arg.split(/\s+/).filter(Boolean);
+  if (!parts.length) { await reply(chatId, usage, [], msgId); return; }
+
+  let targetToken: string | null = null;
+  let amountToken: string | undefined;
+  if (/^-?\d+$/.test(parts[0])) {
+    amountToken = parts[0];
+    parts.shift();
+  } else {
+    targetToken = parts.shift()!;
+    amountToken = parts.shift();
+  }
+  const points = Number(amountToken);
+  if (!Number.isFinite(points) || !Number.isInteger(points) || points === 0 || Math.abs(points) > 100000) {
+    await reply(chatId, usage, [], msgId);
+    return;
+  }
+  const reason = parts.join(" ").slice(0, 200);
+
+  // Resolve the recipient.
+  let targetEmail: string | null = null;
+  let targetLabel = "";
+  if (targetToken?.includes("@") && targetToken.includes(".")) {
+    targetEmail = targetToken.replace(/^@/, "").toLowerCase();
+    targetLabel = targetEmail;
+  } else if (targetToken) {
+    const uname = targetToken.replace(/^@/, "");
+    const { data: l } = await supabase
+      .from("telegram_links").select("email,telegram_username").ilike("telegram_username", uname).maybeSingle();
+    targetEmail = l?.email ?? null;
+    targetLabel = `@${uname}`;
+  } else if (replyToFrom?.id) {
+    targetEmail = await emailForTelegramUser(supabase, replyToFrom.id);
+    targetLabel = replyToFrom.username ? `@${replyToFrom.username}` : (replyToFrom.first_name ?? "that member");
+  }
+
+  if (!targetEmail) {
+    await reply(chatId,
+      `❓ I couldn't find a linked RaidFi account for ${escapeHtml(targetLabel || "that person")}. They need to DM me /start and link first.`,
+      [], msgId);
+    return;
+  }
+
+  const { data: exists } = await supabase.rpc("check_email_exists", { check_email: targetEmail });
+  if (!exists) {
+    await reply(chatId, `❓ <b>${escapeHtml(targetEmail)}</b> isn't a RaidFi account.`, [], msgId);
+    return;
+  }
+
+  const description = reason
+    ? `${reason}${groupProject ? ` (${groupProject.name})` : ""}`
+    : `Points from ${groupProject ? groupProject.name : "RaidFi"} admin`;
+
+  const { error } = await supabase.from("user_activities").insert({
+    user_email: targetEmail,
+    activity_type: "admin_grant",
+    description,
+    points,
+    metadata: {
+      source: "telegram",
+      chat_id: chatId,
+      granted_by: granterEmail,
+      project_id: projectId,
+    },
+  });
+  if (error) {
+    await reply(chatId, `⚠️ Couldn't save that: ${escapeHtml(error.message)}`, [], msgId);
+    return;
+  }
+
+  const { data: score } = await supabase
+    .from("leaderboard_scores").select("total_xp").eq("email", targetEmail).maybeSingle();
+
+  await reply(chatId,
+    `${points > 0 ? "🎁" : "➖"} <b>${points > 0 ? "+" : ""}${points} XP</b> to ${escapeHtml(targetLabel || targetEmail)}` +
+    `${reason ? `\n<i>${escapeHtml(reason)}</i>` : ""}` +
+    `${groupProject ? `\nProject: <b>${escapeHtml(groupProject.name)}</b>` : ""}` +
+    `\nNew total: <b>${score?.total_xp ?? 0} XP</b>`,
+    [], msgId);
+}
+
 // Ask which project a post belongs to, using inline buttons.
 async function askProject(
   supabase: any, chatId: number, msgId: number, email: string, telegramUserId: number, url: string,
