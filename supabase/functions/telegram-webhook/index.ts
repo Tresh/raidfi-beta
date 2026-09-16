@@ -82,7 +82,11 @@ const HELP = `<b>RaidFi bot - quick reference</b>
 /leaderboard · top contributors
 /whitepaper · read the whitepaper
 
-<i>Group commands only work in the official RaidFi group. Personal stuff stays in DM so your email isn't shared publicly.</i>`;
+<b>Admins</b>
+/give @user 50 reason · award XP (RaidFi admins anywhere, project admins in their own group)
+Reply to a message with <code>/give 50 reason</code> to award the person you replied to.
+
+<i>Group commands work in the official RaidFi group and in a project's own connected group. Personal stuff stays in DM so your email isn't shared publicly.</i>`;
 
 const START_DM = `Hey - welcome to RaidFi 👋
 
