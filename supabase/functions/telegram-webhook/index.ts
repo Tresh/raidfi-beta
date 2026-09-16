@@ -330,6 +330,10 @@ async function handleCallback(cb: any, supabase: any) {
 }
 
 async function handle(update: any, supabase: any) {
+  if (update.callback_query) {
+    await handleCallback(update.callback_query, supabase);
+    return;
+  }
   const message = update.message;
   if (!message?.text) return;
 
@@ -642,6 +646,9 @@ async function handle(update: any, supabase: any) {
         await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
       }
+
+      const asked = await askProject(supabase, chatId, msgId, link.email, fromId, url);
+      if (asked) return;
 
       const out = await submitPost(supabase, link.email, url);
       if (out.error) {
