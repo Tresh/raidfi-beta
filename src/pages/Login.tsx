@@ -10,7 +10,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSEO } from "@/hooks/useSEO";
-import { validateEmail, validatePassword, passwordStrength } from "@/lib/password";
+import PasswordStrength from "@/components/ui/password-strength";
+import { cn } from "@/lib/utils";
+import {
+  PASSWORD_MAX_LENGTH,
+  passwordRequirements,
+  validateEmail,
+  validatePassword,
+} from "@/lib/password";
 
 type Mode = "signin" | "signup";
 
@@ -30,6 +37,12 @@ const Login = () => {
   const [betaCode, setBetaCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [sentVerification, setSentVerification] = useState(false);
+
+  const changeMode = (nextMode: Mode) => {
+    setMode(nextMode);
+    setPassword("");
+    setConfirm("");
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -176,8 +189,6 @@ const Login = () => {
     setLoading(false);
   };
 
-  const strength = passwordStrength(password);
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -206,9 +217,7 @@ const Login = () => {
                   className="w-full h-11"
                   onClick={() => {
                     setSentVerification(false);
-                    setMode("signin");
-                    setPassword("");
-                    setConfirm("");
+                    changeMode("signin");
                   }}
                 >
                   Back to sign in
@@ -247,6 +256,7 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base"
+                      aria-label="Email address"
                       maxLength={255}
                       autoComplete="email"
                       required
@@ -256,31 +266,50 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base mt-3"
+                      aria-label={mode === "signin" ? "Password" : "Create a password"}
+                      aria-describedby={mode === "signup" ? "signup-password-guidance" : undefined}
+                      maxLength={mode === "signup" ? PASSWORD_MAX_LENGTH : undefined}
                       autoComplete={mode === "signin" ? "current-password" : "new-password"}
                       required
                     />
                     {mode === "signup" && (
                       <>
-                        {password && (
-                          <p className="text-[11px] text-muted-foreground mt-2">
-                            Strength: <span className="text-foreground">{strength.label}</span> - 8+
-                            characters, upper and lower case, and a number.
-                          </p>
-                        )}
+                        <div
+                          id="signup-password-guidance"
+                          className="mt-3 rounded-lg border border-border/70 bg-muted/35 p-3"
+                        >
+                          <PasswordStrength value={password} rules={passwordRequirements} />
+                        </div>
                         <PasswordInput
                           placeholder="Confirm password"
                           value={confirm}
                           onChange={(e) => setConfirm(e.target.value)}
                           className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base mt-3"
+                          aria-label="Confirm password"
+                          aria-describedby={confirm ? "password-match-status" : undefined}
+                          maxLength={PASSWORD_MAX_LENGTH}
                           autoComplete="new-password"
                           required
                         />
+                        {confirm && (
+                          <p
+                            id="password-match-status"
+                            aria-live="polite"
+                            className={cn(
+                              "mt-2 text-xs",
+                              password === confirm ? "text-primary" : "text-muted-foreground",
+                            )}
+                          >
+                            {password === confirm ? "Passwords match" : "Passwords do not match yet"}
+                          </p>
+                        )}
                         <Input
                           type="text"
                           placeholder="Beta access code (optional)"
                           value={betaCode}
                           onChange={(e) => setBetaCode(e.target.value)}
                           className="bg-white/[0.05] border-white/[0.1] text-foreground h-11 text-sm mt-3 tracking-widest uppercase font-mono"
+                          aria-label="Beta access code"
                         />
                       </>
                     )}
@@ -306,7 +335,7 @@ const Login = () => {
                         Have a beta code?{" "}
                         <button
                           type="button"
-                          onClick={() => setMode("signup")}
+                          onClick={() => changeMode("signup")}
                           className="text-primary hover:underline"
                         >
                           Create an account
@@ -317,7 +346,7 @@ const Login = () => {
                         Already have an account?{" "}
                         <button
                           type="button"
-                          onClick={() => setMode("signin")}
+                          onClick={() => changeMode("signin")}
                           className="text-primary hover:underline"
                         >
                           Sign in
