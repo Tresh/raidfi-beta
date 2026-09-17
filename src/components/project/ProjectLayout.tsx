@@ -16,11 +16,15 @@ import {
 } from "lucide-react";
 
 import {
+  DesktopNavigationIcon,
   DesktopNavigationLabel,
   DesktopNavigationLockButton,
   DesktopNavigationRail,
 } from "@/components/ui/desktop-navigation-rail";
-import { desktopNavigationItemClass } from "@/components/ui/desktop-navigation-rail.styles";
+import {
+  desktopNavigationContentClass,
+  desktopNavigationItemClass,
+} from "@/components/ui/desktop-navigation-rail.styles";
 import { useDesktopNavigationRailLock } from "@/components/ui/desktop-navigation-rail-state";
 import { useProject } from "@/hooks/useProject";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,14 +84,16 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
       <DesktopNavigationRail label="Project navigation" locked={sidebarLocked}>
         {(expanded) => (
           <>
-            <div className="h-16 p-2.5 flex items-center gap-1 border-b border-border shrink-0">
+            <div className="relative h-16 p-2.5 flex items-center border-b border-border shrink-0">
               <a
                 href="/project"
                 aria-label={`${project.name} workspace`}
                 title={expanded ? undefined : project.name}
                 className={desktopNavigationItemClass({ expanded, className: "min-w-0 flex-1" })}
               >
-                <img src={logo} alt="" aria-hidden="true" className="w-7 h-7 shrink-0" />
+                <DesktopNavigationIcon expanded={expanded}>
+                  <img src={logo} alt="" className="w-7 h-7 shrink-0" />
+                </DesktopNavigationIcon>
                 <DesktopNavigationLabel expanded={expanded} className="flex flex-col items-start leading-tight">
                   <span className="max-w-[164px] truncate font-semibold text-foreground">{project.name}</span>
                   <span className="mt-0.5 text-[10px] capitalize text-muted-foreground">{roleLabel}</span>
@@ -101,7 +107,7 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
             </div>
 
             <nav aria-label="Project workspace" className="flex-1 p-2.5 space-y-1 overflow-y-auto min-h-0">
-              <div className={`overflow-hidden transition-all duration-150 motion-reduce:transition-none ${expanded ? "h-7" : "h-2"}`}>
+              <div className="h-7 overflow-hidden">
                 <DesktopNavigationLabel
                   expanded={expanded}
                   className="block px-3 pt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70"
@@ -120,7 +126,9 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
                     title={expanded ? undefined : item.label}
                     className={desktopNavigationItemClass({ expanded, active })}
                   >
-                    <item.icon aria-hidden="true" className="w-4 h-4 shrink-0" />
+                    <DesktopNavigationIcon expanded={expanded}>
+                      <item.icon className="w-4 h-4 shrink-0" />
+                    </DesktopNavigationIcon>
                     <DesktopNavigationLabel expanded={expanded}>{item.label}</DesktopNavigationLabel>
                   </NavLink>
                 );
@@ -134,7 +142,9 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
                 title={expanded ? undefined : "Back to site"}
                 className={desktopNavigationItemClass({ expanded })}
               >
-                <Home aria-hidden="true" className="w-4 h-4 shrink-0" />
+                <DesktopNavigationIcon expanded={expanded}>
+                  <Home className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
                 <DesktopNavigationLabel expanded={expanded}>Back to site</DesktopNavigationLabel>
               </a>
               <button
@@ -144,7 +154,9 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
                 title={expanded ? undefined : "Sign out"}
                 className={desktopNavigationItemClass({ expanded, destructive: true })}
               >
-                <LogOut aria-hidden="true" className="w-4 h-4 shrink-0" />
+                <DesktopNavigationIcon expanded={expanded}>
+                  <LogOut className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
                 <DesktopNavigationLabel expanded={expanded}>Sign out</DesktopNavigationLabel>
               </button>
             </div>
@@ -217,11 +229,10 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
         </div>
       </aside>
 
-      <div
-        className={`flex-1 min-w-0 transition-[margin] duration-200 ease-out motion-reduce:transition-none ${
-          sidebarLocked ? "lg:ml-[15.5rem]" : "lg:ml-[4.5rem]"
-        }`}
-      >
+      <div className={desktopNavigationContentClass({
+        locked: sidebarLocked,
+        className: "flex-1 min-w-0",
+      })}>
         <header className="lg:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 h-14 flex items-center gap-3">
           <button
             type="button"

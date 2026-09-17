@@ -22,11 +22,15 @@ import {
 } from "lucide-react";
 
 import {
+  DesktopNavigationIcon,
   DesktopNavigationLabel,
   DesktopNavigationLockButton,
   DesktopNavigationRail,
 } from "@/components/ui/desktop-navigation-rail";
-import { desktopNavigationItemClass } from "@/components/ui/desktop-navigation-rail.styles";
+import {
+  desktopNavigationContentClass,
+  desktopNavigationItemClass,
+} from "@/components/ui/desktop-navigation-rail.styles";
 import { useDesktopNavigationRailLock } from "@/components/ui/desktop-navigation-rail-state";
 import { useAdmin } from "@/hooks/useAdmin";
 import logo from "@/assets/logo.png";
@@ -84,14 +88,16 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
       <DesktopNavigationRail label="Administration navigation" locked={sidebarLocked}>
         {(expanded) => (
           <>
-            <div className="h-16 p-2.5 flex items-center gap-1 border-b border-border shrink-0">
+            <div className="relative h-16 p-2.5 flex items-center border-b border-border shrink-0">
               <NavLink
                 to="/admin"
                 aria-label="Admin panel"
                 title={expanded ? undefined : "Admin panel"}
                 className={desktopNavigationItemClass({ expanded, className: "min-w-0 flex-1" })}
               >
-                <img src={logo} alt="" aria-hidden="true" className="w-7 h-7 shrink-0" />
+                <DesktopNavigationIcon expanded={expanded}>
+                  <img src={logo} alt="" className="w-7 h-7 shrink-0" />
+                </DesktopNavigationIcon>
                 <DesktopNavigationLabel expanded={expanded} className="flex flex-col items-start leading-tight">
                   <span className="font-semibold text-foreground">Admin Panel</span>
                   <span className="mt-0.5 text-[10px] text-muted-foreground">{accessLabel}</span>
@@ -105,7 +111,7 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
             </div>
 
             <nav aria-label="Administration" className="flex-1 p-2.5 space-y-1 overflow-y-auto min-h-0">
-              <div className={`overflow-hidden transition-all duration-150 motion-reduce:transition-none ${expanded ? "h-7" : "h-2"}`}>
+              <div className="h-7 overflow-hidden">
                 <DesktopNavigationLabel
                   expanded={expanded}
                   className="block px-3 pt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70"
@@ -124,7 +130,9 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
                     title={expanded ? undefined : item.label}
                     className={desktopNavigationItemClass({ expanded, active })}
                   >
-                    <item.icon aria-hidden="true" className="w-4 h-4 shrink-0" />
+                    <DesktopNavigationIcon expanded={expanded}>
+                      <item.icon className="w-4 h-4 shrink-0" />
+                    </DesktopNavigationIcon>
                     <DesktopNavigationLabel expanded={expanded}>{item.label}</DesktopNavigationLabel>
                   </NavLink>
                 );
@@ -138,7 +146,9 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
                 title={expanded ? undefined : "Back to site"}
                 className={desktopNavigationItemClass({ expanded })}
               >
-                <Home aria-hidden="true" className="w-4 h-4 shrink-0" />
+                <DesktopNavigationIcon expanded={expanded}>
+                  <Home className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
                 <DesktopNavigationLabel expanded={expanded}>Back to site</DesktopNavigationLabel>
               </NavLink>
               <button
@@ -148,7 +158,9 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
                 title={expanded ? undefined : "Sign out"}
                 className={desktopNavigationItemClass({ expanded, destructive: true })}
               >
-                <LogOut aria-hidden="true" className="w-4 h-4 shrink-0" />
+                <DesktopNavigationIcon expanded={expanded}>
+                  <LogOut className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
                 <DesktopNavigationLabel expanded={expanded}>Sign out</DesktopNavigationLabel>
               </button>
             </div>
@@ -223,11 +235,10 @@ const AdminLayout = ({ children, requiredPermission }: { children: ReactNode; re
         </div>
       </aside>
 
-      <div
-        className={`flex-1 flex flex-col min-w-0 transition-[margin] duration-200 ease-out motion-reduce:transition-none ${
-          sidebarLocked ? "lg:ml-[15.5rem]" : "lg:ml-[4.5rem]"
-        }`}
-      >
+      <div className={desktopNavigationContentClass({
+        locked: sidebarLocked,
+        className: "flex-1 flex flex-col min-w-0",
+      })}>
         <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background sticky top-0 z-30">
           <button
             type="button"
