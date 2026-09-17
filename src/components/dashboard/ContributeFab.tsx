@@ -17,10 +17,10 @@ const ContributeFab = () => {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] overflow-y-auto rounded-2xl p-5 sm:max-w-lg sm:p-6">
           <DialogHeader>
             <DialogTitle>Track a contribution</DialogTitle>
-            <DialogDescription>Submit an X post from your verified account.</DialogDescription>
+            <DialogDescription>Paste the link, classify the post, and send it for review.</DialogDescription>
           </DialogHeader>
           <ContributionComposer onSubmitted={() => setOpen(false)} />
         </DialogContent>

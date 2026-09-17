@@ -1,23 +1,33 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Signal,
-  ShieldCheck,
   BarChart3,
-  Settings,
-  LogOut,
   Home,
-  Menu,
-  X,
+  LayoutDashboard,
   Loader2,
-  Bell,
-  Gift,
+  LogOut,
+  Menu,
   MessageSquareWarning,
+  Settings,
+  ShieldCheck,
+  Signal,
+  X,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+
 import ContributeFab from "@/components/dashboard/ContributeFab";
 import NotificationsBell from "@/components/dashboard/NotificationsBell";
+import {
+  DesktopNavigationIcon,
+  DesktopNavigationLabel,
+  DesktopNavigationLockButton,
+  DesktopNavigationRail,
+} from "@/components/ui/desktop-navigation-rail";
+import {
+  desktopNavigationContentClass,
+  desktopNavigationItemClass,
+} from "@/components/ui/desktop-navigation-rail.styles";
+import { useDesktopNavigationRailLock } from "@/components/ui/desktop-navigation-rail-state";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "/logo.png";
 
 const navItems = [
@@ -25,16 +35,14 @@ const navItems = [
   { label: "Contributions", to: "/dashboard/contributions", icon: Signal },
   { label: "Reputation", to: "/dashboard/reputation", icon: ShieldCheck },
   { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-  
   { label: "Feedback", to: "/dashboard/feedback", icon: MessageSquareWarning },
   { label: "Settings", to: "/dashboard/settings", icon: Settings },
 ];
 
-
-
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { loading, session, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarLocked, setSidebarLocked] = useDesktopNavigationRailLock();
   const location = useLocation();
 
   if (loading) {
@@ -52,15 +60,103 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <DesktopNavigationRail label="Contributor navigation" locked={sidebarLocked}>
+        {(expanded) => (
+          <>
+            <div className="relative h-14 p-2.5 flex items-center border-b border-border shrink-0">
+              <a
+                href="/"
+                aria-label="RaidFi home"
+                title={expanded ? undefined : "RaidFi home"}
+                className={desktopNavigationItemClass({ expanded, className: "min-w-0 flex-1" })}
+              >
+                <DesktopNavigationIcon expanded={expanded}>
+                  <img src={logo} alt="" className="w-6 h-6 shrink-0" />
+                </DesktopNavigationIcon>
+                <DesktopNavigationLabel expanded={expanded} className="flex items-center gap-2">
+                  <span className="font-semibold tracking-tight text-foreground">RaidFi</span>
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary">
+                    Beta
+                  </span>
+                </DesktopNavigationLabel>
+              </a>
+              <DesktopNavigationLockButton
+                expanded={expanded}
+                locked={sidebarLocked}
+                onLockedChange={setSidebarLocked}
+              />
+            </div>
+
+            <nav aria-label="Contributor workspace" className="flex-1 p-2.5 space-y-1 overflow-y-auto min-h-0">
+              <div className="h-7 overflow-hidden">
+                <DesktopNavigationLabel
+                  expanded={expanded}
+                  className="block px-3 pt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70"
+                >
+                  Intelligence
+                </DesktopNavigationLabel>
+              </div>
+              {navItems.map((item) => {
+                const active = isActive(item.to, item.end);
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    aria-label={item.label}
+                    title={expanded ? undefined : item.label}
+                    className={desktopNavigationItemClass({ expanded, active })}
+                  >
+                    <DesktopNavigationIcon expanded={expanded}>
+                      <item.icon className="w-4 h-4 shrink-0" />
+                    </DesktopNavigationIcon>
+                    <DesktopNavigationLabel expanded={expanded}>{item.label}</DesktopNavigationLabel>
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            <div className="p-2.5 border-t border-border space-y-1 shrink-0">
+              <a
+                href="/"
+                aria-label="Back to site"
+                title={expanded ? undefined : "Back to site"}
+                className={desktopNavigationItemClass({ expanded })}
+              >
+                <DesktopNavigationIcon expanded={expanded}>
+                  <Home className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
+                <DesktopNavigationLabel expanded={expanded}>Back to site</DesktopNavigationLabel>
+              </a>
+              <button
+                type="button"
+                onClick={signOut}
+                aria-label="Sign out"
+                title={expanded ? undefined : "Sign out"}
+                className={desktopNavigationItemClass({ expanded, destructive: true })}
+              >
+                <DesktopNavigationIcon expanded={expanded}>
+                  <LogOut className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
+                <DesktopNavigationLabel expanded={expanded}>Sign out</DesktopNavigationLabel>
+              </button>
+            </div>
+          </>
+        )}
+      </DesktopNavigationRail>
+
       {sidebarOpen && (
-        <div
+        <button
+          type="button"
+          aria-label="Close navigation menu"
           className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transition-transform lg:translate-x-0 ${
+        aria-label="Contributor navigation"
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transition-transform lg:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -73,15 +169,16 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </span>
           </a>
           <button
+            type="button"
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-muted-foreground"
-            aria-label="Close menu"
+            className="text-muted-foreground"
+            aria-label="Close navigation menu"
           >
-            <X className="w-4 h-4" />
+            <X aria-hidden="true" className="w-4 h-4" />
           </button>
         </div>
 
-        <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto min-h-0">
+        <nav aria-label="Contributor workspace" className="flex-1 p-2.5 space-y-0.5 overflow-y-auto min-h-0">
           <p className="px-3 pt-2 pb-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70">
             Intelligence
           </p>
@@ -91,13 +188,13 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               to={item.to}
               end={item.end}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors ${
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isActive(item.to, item.end)
                   ? "bg-primary/10 text-primary font-medium"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
-              <item.icon className="w-4 h-4" />
+              <item.icon aria-hidden="true" className="w-4 h-4" />
               {item.label}
             </NavLink>
           ))}
@@ -108,27 +205,32 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             href="/"
             className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
-            <Home className="w-4 h-4" />
+            <Home aria-hidden="true" className="w-4 h-4" />
             Back to site
           </a>
           <button
+            type="button"
             onClick={signOut}
             className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-destructive hover:bg-destructive/10 transition-colors w-full"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut aria-hidden="true" className="w-4 h-4" />
             Sign out
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-60">
+      <div className={desktopNavigationContentClass({
+        locked: sidebarLocked,
+        className: "flex-1 flex flex-col min-w-0",
+      })}>
         <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-background/95 backdrop-blur sticky top-0 z-30">
           <button
+            type="button"
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden text-foreground"
-            aria-label="Open menu"
+            aria-label="Open navigation menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu aria-hidden="true" className="w-5 h-5" />
           </button>
           <div className="hidden lg:block text-xs text-muted-foreground">
             Contribution intelligence workspace
@@ -145,9 +247,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         </header>
 
         <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
-        <ContributeFab />
+        {location.pathname !== "/dashboard/contributions" && <ContributeFab />}
       </div>
-
     </div>
   );
 };

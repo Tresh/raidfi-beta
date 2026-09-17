@@ -1,9 +1,31 @@
 import { z } from "zod";
 
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 72;
+
+export const passwordRequirements = [
+  {
+    id: "length",
+    label: `${PASSWORD_MIN_LENGTH}-${PASSWORD_MAX_LENGTH} characters`,
+    test: (value: string) =>
+      value.length >= PASSWORD_MIN_LENGTH && value.length <= PASSWORD_MAX_LENGTH,
+  },
+  {
+    id: "case",
+    label: "Upper and lower case",
+    test: (value: string) => /[a-z]/.test(value) && /[A-Z]/.test(value),
+  },
+  {
+    id: "digit",
+    label: "At least one number",
+    test: (value: string) => /[0-9]/.test(value),
+  },
+] as const;
+
 export const passwordSchema = z
   .string()
-  .min(8, { message: "Password must be at least 8 characters" })
-  .max(72, { message: "Password must be less than 72 characters" })
+  .min(PASSWORD_MIN_LENGTH, { message: "Password must be at least 8 characters" })
+  .max(PASSWORD_MAX_LENGTH, { message: "Password must be less than 72 characters" })
   .regex(/[a-z]/, { message: "Include at least one lowercase letter" })
   .regex(/[A-Z]/, { message: "Include at least one uppercase letter" })
   .regex(/[0-9]/, { message: "Include at least one number" });

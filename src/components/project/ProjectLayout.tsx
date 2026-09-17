@@ -1,6 +1,31 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Settings as SettingsIcon, Menu, X, Home, Loader2, LogOut, LayoutDashboard, Activity, ClipboardCheck, Bot, BarChart3 } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Bot,
+  ClipboardCheck,
+  Home,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Menu,
+  Settings as SettingsIcon,
+  Users,
+  X,
+} from "lucide-react";
+
+import {
+  DesktopNavigationIcon,
+  DesktopNavigationLabel,
+  DesktopNavigationLockButton,
+  DesktopNavigationRail,
+} from "@/components/ui/desktop-navigation-rail";
+import {
+  desktopNavigationContentClass,
+  desktopNavigationItemClass,
+} from "@/components/ui/desktop-navigation-rail.styles";
+import { useDesktopNavigationRailLock } from "@/components/ui/desktop-navigation-rail-state";
 import { useProject } from "@/hooks/useProject";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
@@ -15,12 +40,11 @@ const navItems = [
   { label: "Settings", to: "/project/settings", icon: SettingsIcon },
 ];
 
-
 const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; fullBleed?: boolean }) => {
   const { loading, project, role } = useProject();
   const [open, setOpen] = useState(false);
+  const [sidebarLocked, setSidebarLocked] = useDesktopNavigationRailLock();
   const location = useLocation();
-
 
   if (loading) {
     return (
@@ -48,61 +72,176 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
 
   const isActive = (path: string, end?: boolean) =>
     end ? location.pathname === path : location.pathname.startsWith(path);
+  const roleLabel = (role ?? "member").replace("_", " ");
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
-      {open && <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setOpen(false)} />}
+      <DesktopNavigationRail label="Project navigation" locked={sidebarLocked}>
+        {(expanded) => (
+          <>
+            <div className="relative h-16 p-2.5 flex items-center border-b border-border shrink-0">
+              <a
+                href="/project"
+                aria-label={`${project.name} workspace`}
+                title={expanded ? undefined : project.name}
+                className={desktopNavigationItemClass({ expanded, className: "min-w-0 flex-1" })}
+              >
+                <DesktopNavigationIcon expanded={expanded}>
+                  <img src={logo} alt="" className="w-7 h-7 shrink-0" />
+                </DesktopNavigationIcon>
+                <DesktopNavigationLabel expanded={expanded} className="flex flex-col items-start leading-tight">
+                  <span className="max-w-[164px] truncate font-semibold text-foreground">{project.name}</span>
+                  <span className="mt-0.5 text-[10px] capitalize text-muted-foreground">{roleLabel}</span>
+                </DesktopNavigationLabel>
+              </a>
+              <DesktopNavigationLockButton
+                expanded={expanded}
+                locked={sidebarLocked}
+                onLockedChange={setSidebarLocked}
+              />
+            </div>
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
+            <nav aria-label="Project workspace" className="flex-1 p-2.5 space-y-1 overflow-y-auto min-h-0">
+              <div className="h-7 overflow-hidden">
+                <DesktopNavigationLabel
+                  expanded={expanded}
+                  className="block px-3 pt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70"
+                >
+                  Workspace
+                </DesktopNavigationLabel>
+              </div>
+              {navItems.map((item) => {
+                const active = isActive(item.to, item.end);
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    aria-label={item.label}
+                    title={expanded ? undefined : item.label}
+                    className={desktopNavigationItemClass({ expanded, active })}
+                  >
+                    <DesktopNavigationIcon expanded={expanded}>
+                      <item.icon className="w-4 h-4 shrink-0" />
+                    </DesktopNavigationIcon>
+                    <DesktopNavigationLabel expanded={expanded}>{item.label}</DesktopNavigationLabel>
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            <div className="p-2.5 border-t border-border space-y-1 shrink-0">
+              <a
+                href="/"
+                aria-label="Back to site"
+                title={expanded ? undefined : "Back to site"}
+                className={desktopNavigationItemClass({ expanded })}
+              >
+                <DesktopNavigationIcon expanded={expanded}>
+                  <Home className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
+                <DesktopNavigationLabel expanded={expanded}>Back to site</DesktopNavigationLabel>
+              </a>
+              <button
+                type="button"
+                onClick={signOut}
+                aria-label="Sign out"
+                title={expanded ? undefined : "Sign out"}
+                className={desktopNavigationItemClass({ expanded, destructive: true })}
+              >
+                <DesktopNavigationIcon expanded={expanded}>
+                  <LogOut className="w-4 h-4 shrink-0" />
+                </DesktopNavigationIcon>
+                <DesktopNavigationLabel expanded={expanded}>Sign out</DesktopNavigationLabel>
+              </button>
+            </div>
+          </>
+        )}
+      </DesktopNavigationRail>
+
+      {open && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      <aside
+        aria-label="Project navigation"
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transition-transform lg:hidden ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="min-w-0">
             <p className="font-semibold text-sm text-foreground truncate">{project.name}</p>
-            <p className="text-[11px] text-muted-foreground capitalize">{(role ?? "member").replace("_", " ")}</p>
+            <p className="text-[11px] text-muted-foreground capitalize">{roleLabel}</p>
           </div>
-          <button onClick={() => setOpen(false)} className="lg:hidden text-muted-foreground"><X className="w-5 h-5" /></button>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="text-muted-foreground"
+            aria-label="Close navigation menu"
+          >
+            <X aria-hidden="true" className="w-5 h-5" />
+          </button>
         </div>
 
-        <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
+        <nav aria-label="Project workspace" className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               onClick={() => setOpen(false)}
-              className={`block px-3 py-2 rounded-md transition-colors ${
+              className={`block px-3 py-2 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isActive(item.to, item.end)
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
               <span className="flex items-center gap-2.5 text-[13px] font-medium">
-                <item.icon className="w-4 h-4" />
+                <item.icon aria-hidden="true" className="w-4 h-4" />
                 {item.label}
               </span>
-              
             </NavLink>
           ))}
         </nav>
 
         <div className="p-2.5 border-t border-border space-y-0.5">
           <a href="/" className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-muted-foreground hover:text-foreground hover:bg-muted">
-            <Home className="w-4 h-4" /> Back to site
+            <Home aria-hidden="true" className="w-4 h-4" /> Back to site
           </a>
           <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = "/login";
-            }}
+            type="button"
+            onClick={signOut}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-destructive hover:bg-destructive/10"
           >
-            <LogOut className="w-4 h-4" /> Sign out
+            <LogOut aria-hidden="true" className="w-4 h-4" /> Sign out
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 lg:ml-60 min-w-0">
+      <div className={desktopNavigationContentClass({
+        locked: sidebarLocked,
+        className: "flex-1 min-w-0",
+      })}>
         <header className="lg:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 h-14 flex items-center gap-3">
-          <button onClick={() => setOpen(true)} className="text-muted-foreground"><Menu className="w-5 h-5" /></button>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="text-muted-foreground"
+            aria-label="Open navigation menu"
+          >
+            <Menu aria-hidden="true" className="w-5 h-5" />
+          </button>
           <span className="text-sm font-semibold text-foreground truncate">{project.name}</span>
         </header>
         {fullBleed ? (
@@ -110,7 +249,6 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
         ) : (
           <main className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">{children}</main>
         )}
-
       </div>
     </div>
   );
