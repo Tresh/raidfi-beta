@@ -247,7 +247,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         </header>
 
         <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
-        <ContributeFab />
+        {location.pathname !== "/dashboard/contributions" && <ContributeFab />}
       </div>
     </div>
   );
