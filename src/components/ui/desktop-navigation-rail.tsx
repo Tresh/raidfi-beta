@@ -57,7 +57,7 @@ export function DesktopNavigationRail({
         }
       }}
       className={cn(
-        "fixed inset-y-0 left-0 z-50 hidden w-[15.5rem] flex-col overflow-hidden border-r border-border bg-card shadow-sm will-change-transform lg:flex",
+        "fixed inset-y-0 left-0 z-50 hidden w-[15.5rem] flex-col overflow-hidden rounded-r-lg border-r border-border bg-card shadow-sm will-change-transform lg:flex",
         className,
       )}
     >
