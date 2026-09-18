@@ -436,12 +436,15 @@ async function handle(update: any, supabase: any) {
   const requireLink = async () => {
     if (link) return true;
     await reply(chatId,
-      `🔒 You need to link your RaidFi account first.\nSend <code>/start</code> in a DM with me to begin.`,
-      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
+      isPrivate(chatType)
+        ? `🔒 You need to connect your RaidFi account first.\nSend <code>/start</code> and follow the steps.`
+        : `🔒 <b>You're not connected yet.</b>\nDM me and send <code>/start</code> to connect your RaidFi account, then come back and try again.`,
+      isPrivate(chatType) ? [] : [[{ text: "💬 Connect in DM", url: `https://t.me/raidficontributionbot?start=link` }]],
       msgId,
     );
     return false;
   };
+
 
   switch (cmd) {
     case "start": {
