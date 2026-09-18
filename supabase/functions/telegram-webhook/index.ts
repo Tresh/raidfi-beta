@@ -58,6 +58,27 @@ async function reply(chatId: number, text: string, buttons: Btn[][] = [], replyT
   return tg("sendMessage", body);
 }
 
+async function deleteMsg(chatId: number, messageId: number) {
+  try { await tg("deleteMessage", { chat_id: chatId, message_id: messageId }); } catch { /* ignore */ }
+}
+
+// Schedule a bot message for self-destruct so chats stay clean.
+function deleteAfter(chatId: number, messageId: number | undefined, secs: number) {
+  if (!messageId) return;
+  const task = new Promise((r) => setTimeout(r, secs * 1000)).then(() => deleteMsg(chatId, messageId));
+  try { (globalThis as any).EdgeRuntime?.waitUntil?.(task); } catch { /* ignore */ }
+}
+
+// Send a message that removes itself after `secs`.
+async function replyTemp(
+  chatId: number, text: string, buttons: Btn[][] = [], replyTo?: number, secs = 25,
+) {
+  const res = await reply(chatId, text, buttons, replyTo);
+  deleteAfter(chatId, (res as any)?.data?.result?.message_id, secs);
+  return res;
+}
+
+
 function isPrivate(chatType: string) { return chatType === "private"; }
 function isGroup(chatType: string) { return chatType === "group" || chatType === "supergroup"; }
 
@@ -300,15 +321,17 @@ async function askProject(
   const buttons: Btn[][] = (projects as any[]).map((p) => [
     { text: p.name, callback_data: `p:${token}:${p.id}` },
   ]);
-  buttons.push([{ text: "No specific project", callback_data: `p:${token}:none` }]);
+  buttons.push([{ text: "RaidFi", callback_data: `p:${token}:none` }]);
 
-  await reply(chatId, `Which project is this post about?`, buttons, msgId);
+  // Self-destructs so the chat doesn't fill up with prompts.
+  await replyTemp(chatId, `Which project is this post about?`, buttons, msgId, 120);
   return true;
 }
 
 async function handleCallback(cb: any, supabase: any) {
   const data: string = cb.data ?? "";
   const chatId: number = cb.message?.chat?.id;
+  const promptMsgId: number | undefined = cb.message?.message_id;
   const answer = (text: string) => tg("answerCallbackQuery", { callback_query_id: cb.id, text });
   if (!data.startsWith("p:") || !chatId) { await answer(""); return; }
 
@@ -320,22 +343,32 @@ async function handleCallback(cb: any, supabase: any) {
 
   await supabase.from("telegram_pending_submissions").delete().eq("token", token);
 
+  // Keep the Telegram identity fresh whenever we see the user act.
+  await supabase.from("telegram_links").update({
+    telegram_username: cb.from?.username || null,
+    first_name: cb.from?.first_name || null,
+  }).eq("telegram_user_id", cb.from?.id);
+
   const projectId = choice === "none" ? null : choice;
   const out = await submitPost(supabase, pending.email, pending.post_url, projectId);
   await answer(out.error ? "Could not submit" : "Submitted");
+
+  // The question has been answered - clear it.
+  if (promptMsgId) await deleteMsg(chatId, promptMsgId);
 
   if (out.error) {
     await reply(chatId, `⚠️ ${escapeHtml(out.error)}`, [], pending.message_id ?? undefined);
     return;
   }
 
-  let label = "no specific project";
+  let label = "RaidFi";
   if (projectId) {
     const { data: p } = await supabase.from("projects").select("name").eq("id", projectId).maybeSingle();
     label = p?.name ? escapeHtml(p.name) : "your project";
   }
-  await reply(chatId, `✅ Tracked for <b>${label}</b> - your post is in review.`, [], pending.message_id ?? undefined);
+  await replyTemp(chatId, `✅ Tracked for <b>${label}</b> - your post is in review.`, [], pending.message_id ?? undefined, 25);
 }
+
 
 async function handle(update: any, supabase: any) {
   if (update.callback_query) {
