@@ -76,7 +76,7 @@ const HELP = `<b>RaidFi bot - quick reference</b>
 
 <b>Contribute</b>
 /tasks · open tasks (here or in the group)
-/submit &lt;x-url&gt; · submit an X post (DM)
+/submit &lt;x-url&gt; · submit an X post (works in DM and in groups)
 
 <b>Community</b>
 /leaderboard · top contributors
@@ -104,8 +104,12 @@ Send <code>/link you@example.com</code>, then reply with the code we email you: 
 Once linked, try /tasks or /mypoints. Type /help to see everything.`;
 
 const START_GROUP = `Hey, I'm the RaidFi bot 👋
-I post new contribute tasks here and answer /tasks, /leaderboard and /whitepaper.
-For anything personal, DM me → @raidficontributionbot`;
+
+To submit a post here, use the command:
+<code>/submit https://x.com/you/status/123</code>
+
+I also answer /tasks, /leaderboard and /whitepaper.
+Not connected yet? DM me → @raidficontributionbot and send /start.`;
 
 // Shared submission path used by /submit and by plain "dropped" links.
 async function submitPost(supabase: any, email: string, url: string, projectId?: string | null): Promise<{ error?: string }> {
