@@ -58,6 +58,27 @@ async function reply(chatId: number, text: string, buttons: Btn[][] = [], replyT
   return tg("sendMessage", body);
 }
 
+async function deleteMsg(chatId: number, messageId: number) {
+  try { await tg("deleteMessage", { chat_id: chatId, message_id: messageId }); } catch { /* ignore */ }
+}
+
+// Schedule a bot message for self-destruct so chats stay clean.
+function deleteAfter(chatId: number, messageId: number | undefined, secs: number) {
+  if (!messageId) return;
+  const task = new Promise((r) => setTimeout(r, secs * 1000)).then(() => deleteMsg(chatId, messageId));
+  try { (globalThis as any).EdgeRuntime?.waitUntil?.(task); } catch { /* ignore */ }
+}
+
+// Send a message that removes itself after `secs`.
+async function replyTemp(
+  chatId: number, text: string, buttons: Btn[][] = [], replyTo?: number, secs = 25,
+) {
+  const res = await reply(chatId, text, buttons, replyTo);
+  deleteAfter(chatId, (res as any)?.data?.result?.message_id, secs);
+  return res;
+}
+
+
 function isPrivate(chatType: string) { return chatType === "private"; }
 function isGroup(chatType: string) { return chatType === "group" || chatType === "supergroup"; }
 
