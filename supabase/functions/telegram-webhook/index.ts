@@ -635,24 +635,32 @@ async function handle(update: any, supabase: any) {
 
     case "submit": {
       if (!(await requireLink())) return;
-      const url = arg;
+      const url = (arg.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i) || [])[0] || arg;
       if (!TWEET_URL_REGEX.test(url)) {
         await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
       }
 
-      const asked = await askProject(supabase, chatId, msgId, link.email, fromId, url);
-      if (asked) return;
+      // In a project's own group the project is implied; elsewhere ask.
+      if (!groupProject) {
+        const asked = await askProject(supabase, chatId, msgId, link.email, fromId, url);
+        if (asked) return;
+      }
 
-      const out = await submitPost(supabase, link.email, url);
+      const out = await submitPost(supabase, link.email, url, groupProject?.id ?? null);
       if (out.error) {
         await reply(chatId, `${escapeHtml(out.error)}`,
           [[{ text: "Open Settings", url: `${SITE_ORIGIN}/dashboard/settings` }]], msgId);
         return;
       }
 
-      await reply(chatId, `Got it - your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
+      await reply(chatId,
+        groupProject
+          ? `✅ Tracked for <b>${escapeHtml(groupProject.name)}</b> - an admin will review it shortly.`
+          : `Got it - your post is in.\nAn admin will review shortly and it'll show up on the live feed.`,
+        [[{ text: "View post", url }]], msgId);
       return;
+
     }
 
     case "whitepaper": {
