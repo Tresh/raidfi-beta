@@ -76,7 +76,7 @@ const HELP = `<b>RaidFi bot - quick reference</b>
 
 <b>Contribute</b>
 /tasks · open tasks (here or in the group)
-/submit &lt;x-url&gt; · submit an X post (DM)
+/submit &lt;x-url&gt; · submit an X post (works in DM and in groups)
 
 <b>Community</b>
 /leaderboard · top contributors
@@ -104,8 +104,12 @@ Send <code>/link you@example.com</code>, then reply with the code we email you: 
 Once linked, try /tasks or /mypoints. Type /help to see everything.`;
 
 const START_GROUP = `Hey, I'm the RaidFi bot 👋
-I post new contribute tasks here and answer /tasks, /leaderboard and /whitepaper.
-For anything personal, DM me → @raidficontributionbot`;
+
+To submit a post here, use the command:
+<code>/submit https://x.com/you/status/123</code>
+
+I also answer /tasks, /leaderboard and /whitepaper.
+Not connected yet? DM me → @raidficontributionbot and send /start.`;
 
 // Shared submission path used by /submit and by plain "dropped" links.
 async function submitPost(supabase: any, email: string, url: string, projectId?: string | null): Promise<{ error?: string }> {
@@ -355,58 +359,45 @@ async function handle(update: any, supabase: any) {
   // Parse command, strip bot suffix in groups
   const m = text.match(/^\/(\w+)(?:@\w+)?(?:\s+(.+))?$/s);
   if (!m) {
-    // "Drop a link" behaviour: a plain X post link, no command needed.
+    // Plain links only work in DM. In groups we require /submit so the bot
+    // never reacts to normal chatter.
+    if (!isPrivate(chatType)) return;
+
     const found = text.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i);
     if (!found) return;
     const droppedUrl = found[0];
-
-    let dropProjectId: string | null = null;
-    if (isGroup(chatType)) {
-      const { data: s } = await supabase
-        .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
-      const official = s?.telegram_chat_id ? String(s.telegram_chat_id) : null;
-      const isOfficial = official && String(chatId) === official;
-      if (!isOfficial && !groupProject) return;
-      dropProjectId = groupProject?.id ?? null;
-    }
 
     const { data: dropLink } = await supabase
       .from("telegram_links").select("*").eq("telegram_user_id", fromId).maybeSingle();
     if (!dropLink) {
       await reply(chatId,
-        `🔗 Nice post! Link your RaidFi account and I'll track it automatically next time.`,
-        [[{ text: "💬 Link account", url: `https://t.me/raidficontributionbot?start=link` }]],
-        msgId);
+        `🔒 Link your RaidFi account first - send <code>/start</code> and follow the steps.`,
+        [], msgId);
       return;
     }
 
-    // In a project group the project is obvious; elsewhere, ask.
-    if (!dropProjectId) {
-      const asked = await askProject(supabase, chatId, msgId, dropLink.email, fromId, droppedUrl);
-      if (asked) return;
-    }
+    const asked = await askProject(supabase, chatId, msgId, dropLink.email, fromId, droppedUrl);
+    if (asked) return;
 
-    const out = await submitPost(supabase, dropLink.email, droppedUrl, dropProjectId);
+    const out = await submitPost(supabase, dropLink.email, droppedUrl, null);
     if (out.error) {
       await reply(chatId, `⚠️ ${escapeHtml(out.error)}`, [], msgId);
     } else {
-      await reply(chatId,
-        dropProjectId
-          ? `✅ Tracked for <b>${escapeHtml(groupProject!.name)}</b> - your post is in review.`
-          : `✅ Tracked - your post is in review.`,
-        [], msgId);
+      await reply(chatId, `✅ Tracked - your post is in review.`, [], msgId);
     }
     return;
   }
+
   const cmd = m[1].toLowerCase();
   const arg = (m[2] || "").trim();
 
 
   // ---- Chat-type gating ----
   // Commands allowed in groups (official RaidFi group or a project's own group):
-  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper", "give", "points"]);
+  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper", "give", "points", "submit"]);
   // Commands that ONLY work in DM (private chat):
-  const DM_ONLY = new Set(["link", "verify", "whoami", "mypoints", "submit", "subscribe", "unsubscribe"]);
+  const DM_ONLY = new Set(["link", "verify", "whoami", "mypoints", "subscribe", "unsubscribe"]);
+
 
   if (isGroup(chatType)) {
     // Fetch the configured official RaidFi group id
@@ -449,12 +440,15 @@ async function handle(update: any, supabase: any) {
   const requireLink = async () => {
     if (link) return true;
     await reply(chatId,
-      `🔒 You need to link your RaidFi account first.\nSend <code>/start</code> in a DM with me to begin.`,
-      isPrivate(chatType) ? [] : [[{ text: "💬 Open DM", url: `https://t.me/raidficontributionbot` }]],
+      isPrivate(chatType)
+        ? `🔒 You need to connect your RaidFi account first.\nSend <code>/start</code> and follow the steps.`
+        : `🔒 <b>You're not connected yet.</b>\nDM me and send <code>/start</code> to connect your RaidFi account, then come back and try again.`,
+      isPrivate(chatType) ? [] : [[{ text: "💬 Connect in DM", url: `https://t.me/raidficontributionbot?start=link` }]],
       msgId,
     );
     return false;
   };
+
 
   switch (cmd) {
     case "start": {
@@ -645,24 +639,32 @@ async function handle(update: any, supabase: any) {
 
     case "submit": {
       if (!(await requireLink())) return;
-      const url = arg;
+      const url = (arg.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i) || [])[0] || arg;
       if (!TWEET_URL_REGEX.test(url)) {
         await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
       }
 
-      const asked = await askProject(supabase, chatId, msgId, link.email, fromId, url);
-      if (asked) return;
+      // In a project's own group the project is implied; elsewhere ask.
+      if (!groupProject) {
+        const asked = await askProject(supabase, chatId, msgId, link.email, fromId, url);
+        if (asked) return;
+      }
 
-      const out = await submitPost(supabase, link.email, url);
+      const out = await submitPost(supabase, link.email, url, groupProject?.id ?? null);
       if (out.error) {
         await reply(chatId, `${escapeHtml(out.error)}`,
           [[{ text: "Open Settings", url: `${SITE_ORIGIN}/dashboard/settings` }]], msgId);
         return;
       }
 
-      await reply(chatId, `Got it - your post is in.\nAn admin will review shortly and it'll show up on the live feed.`, [[{ text: "View post", url }]], msgId);
+      await reply(chatId,
+        groupProject
+          ? `✅ Tracked for <b>${escapeHtml(groupProject.name)}</b> - an admin will review it shortly.`
+          : `Got it - your post is in.\nAn admin will review shortly and it'll show up on the live feed.`,
+        [[{ text: "View post", url }]], msgId);
       return;
+
     }
 
     case "whitepaper": {
