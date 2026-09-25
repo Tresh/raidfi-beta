@@ -29,7 +29,9 @@ const Referrals = () => {
   const [sending, setSending] = useState(false);
   const [form, setForm] = useState({ project_name: "", contact_email: "", note: "" });
 
+  const [codes, setCodes] = useState<any[]>([]);
   const load = async () => {
+    supabase.rpc("get_my_invite_codes" as any).then(({ data }) => setCodes((data as any[]) ?? []));
     const [{ data: settings }, { data: referrals }] = await Promise.all([
       supabase.from("admin_settings").select("referral_xp_per_signup,project_referral_percent").eq("id", "global").maybeSingle(),
       supabase.from("project_referrals" as any).select("*").order("created_at", { ascending: false }),
@@ -47,6 +49,10 @@ const Referrals = () => {
 
   const referralUrl = data.profile?.referral_code
     ? `${window.location.origin}/beta?ref=${data.profile.referral_code}`
+    : null;
+
+  const projectUrl = data.profile?.referral_code
+    ? `${window.location.origin}/project-request?ref=${data.profile.referral_code}`
     : null;
 
   const copy = (value: string, key: string) => {
@@ -100,6 +106,37 @@ const Referrals = () => {
               <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{referralUrl}</code>
               <Button variant="outline" className="h-10" onClick={() => copy(referralUrl, "ref")}>
                 {copied === "ref" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No referral code on this account yet.</p>
+          )}
+        </Panel>
+
+        <Panel title="Your 5 invite codes" description="Each code lets one friend skip the beta queue. Share them one per person.">
+          <ul className="space-y-2">
+            {codes.map((c) => (
+              <li key={c.code} className="flex items-center gap-2">
+                <code className={`flex-1 text-xs px-3 py-2 rounded-md bg-muted ${c.used_at ? "line-through text-muted-foreground" : "text-foreground"}`}>{c.code}</code>
+                {c.used_at ? (
+                  <span className="text-[11px] text-muted-foreground w-10 text-center">Used</span>
+                ) : (
+                  <Button variant="outline" className="h-9 w-10 p-0" onClick={() => copy(c.code, c.code)}>
+                    {copied === c.code ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                )}
+              </li>
+            ))}
+            {codes.length === 0 && <p className="text-xs text-muted-foreground">Loading codes...</p>}
+          </ul>
+        </Panel>
+
+        <Panel title="Project invite link" description={`Send this to a project. Their request is tagged to you and you earn ${percent}% when they work with RaidFi.`}>
+          {projectUrl ? (
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{projectUrl}</code>
+              <Button variant="outline" className="h-10" onClick={() => copy(projectUrl, "proj")}>
+                {copied === "proj" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
           ) : (

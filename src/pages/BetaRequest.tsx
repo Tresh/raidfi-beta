@@ -118,7 +118,7 @@ const BetaRequest = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="beta-why">What would you use it for?</Label>
+                <Label htmlFor="beta-why">Why do you want to join? (optional)</Label>
                 <Textarea id="beta-why" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="A sentence or two about your work in Web3" />
               </div>
 
