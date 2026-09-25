@@ -382,26 +382,8 @@ const Settings = () => {
           </div>
         </Panel>
 
-        <Panel title="Referral link" description="Invite contributors and earn +50 XP for each one who joins.">
-          {referralUrl ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">
-                  {referralUrl}
-                </code>
-                <Button variant="outline" className="h-10" onClick={() => copy(referralUrl, "ref")}>
-                  {copied === "ref" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </Button>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                {data.profile?.referral_count ?? 0} referral
-                {(data.profile?.referral_count ?? 0) === 1 ? "" : "s"} so far - you earn +50 XP for each
-                one who joins.
-              </p>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">No referral code on this account yet.</p>
-          )}
+        <Panel title="Referrals" description="Your invite codes and referral links now live on their own page.">
+          <Button asChild variant="outline" className="h-9 text-sm"><a href="/dashboard/referrals">Open referrals</a></Button>
         </Panel>
 
         <Panel title="Password" description="Change your password, or get a reset link by email.">

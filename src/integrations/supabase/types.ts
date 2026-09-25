@@ -492,6 +492,33 @@ export type Database = {
         }
         Relationships: []
       }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          owner_email: string
+          owner_user_id: string
+          used_at: string | null
+          used_by_email: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          owner_email: string
+          owner_user_id: string
+          used_at?: string | null
+          used_by_email?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          owner_email?: string
+          owner_user_id?: string
+          used_at?: string | null
+          used_by_email?: string | null
+        }
+        Relationships: []
+      }
       leaderboard_scores: {
         Row: {
           contribution_xp: number
@@ -785,6 +812,7 @@ export type Database = {
           logo_data_url: string | null
           project_name: string
           raidfi_community_opt_in: boolean
+          referred_by: string | null
           request_types: string[]
           reviewed_at: string | null
           reviewed_by: string | null
@@ -812,6 +840,7 @@ export type Database = {
           logo_data_url?: string | null
           project_name: string
           raidfi_community_opt_in?: boolean
+          referred_by?: string | null
           request_types?: string[]
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -839,6 +868,7 @@ export type Database = {
           logo_data_url?: string | null
           project_name?: string
           raidfi_community_opt_in?: boolean
+          referred_by?: string | null
           request_types?: string[]
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1514,6 +1544,23 @@ export type Database = {
           period_xp: number
           total_xp: number
         }[]
+      }
+      get_my_invite_codes: {
+        Args: never
+        Returns: {
+          code: string
+          created_at: string
+          owner_email: string
+          owner_user_id: string
+          used_at: string | null
+          used_by_email: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "invite_codes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_profile_tags: {
         Args: { _referral_code: string }

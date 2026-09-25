@@ -34,6 +34,7 @@ const ProjectRequest = () => {
   useSEO({ title: "Project & Partnership Request - RaidFi", description: "Request a RaidFi project workspace, listing, partnership, or community service.", path: "/project-request" });
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
+  const refCode = new URLSearchParams(window.location.search).get("ref")?.slice(0, 40) || null;
   const [done, setDone] = useState(false);
   const [services, setServices] = useState<string[]>([SERVICES[0]]);
   const [logo, setLogo] = useState<string | null>(null);
@@ -64,6 +65,7 @@ const ProjectRequest = () => {
       telegram_bot_added: false,
       raidfi_community_opt_in: false,
       logo_data_url: logo,
+      referred_by: refCode,
     } as any);
     setSending(false);
     if (error) return toast({ title: "Request not sent", description: error.message, variant: "destructive" });

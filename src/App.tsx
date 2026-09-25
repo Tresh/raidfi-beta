@@ -20,6 +20,7 @@ const Overview = lazy(() => import("./pages/dashboard/Overview"));
 const DashContributions = lazy(() => import("./pages/dashboard/DashContributions"));
 const ReputationPage = lazy(() => import("./pages/dashboard/Reputation"));
 const AnalyticsDash = lazy(() => import("./pages/dashboard/Analytics"));
+const DashReferrals = lazy(() => import("./pages/dashboard/Referrals"));
 const DashSettings = lazy(() => import("./pages/dashboard/Settings"));
 const DashFeedback = lazy(() => import("./pages/dashboard/Feedback"));
 
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/dashboard/contributions" element={<DashContributions />} />
             <Route path="/dashboard/reputation" element={<ReputationPage />} />
             <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
+            <Route path="/dashboard/referrals" element={<DashReferrals />} />
             <Route path="/dashboard/settings" element={<DashSettings />} />
             <Route path="/dashboard/feedback" element={<DashFeedback />} />
 

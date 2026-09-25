@@ -133,6 +133,7 @@ const ProjectRequestsManager = () => {
               </div>
 
               {r.why && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{r.why}</p>}
+              {(r as any).referred_by && <p className="text-[11px] text-primary mt-1">Referred by {(r as any).referred_by}</p>}
 
               {r.status === "pending" && (
                 <div className="mt-3 flex gap-2">
