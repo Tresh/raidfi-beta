@@ -29,8 +29,37 @@ const Referrals = () => {
   const [form, setForm] = useState({ project_name: "", contact_email: "", note: "" });
 
   const [codes, setCodes] = useState<any[]>([]);
+  const [loadingCodes, setLoadingCodes] = useState(true);
+
   const load = async () => {
-    supabase.rpc("get_my_invite_codes" as any).then(({ data }) => setCodes((data as any[]) ?? []));
+    setLoadingCodes(true);
+    let myCodes: any[] = [];
+    try {
+      const { data: inviteData } = await supabase.rpc("get_my_invite_codes" as any);
+      if (Array.isArray(inviteData) && inviteData.length > 0) {
+        myCodes = inviteData;
+      }
+    } catch (e) {
+      console.error("RPC invite codes error:", e);
+    }
+
+    if (myCodes.length === 0 && session?.user?.id) {
+      try {
+        const { data: tableCodes } = await supabase
+          .from("invite_codes" as any)
+          .select("*")
+          .order("created_at", { ascending: true });
+        if (Array.isArray(tableCodes) && tableCodes.length > 0) {
+          myCodes = tableCodes;
+        }
+      } catch (e) {
+        console.error("Table invite codes error:", e);
+      }
+    }
+
+    setCodes(myCodes);
+    setLoadingCodes(false);
+
     const [{ data: settings }, { data: referrals }] = await Promise.all([
       supabase.from("admin_settings").select("referral_xp_per_signup").eq("id", "global").maybeSingle(),
       supabase.from("project_referrals" as any).select("*").order("created_at", { ascending: false }),
@@ -43,7 +72,7 @@ const Referrals = () => {
 
   useEffect(() => {
     load();
-  }, [session?.user?.email]);
+  }, [session?.user?.email, session?.user?.id]);
 
   const referralUrl = data.profile?.referral_code
     ? `${window.location.origin}/beta?ref=${data.profile.referral_code}`
@@ -120,7 +149,7 @@ const Referrals = () => {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">No referral code on this account yet.</p>
+            <p className="text-xs text-muted-foreground">Generating referral code...</p>
           )}
         </Panel>
 
@@ -138,7 +167,8 @@ const Referrals = () => {
                 )}
               </li>
             ))}
-            {codes.length === 0 && <p className="text-xs text-muted-foreground">Loading codes...</p>}
+            {loadingCodes && <p className="text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading invite codes...</p>}
+            {!loadingCodes && codes.length === 0 && <p className="text-xs text-muted-foreground">No invite codes assigned yet.</p>}
           </ul>
         </Panel>
 
