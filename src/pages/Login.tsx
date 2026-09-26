@@ -43,10 +43,11 @@ const Login = () => {
   useEffect(() => {
     const codeParam = searchParams.get("code");
     const modeParam = searchParams.get("mode");
+    const isSignupPath = window.location.pathname === "/signup" || window.location.pathname === "/beta-access";
     if (codeParam) {
       setBetaCode(codeParam.trim().toUpperCase());
       setMode("signup");
-    } else if (modeParam === "signup") {
+    } else if (modeParam === "signup" || isSignupPath) {
       setMode("signup");
     }
   }, [searchParams]);
