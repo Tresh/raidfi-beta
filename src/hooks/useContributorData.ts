@@ -98,7 +98,17 @@ export function useContributorData(email: string | null | undefined): Contributo
       supabase.from("telegram_links").select("telegram_user_id").ilike("email", lower).maybeSingle(),
     ]);
 
-    const nextProfile = ((profileRes.data as any) ?? null) as ContributorProfile | null;
+    let nextProfile = ((profileRes.data as any) ?? null) as ContributorProfile | null;
+    if (nextProfile && !nextProfile.referral_code) {
+      try {
+        const { data: codeData } = await supabase.rpc("generate_referral_code");
+        const refCode = codeData || lower.split("@")[0].substring(0, 8).toUpperCase();
+        await supabase.from("profiles").update({ referral_code: refCode } as any).eq("id", nextProfile.id);
+        nextProfile.referral_code = refCode;
+      } catch (err) {
+        console.error("Referral code error:", err);
+      }
+    }
     const nextContributions = (((contribRes.data as any) ?? []) as ContributionRow[]);
     const nextActivities = (((activityRes.data as any) ?? []) as ActivityRow[]);
     const nextTelegram = Boolean(tgRes.data);
