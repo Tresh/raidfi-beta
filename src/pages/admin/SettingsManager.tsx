@@ -264,27 +264,29 @@ const SettingsManager = () => {
               <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
           </div>
-          <div className="space-y-2">
-            {contentTypes.map((t) => (
-              <div key={t.id} className="grid grid-cols-[1fr_1fr_90px_90px_auto_auto] gap-2 items-center">
-                <Input className="h-8 text-xs" value={t.value} disabled />
-                <Input className="h-8 text-xs" value={t.label}
-                  onChange={(e) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, label: e.target.value } : x))} />
-                <Input type="number" className="h-8 text-xs" value={t.default_points || 0}
-                  onChange={(e) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, default_points: parseInt(e.target.value) || 0 } : x))} />
-                <Input type="number" className="h-8 text-xs" value={t.sort_order}
-                  onChange={(e) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, sort_order: parseInt(e.target.value) || 0 } : x))} />
-                <Switch checked={t.is_active}
-                  onCheckedChange={(v) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, is_active: v } : x))} />
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => updateType("content_types", t)}><Save className="w-3 h-3" /></Button>
-                  <Button size="sm" variant="ghost" className="text-destructive"
-                    onClick={() => askConfirm("Delete content type", `Delete "${t.label}"?`, () => deleteType("content_types", t.id))}>
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+          <div className="space-y-2 overflow-x-auto pb-1">
+            <div className="min-w-[550px] space-y-2">
+              {contentTypes.map((t) => (
+                <div key={t.id} className="grid grid-cols-[1fr_1fr_90px_90px_auto_auto] gap-2 items-center">
+                  <Input className="h-8 text-xs" value={t.value} disabled />
+                  <Input className="h-8 text-xs" value={t.label}
+                    onChange={(e) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, label: e.target.value } : x))} />
+                  <Input type="number" className="h-8 text-xs" value={t.default_points || 0}
+                    onChange={(e) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, default_points: parseInt(e.target.value) || 0 } : x))} />
+                  <Input type="number" className="h-8 text-xs" value={t.sort_order}
+                    onChange={(e) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, sort_order: parseInt(e.target.value) || 0 } : x))} />
+                  <Switch checked={t.is_active}
+                    onCheckedChange={(v) => setContentTypes(prev => prev.map(x => x.id === t.id ? { ...x, is_active: v } : x))} />
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => updateType("content_types", t)}><Save className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="ghost" className="text-destructive"
+                      onClick={() => askConfirm("Delete content type", `Delete "${t.label}"?`, () => deleteType("content_types", t.id))}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <p className="text-[11px] text-muted-foreground">Columns: value · label · default points · sort order · active</p>
           </div>
         </CardContent>
@@ -302,25 +304,27 @@ const SettingsManager = () => {
               <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
           </div>
-          <div className="space-y-2">
-            {actionTypes.map((t) => (
-              <div key={t.id} className="grid grid-cols-[1fr_1fr_90px_auto_auto] gap-2 items-center">
-                <Input className="h-8 text-xs" value={t.value} disabled />
-                <Input className="h-8 text-xs" value={t.label}
-                  onChange={(e) => setActionTypes(prev => prev.map(x => x.id === t.id ? { ...x, label: e.target.value } : x))} />
-                <Input type="number" className="h-8 text-xs" value={t.sort_order}
-                  onChange={(e) => setActionTypes(prev => prev.map(x => x.id === t.id ? { ...x, sort_order: parseInt(e.target.value) || 0 } : x))} />
-                <Switch checked={t.is_active}
-                  onCheckedChange={(v) => setActionTypes(prev => prev.map(x => x.id === t.id ? { ...x, is_active: v } : x))} />
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => updateType("task_action_types", t)}><Save className="w-3 h-3" /></Button>
-                  <Button size="sm" variant="ghost" className="text-destructive"
-                    onClick={() => askConfirm("Delete action type", `Delete "${t.label}"?`, () => deleteType("task_action_types", t.id))}>
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+          <div className="space-y-2 overflow-x-auto pb-1">
+            <div className="min-w-[450px] space-y-2">
+              {actionTypes.map((t) => (
+                <div key={t.id} className="grid grid-cols-[1fr_1fr_90px_auto_auto] gap-2 items-center">
+                  <Input className="h-8 text-xs" value={t.value} disabled />
+                  <Input className="h-8 text-xs" value={t.label}
+                    onChange={(e) => setActionTypes(prev => prev.map(x => x.id === t.id ? { ...x, label: e.target.value } : x))} />
+                  <Input type="number" className="h-8 text-xs" value={t.sort_order}
+                    onChange={(e) => setActionTypes(prev => prev.map(x => x.id === t.id ? { ...x, sort_order: parseInt(e.target.value) || 0 } : x))} />
+                  <Switch checked={t.is_active}
+                    onCheckedChange={(v) => setActionTypes(prev => prev.map(x => x.id === t.id ? { ...x, is_active: v } : x))} />
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => updateType("task_action_types", t)}><Save className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="ghost" className="text-destructive"
+                      onClick={() => askConfirm("Delete action type", `Delete "${t.label}"?`, () => deleteType("task_action_types", t.id))}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

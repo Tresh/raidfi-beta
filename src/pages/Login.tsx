@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PasswordInput from "@/components/auth/PasswordInput";
@@ -28,6 +28,7 @@ const Login = () => {
     path: "/login",
   });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const [mode, setMode] = useState<Mode>("signin");
@@ -37,6 +38,18 @@ const Login = () => {
   const [betaCode, setBetaCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [sentVerification, setSentVerification] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  useEffect(() => {
+    const codeParam = searchParams.get("code");
+    const modeParam = searchParams.get("mode");
+    if (codeParam) {
+      setBetaCode(codeParam.trim().toUpperCase());
+      setMode("signup");
+    } else if (modeParam === "signup") {
+      setMode("signup");
+    }
+  }, [searchParams]);
 
   const changeMode = (nextMode: Mode) => {
     setMode(nextMode);
@@ -265,21 +278,24 @@ const Login = () => {
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setPasswordFocused(true)}
                       className="bg-white/[0.05] border-white/[0.1] text-foreground h-12 text-base mt-3"
                       aria-label={mode === "signin" ? "Password" : "Create a password"}
-                      aria-describedby={mode === "signup" ? "signup-password-guidance" : undefined}
+                      aria-describedby={mode === "signup" && (passwordFocused || password) ? "signup-password-guidance" : undefined}
                       maxLength={mode === "signup" ? PASSWORD_MAX_LENGTH : undefined}
                       autoComplete={mode === "signin" ? "current-password" : "new-password"}
                       required
                     />
                     {mode === "signup" && (
                       <>
-                        <div
-                          id="signup-password-guidance"
-                          className="mt-3 rounded-lg border border-border/70 bg-muted/35 p-3"
-                        >
-                          <PasswordStrength value={password} rules={passwordRequirements} />
-                        </div>
+                        {(passwordFocused || password.length > 0) && (
+                          <div
+                            id="signup-password-guidance"
+                            className="mt-3 rounded-lg border border-border/70 bg-muted/35 p-3"
+                          >
+                            <PasswordStrength value={password} rules={passwordRequirements} />
+                          </div>
+                        )}
                         <PasswordInput
                           placeholder="Confirm password"
                           value={confirm}
@@ -305,7 +321,7 @@ const Login = () => {
                         )}
                         <Input
                           type="text"
-                          placeholder="Beta access code (optional)"
+                          placeholder="Beta access code"
                           value={betaCode}
                           onChange={(e) => setBetaCode(e.target.value)}
                           className="bg-white/[0.05] border-white/[0.1] text-foreground h-11 text-sm mt-3 tracking-widest uppercase font-mono"
