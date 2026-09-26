@@ -85,18 +85,17 @@ const Referrals = () => {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Referrals & affiliate"
-        subtitle="Earn XP for contributors you bring in, and revenue share for projects you introduce."
+        title="Referrals"
+        subtitle="Invite contributors and recommend projects to earn XP."
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <StatCard label="Contributors referred" value={referralCount} accent />
         <StatCard label="XP earned" value={(referralCount * xpPerSignup).toLocaleString()} hint={`+${xpPerSignup} XP each`} />
-        <StatCard label="Projects referred" value={rows.length} />
-        <StatCard label="Your share" value={`${percent}%`} hint="Of what RaidFi earns" />
+        <StatCard label="Projects recommended" value={rows.length} />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Panel title="Your referral link" description={`Every contributor who joins with it gives you +${xpPerSignup} XP.`}>
           {referralUrl ? (
             <div className="flex items-center gap-2">
@@ -128,7 +127,7 @@ const Referrals = () => {
           </ul>
         </Panel>
 
-        <Panel title="Project invite link" description={`Send this to a project. Their request is tagged to you and you earn ${percent}% when they work with RaidFi.`}>
+        <Panel title="Project invite link" description="Send this to a project. Their request is tagged to you.">
           {projectUrl ? (
             <div className="flex items-center gap-2">
               <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{projectUrl}</code>
