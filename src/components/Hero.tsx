@@ -58,9 +58,9 @@ const Hero = () => {
             </Button>
           </motion.div>
 
-          <p className="mt-4 text-xs text-muted-foreground">
+          {/* <p className="mt-4 text-xs text-muted-foreground">
             No token. No wallet needed to get started.
-          </p>
+          </p> */}
         </div>
       </div>
 
