@@ -15,7 +15,7 @@ import { Check, Copy, Loader2 } from "lucide-react";
 const Referrals = () => {
   useSEO({
     title: "Referrals - RaidFi",
-    description: "Invite contributors and projects to RaidFi and earn XP and revenue share.",
+    description: "Invite contributors and recommend projects to RaidFi and earn XP.",
     path: "/dashboard/referrals",
   });
   const { session } = useAuth();
@@ -23,7 +23,6 @@ const Referrals = () => {
   const data = useContributorData(session?.user?.email);
 
   const [xpPerSignup, setXpPerSignup] = useState(50);
-  const [percent, setPercent] = useState(10);
   const [rows, setRows] = useState<any[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -33,12 +32,11 @@ const Referrals = () => {
   const load = async () => {
     supabase.rpc("get_my_invite_codes" as any).then(({ data }) => setCodes((data as any[]) ?? []));
     const [{ data: settings }, { data: referrals }] = await Promise.all([
-      supabase.from("admin_settings").select("referral_xp_per_signup,project_referral_percent").eq("id", "global").maybeSingle(),
+      supabase.from("admin_settings").select("referral_xp_per_signup").eq("id", "global").maybeSingle(),
       supabase.from("project_referrals" as any).select("*").order("created_at", { ascending: false }),
     ]);
     if (settings) {
       setXpPerSignup((settings as any).referral_xp_per_signup ?? 50);
-      setPercent(Number((settings as any).project_referral_percent ?? 10));
     }
     setRows((referrals as any[]) ?? []);
   };
@@ -71,14 +69,13 @@ const Referrals = () => {
       project_name: form.project_name.trim(),
       contact_email: form.contact_email.trim() || null,
       note: form.note.trim() || null,
-      commission_percent: percent,
     } as any);
     setSending(false);
     if (error) {
       toast({ title: "Couldn't submit", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Project referral submitted", description: "We'll reach out and keep you posted." });
+    toast({ title: "Project recommended", description: "We'll reach out and keep you posted." });
     setForm({ project_name: "", contact_email: "", note: "" });
     load();
   };
@@ -88,18 +85,17 @@ const Referrals = () => {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Referrals & affiliate"
-        subtitle="Earn XP for contributors you bring in, and revenue share for projects you introduce."
+        title="Referrals"
+        subtitle="Invite contributors and recommend projects to earn XP."
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <StatCard label="Contributors referred" value={referralCount} accent />
         <StatCard label="XP earned" value={(referralCount * xpPerSignup).toLocaleString()} hint={`+${xpPerSignup} XP each`} />
-        <StatCard label="Projects referred" value={rows.length} />
-        <StatCard label="Your share" value={`${percent}%`} hint="Of what RaidFi earns" />
+        <StatCard label="Projects recommended" value={rows.length} />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Panel title="Your referral link" description={`Every contributor who joins with it gives you +${xpPerSignup} XP.`}>
           {referralUrl ? (
             <div className="flex items-center gap-2">
@@ -131,7 +127,7 @@ const Referrals = () => {
           </ul>
         </Panel>
 
-        <Panel title="Project invite link" description={`Send this to a project. Their request is tagged to you and you earn ${percent}% when they work with RaidFi.`}>
+        <Panel title="Project invite link" description="Send this to a project. Their request is tagged to you.">
           {projectUrl ? (
             <div className="flex items-center gap-2">
               <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{projectUrl}</code>
@@ -144,7 +140,7 @@ const Referrals = () => {
           )}
         </Panel>
 
-        <Panel title="Refer a project" description={`Introduce a project. When they work with RaidFi you earn ${percent}% of what we get.`}>
+        <Panel title="Recommend a project" description="Know a project that needs RaidFi? Introduce them and we'll reach out.">
           <form onSubmit={submitProject} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="r-name">Project name</Label>
@@ -159,15 +155,15 @@ const Referrals = () => {
               <Textarea id="r-note" rows={3} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Who they are and why they need RaidFi" />
             </div>
             <Button type="submit" disabled={sending} className="h-9 text-sm">
-              {sending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Submit referral
+              {sending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Recommend project
             </Button>
           </form>
         </Panel>
 
         <div className="lg:col-span-2">
-          <Panel title="Your project referrals" description="Status updates as we move each conversation forward.">
+          <Panel title="Your recommended projects" description="Status updates as we move each conversation forward.">
             {rows.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-6 text-center">No project referrals yet.</p>
+              <p className="text-xs text-muted-foreground py-6 text-center">No recommended projects yet.</p>
             ) : (
               <ul className="divide-y divide-border -my-1">
                 {rows.map((r) => (
@@ -175,7 +171,7 @@ const Referrals = () => {
                     <div className="min-w-0">
                       <p className="text-sm text-foreground truncate">{r.project_name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        {new Date(r.created_at).toLocaleDateString()} · {r.commission_percent}% share
+                        {new Date(r.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground capitalize shrink-0">

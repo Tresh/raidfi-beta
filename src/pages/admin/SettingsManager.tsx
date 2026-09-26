@@ -16,6 +16,8 @@ interface Settings {
   telegram_notify_feed: boolean;
   telegram_notify_tasks: boolean;
   scoring_delay_hours: number;
+  referral_xp_per_signup: number;
+  project_referral_percent: number;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +28,8 @@ const DEFAULT_SETTINGS: Settings = {
   telegram_notify_feed: false,
   telegram_notify_tasks: false,
   scoring_delay_hours: 24,
+  referral_xp_per_signup: 50,
+  project_referral_percent: 10,
 };
 
 interface TypeRow {
@@ -81,6 +85,8 @@ const SettingsManager = () => {
       telegram_notify_feed: settings.telegram_notify_feed,
       telegram_notify_tasks: settings.telegram_notify_tasks,
       scoring_delay_hours: settings.scoring_delay_hours,
+      referral_xp_per_signup: settings.referral_xp_per_signup,
+      project_referral_percent: settings.project_referral_percent,
       updated_at: new Date().toISOString(),
     };
 
@@ -177,6 +183,27 @@ const SettingsManager = () => {
             <Input type="number" className="h-9 max-w-[160px]" value={settings.scoring_delay_hours}
               onChange={(e) => setSettings({ ...settings, scoring_delay_hours: parseInt(e.target.value) || 0 })} />
             <p className="text-[11px] text-muted-foreground mt-1">Shown to users: "Posts are scored within X hours."</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Referrals */}
+      <Card>
+        <CardContent className="p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Referrals</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">XP per referred contributor</label>
+              <Input type="number" className="h-9" value={settings.referral_xp_per_signup}
+                onChange={(e) => setSettings({ ...settings, referral_xp_per_signup: parseInt(e.target.value) || 0 })} />
+              <p className="text-[11px] text-muted-foreground mt-1">XP a contributor earns when someone joins with their link or invite code.</p>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Project referral share (%)</label>
+              <Input type="number" className="h-9" min={0} max={100} value={settings.project_referral_percent}
+                onChange={(e) => setSettings({ ...settings, project_referral_percent: parseInt(e.target.value) || 0 })} />
+              <p className="text-[11px] text-muted-foreground mt-1">Referrer's share of what RaidFi earns from a project they introduced. Not shown to users during beta.</p>
+            </div>
           </div>
         </CardContent>
       </Card>
