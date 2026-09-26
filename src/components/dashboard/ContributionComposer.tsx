@@ -68,7 +68,6 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
     supabase
       .from("projects")
       .select("id,name")
-      .eq("status", "active")
       .order("name")
       .then(({ data }) => setProjects(data ?? []));
   }, []);
@@ -160,24 +159,22 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
         )}
       </div>
 
-      {projects.length > 0 && (
-        <div>
-          <label htmlFor="project-select" className="mb-1 block text-xs font-medium text-foreground">
-            Project
-          </label>
-          <select
-            id="project-select"
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="">General RaidFi contribution</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div>
+        <label htmlFor="project-select" className="mb-1 block text-xs font-medium text-foreground">
+          Project
+        </label>
+        <select
+          id="project-select"
+          value={projectId}
+          onChange={(e) => setProjectId(e.target.value)}
+          className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground focus:border-primary focus-visible:outline-none transition-colors"
+        >
+          <option value="">General RaidFi contribution</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
