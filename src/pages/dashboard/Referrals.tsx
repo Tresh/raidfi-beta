@@ -75,7 +75,7 @@ const Referrals = () => {
       toast({ title: "Couldn't submit", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Project referral submitted", description: "We'll reach out and keep you posted." });
+    toast({ title: "Project recommended", description: "We'll reach out and keep you posted." });
     setForm({ project_name: "", contact_email: "", note: "" });
     load();
   };

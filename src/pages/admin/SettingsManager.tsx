@@ -16,6 +16,8 @@ interface Settings {
   telegram_notify_feed: boolean;
   telegram_notify_tasks: boolean;
   scoring_delay_hours: number;
+  referral_xp_per_signup: number;
+  project_referral_percent: number;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +28,8 @@ const DEFAULT_SETTINGS: Settings = {
   telegram_notify_feed: false,
   telegram_notify_tasks: false,
   scoring_delay_hours: 24,
+  referral_xp_per_signup: 50,
+  project_referral_percent: 10,
 };
 
 interface TypeRow {
@@ -81,6 +85,8 @@ const SettingsManager = () => {
       telegram_notify_feed: settings.telegram_notify_feed,
       telegram_notify_tasks: settings.telegram_notify_tasks,
       scoring_delay_hours: settings.scoring_delay_hours,
+      referral_xp_per_signup: settings.referral_xp_per_signup,
+      project_referral_percent: settings.project_referral_percent,
       updated_at: new Date().toISOString(),
     };
 
