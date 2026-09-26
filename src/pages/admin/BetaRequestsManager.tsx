@@ -42,10 +42,13 @@ const BetaRequestsManager = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("beta_requests" as any)
       .select("*")
       .order("created_at", { ascending: false });
+    if (error) {
+      toast({ title: "Failed to load beta requests", description: error.message, variant: "destructive" });
+    }
     setRows((data as any) ?? []);
     setSelected([]);
     setLoading(false);

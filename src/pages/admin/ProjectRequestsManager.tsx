@@ -37,10 +37,13 @@ const ProjectRequestsManager = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("project_requests" as any)
       .select("*")
       .order("created_at", { ascending: false });
+    if (error) {
+      toast({ title: "Failed to load project requests", description: error.message, variant: "destructive" });
+    }
     setRows((data as any) ?? []);
     setLoading(false);
   };
