@@ -15,7 +15,7 @@ import { Check, Copy, Loader2 } from "lucide-react";
 const Referrals = () => {
   useSEO({
     title: "Referrals - RaidFi",
-    description: "Invite contributors and projects to RaidFi and earn XP and revenue share.",
+    description: "Invite contributors and recommend projects to RaidFi and earn XP.",
     path: "/dashboard/referrals",
   });
   const { session } = useAuth();
@@ -23,7 +23,6 @@ const Referrals = () => {
   const data = useContributorData(session?.user?.email);
 
   const [xpPerSignup, setXpPerSignup] = useState(50);
-  const [percent, setPercent] = useState(10);
   const [rows, setRows] = useState<any[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -33,12 +32,11 @@ const Referrals = () => {
   const load = async () => {
     supabase.rpc("get_my_invite_codes" as any).then(({ data }) => setCodes((data as any[]) ?? []));
     const [{ data: settings }, { data: referrals }] = await Promise.all([
-      supabase.from("admin_settings").select("referral_xp_per_signup,project_referral_percent").eq("id", "global").maybeSingle(),
+      supabase.from("admin_settings").select("referral_xp_per_signup").eq("id", "global").maybeSingle(),
       supabase.from("project_referrals" as any).select("*").order("created_at", { ascending: false }),
     ]);
     if (settings) {
       setXpPerSignup((settings as any).referral_xp_per_signup ?? 50);
-      setPercent(Number((settings as any).project_referral_percent ?? 10));
     }
     setRows((referrals as any[]) ?? []);
   };
@@ -71,7 +69,6 @@ const Referrals = () => {
       project_name: form.project_name.trim(),
       contact_email: form.contact_email.trim() || null,
       note: form.note.trim() || null,
-      commission_percent: percent,
     } as any);
     setSending(false);
     if (error) {
