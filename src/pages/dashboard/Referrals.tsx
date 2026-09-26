@@ -96,13 +96,28 @@ const Referrals = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Panel title="Your referral link" description={`Every contributor who joins with it gives you +${xpPerSignup} XP.`}>
-          {referralUrl ? (
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{referralUrl}</code>
-              <Button variant="outline" className="h-10" onClick={() => copy(referralUrl, "ref")}>
-                {copied === "ref" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
+        <Panel title="Referral Links" description={`Share your links to refer contributors (+${xpPerSignup} XP) or invite projects.`}>
+          {data.profile?.referral_code ? (
+            <div className="space-y-3">
+              <div>
+                <Label className="text-[11px] text-muted-foreground mb-1 block">Contributor Signup Link</Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{referralUrl}</code>
+                  <Button variant="outline" className="h-9" onClick={() => copy(referralUrl!, "ref")}>
+                    {copied === "ref" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-[11px] text-muted-foreground mb-1 block">Project Request Link</Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{projectUrl}</code>
+                  <Button variant="outline" className="h-9" onClick={() => copy(projectUrl!, "proj")}>
+                    {copied === "proj" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">No referral code on this account yet.</p>
@@ -125,19 +140,6 @@ const Referrals = () => {
             ))}
             {codes.length === 0 && <p className="text-xs text-muted-foreground">Loading codes...</p>}
           </ul>
-        </Panel>
-
-        <Panel title="Project invite link" description="Send this to a project. Their request is tagged to you.">
-          {projectUrl ? (
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-[11px] px-3 py-2 rounded-md bg-muted text-foreground truncate">{projectUrl}</code>
-              <Button variant="outline" className="h-10" onClick={() => copy(projectUrl, "proj")}>
-                {copied === "proj" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">No referral code on this account yet.</p>
-          )}
         </Panel>
 
         <Panel title="Recommend a project" description="Know a project that needs RaidFi? Introduce them and we'll reach out.">
