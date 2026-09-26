@@ -40,7 +40,7 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            <Button size="sm" asChild variant="outline" className="h-9 px-5 text-xs">
+            <Button size="sm" asChild className="h-9 px-5 text-xs">
               <a href="/login">Sign in</a>
             </Button>
           </div>
