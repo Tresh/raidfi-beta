@@ -11,9 +11,9 @@ const ContributeFab = () => {
       <button
         onClick={() => setOpen(true)}
         aria-label="Submit a contribution"
-        className="fixed bottom-5 right-5 z-40 h-13 w-13 sm:h-14 sm:w-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        className="fixed bottom-6 right-6 z-40 h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/35 flex items-center justify-center p-3.5 hover:scale-105 active:scale-95 transition-all"
       >
-        <Plus className="w-6 h-6" />
+        <Plus className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
