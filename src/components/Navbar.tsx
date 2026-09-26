@@ -46,9 +46,9 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-1 md:hidden">
-            <a href="/login" className="text-sm text-muted-foreground transition-colors px-2">
-              Sign in
-            </a>
+            <Button size="sm" asChild className="h-9 px-5 text-xs">
+              <a href="/login">Sign in</a>
+            </Button>
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <button className="p-2 text-foreground rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Open menu">
