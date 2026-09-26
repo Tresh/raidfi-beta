@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import AdminLayout from "./components/admin/AdminLayout";
 
 // Route Code Splitting: Lazy load page components to minimize initial JS bundle size
@@ -60,10 +60,22 @@ const AdminProjectDetail = lazy(() => import("./pages/admin/ProjectDetail"));
 const queryClient = new QueryClient();
 
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+    <div className="flex items-center gap-2">
+      <img src="/logo.png" alt="RaidFi" className="w-8 h-8" />
+      <span className="text-xl font-bold text-gradient tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        RaidFi
+      </span>
+    </div>
+    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    <p className="text-xs text-muted-foreground tracking-wide font-medium">Launching soon</p>
   </div>
 );
+
+const BetaAccessRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`/signup${location.search}`} replace />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -79,6 +91,8 @@ const App = () => (
             <Route path="/waitlist/confirmed" element={<Navigate to="/beta" replace />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Login />} />
+            <Route path="/beta-access" element={<BetaAccessRedirect />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-verified" element={<EmailVerified />} />

@@ -65,7 +65,7 @@ export function betaAccessEmailHtml(params: {
     <p style="font-size:14px;color:#b9c0cc;margin:0 0 24px;">
       The code is valid until <strong style="color:#ffffff;">${expiresAt}</strong>.
     </p>
-    <a href="${appUrl}/login?code=${encodeURIComponent(code)}&mode=signup" style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 28px;border-radius:8px;">Redeem your code</a>
+    <a href="${appUrl}/signup?code=${encodeURIComponent(code)}" style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 28px;border-radius:8px;">Redeem your code</a>
     <p style="font-size:12px;color:#6b7482;margin:32px 0 0;">
       RaidFi - contribution tracking and reputation infrastructure for Web3.<br/>
       If you didn't request access, you can ignore this email.
