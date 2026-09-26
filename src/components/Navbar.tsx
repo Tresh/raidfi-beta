@@ -17,11 +17,9 @@ const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/whitepaper", label: "Whitepaper" },
-    { href: "/contributions", label: "Contribute" },
     { href: "/explore", label: "Explore" },
     { href: "/contact", label: "Contact" },
   ];
-
 
   const handleLinkClick = () => setOpen(false);
 
@@ -42,39 +40,33 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            <a href="/login" className="text-sm text-muted-foreground transition-colors">
-              Sign in
-            </a>
-            <Button size="sm" asChild className="h-9 px-5 text-xs">
-              <a href="/beta">Request Beta</a>
+            <Button size="sm" asChild variant="outline" className="h-9 px-5 text-xs">
+              <a href="/login">Sign in</a>
             </Button>
           </div>
 
-
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <button className="p-2 text-foreground rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Open menu">
-                <Menu className="w-5 h-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 [&>button]:hidden">
-              <div className="flex flex-col gap-6 mt-8">
-                {navLinks.map((link) => (
-                  <a key={link.href} href={link.href} onClick={handleLinkClick}
-                    className="text-foreground text-base font-medium">
-                    {link.label}
-                  </a>
-                ))}
-                <a href="/login" onClick={handleLinkClick} className="text-foreground text-base font-medium">
-                  Sign in
-                </a>
-                <Button className="mt-4" asChild>
-                  <a href="/beta" onClick={handleLinkClick}>Request Beta</a>
-                </Button>
-
-              </div>
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-1 md:hidden">
+            <a href="/login" className="text-sm text-muted-foreground transition-colors px-2">
+              Sign in
+            </a>
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <button className="p-2 text-foreground rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Open menu">
+                  <Menu className="w-5 h-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 [&>button]:hidden">
+                <div className="flex flex-col gap-6 mt-8">
+                  {navLinks.map((link) => (
+                    <a key={link.href} href={link.href} onClick={handleLinkClick}
+                      className="text-foreground text-base font-medium">
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>
