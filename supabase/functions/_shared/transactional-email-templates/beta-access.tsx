@@ -90,8 +90,8 @@ export const BetaAccessEmail = ({
           </Text>
         ) : null}
         <Section style={{ margin: '20px 0 0' }}>
-          <Link href={`${appUrl}/login`} style={button}>
-            Sign in with your code
+          <Link href={`${appUrl}/login?code=${encodeURIComponent(code)}&mode=signup`} style={button}>
+            Redeem your code
           </Link>
         </Section>
         <Text style={small}>
