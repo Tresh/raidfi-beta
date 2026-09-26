@@ -67,7 +67,73 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/beta" element={<BetaRequest />} />
+            <Route path="/waitlist" element={<Navigate to="/beta" replace />} />
+            <Route path="/waitlist/confirmed" element={<Navigate to="/beta" replace />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/email-verified" element={<EmailVerified />} />
+            <Route path="/whitepaper" element={<Whitepaper />} />
+            <Route path="/contributions" element={<Navigate to="/dashboard/contributions" replace />} />
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/explore" element={<Feed />} />
+            <Route path="/project-request" element={<ProjectRequest />} />
+            <Route path="/u/:code" element={<Profile />} />
+            <Route path="/p/:slug" element={<ProjectDetail />} />
+            {/* Contributor dashboard (MVP) */}
+            <Route path="/dashboard" element={<Overview />} />
+            <Route path="/dashboard/contributions" element={<DashContributions />} />
+            <Route path="/dashboard/reputation" element={<ReputationPage />} />
+            <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
+            <Route path="/dashboard/referrals" element={<DashReferrals />} />
+            <Route path="/dashboard/settings" element={<DashSettings />} />
+            <Route path="/dashboard/feedback" element={<DashFeedback />} />
+
+            {/* Project workspace */}
+            <Route path="/project" element={<ProjectOverview />} />
+            <Route path="/project/contributors" element={<ProjectContributors />} />
+            <Route path="/project/activity" element={<ProjectActivity />} />
+            <Route path="/project/evaluate" element={<ProjectEvaluate />} />
+            <Route path="/project/analytics" element={<ProjectAnalytics />} />
+            <Route path="/project/ai" element={<ProjectAIAnalyst />} />
+            <Route path="/project/settings" element={<ProjectSettings />} />
+
+            {/* Admin */}
+
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
+            <Route path="/admin/waitlist" element={<AdminLayout requiredPermission="waitlist"><WaitlistManager /></AdminLayout>} />
+            <Route path="/admin/tasks" element={<AdminLayout requiredPermission="tasks"><TasksManager /></AdminLayout>} />
+            <Route path="/admin/contribute-tasks" element={<AdminLayout requiredPermission="contribute-tasks"><ContributeTasksManager /></AdminLayout>} />
+            <Route path="/admin/validations" element={<AdminLayout requiredPermission="validations"><ValidationsManager /></AdminLayout>} />
+            <Route path="/admin/contacts" element={<AdminLayout requiredPermission="contacts"><ContactsManager /></AdminLayout>} />
+            <Route path="/admin/whitepaper" element={<AdminLayout requiredPermission="whitepaper"><WhitepaperManager /></AdminLayout>} />
+            <Route path="/admin/contributions" element={<AdminLayout requiredPermission="contributions"><ContributionsManager /></AdminLayout>} />
+            <Route path="/admin/points" element={<AdminLayout requiredPermission="points"><PointsManager /></AdminLayout>} />
+            <Route path="/admin/users" element={<AdminLayout requiredPermission="users"><UsersManager /></AdminLayout>} />
+            <Route path="/admin/analytics" element={<AdminLayout requiredPermission="dashboard"><AnalyticsPage /></AdminLayout>} />
+            <Route path="/admin/settings" element={<AdminLayout requiredPermission="settings"><SettingsManager /></AdminLayout>} />
+            <Route path="/admin/beta" element={<AdminLayout requiredPermission="beta"><BetaRequestsManager /></AdminLayout>} />
+            <Route path="/admin/projects" element={<AdminLayout requiredPermission="projects"><ProjectRequestsManager /></AdminLayout>} />
+            <Route path="/admin/manage-projects" element={<AdminLayout requiredPermission="manage-projects"><ProjectsManager /></AdminLayout>} />
+            <Route path="/admin/manage-projects/:id" element={<AdminLayout requiredPermission="manage-projects"><AdminProjectDetail /></AdminLayout>} />
+            <Route path="/admin/contributors" element={<AdminLayout requiredPermission="contributors"><ContributorsManager /></AdminLayout>} />
+            <Route path="/admin/reports" element={<AdminLayout requiredPermission="reports"><ReportsManager /></AdminLayout>} />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
