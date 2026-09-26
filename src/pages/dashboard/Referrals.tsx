@@ -140,7 +140,7 @@ const Referrals = () => {
           )}
         </Panel>
 
-        <Panel title="Refer a project" description={`Introduce a project. When they work with RaidFi you earn ${percent}% of what we get.`}>
+        <Panel title="Recommend a project" description="Know a project that needs RaidFi? Introduce them and we'll reach out.">
           <form onSubmit={submitProject} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="r-name">Project name</Label>
@@ -155,15 +155,15 @@ const Referrals = () => {
               <Textarea id="r-note" rows={3} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Who they are and why they need RaidFi" />
             </div>
             <Button type="submit" disabled={sending} className="h-9 text-sm">
-              {sending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Submit referral
+              {sending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Recommend project
             </Button>
           </form>
         </Panel>
 
         <div className="lg:col-span-2">
-          <Panel title="Your project referrals" description="Status updates as we move each conversation forward.">
+          <Panel title="Your recommended projects" description="Status updates as we move each conversation forward.">
             {rows.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-6 text-center">No project referrals yet.</p>
+              <p className="text-xs text-muted-foreground py-6 text-center">No recommended projects yet.</p>
             ) : (
               <ul className="divide-y divide-border -my-1">
                 {rows.map((r) => (
@@ -171,7 +171,7 @@ const Referrals = () => {
                     <div className="min-w-0">
                       <p className="text-sm text-foreground truncate">{r.project_name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        {new Date(r.created_at).toLocaleDateString()} · {r.commission_percent}% share
+                        {new Date(r.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground capitalize shrink-0">
