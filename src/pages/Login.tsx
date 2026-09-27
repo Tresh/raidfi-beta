@@ -153,9 +153,16 @@ const Login = () => {
       const { data: check } = await supabase.rpc("check_beta_code" as any, { _code: code, _email: cleanEmail });
       const result: any = Array.isArray(check) ? check[0] : check;
       if (!result?.valid) {
+        const reasons: Record<string, string> = {
+          unknown: "We couldn't find that code. Check for typos.",
+          exhausted: "That code has already been used.",
+          email_mismatch: "That code belongs to a different email. Use the email you requested access with.",
+          own_code: "You can't use your own invite code.",
+          not_approved: "That request hasn't been approved yet.",
+        };
         toast({
           title: "Invalid beta code",
-          description: "That code is unknown, already used, or expired.",
+          description: reasons[result?.reason] ?? "That code can't be used.",
           variant: "destructive",
         });
         setLoading(false);

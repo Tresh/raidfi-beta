@@ -26,6 +26,7 @@ interface ProjectRow {
   verification: string;
   status: string;
   trust_score: number;
+  is_private?: boolean;
   telegram_group_id: string | null;
   telegram_bot_added: boolean;
   x_verified: boolean;
@@ -107,6 +108,7 @@ const ProjectsManager = () => {
         verification: editing.verification,
         status: editing.status,
         trust_score: Number(editing.trust_score) || 0,
+        is_private: !!editing.is_private,
         telegram_group_id: editing.telegram_group_id,
         telegram_bot_added: editing.telegram_bot_added,
         x_verified: editing.x_verified,
@@ -285,6 +287,10 @@ const ProjectsManager = () => {
                   <Label className="text-xs">Trust score</Label>
                   <Input type="number" value={editing.trust_score} onChange={(e) => patch("trust_score", Number(e.target.value))} className="h-9 text-xs" />
                 </div>
+                <label className="flex items-center gap-2 text-xs col-span-full">
+                  <input type="checkbox" checked={!!editing.is_private} onChange={(e) => patch("is_private", e.target.checked)} />
+                  Private partner (hidden from Explore and public pages)
+                </label>
               </div>
 
               <div className="flex items-center gap-4 text-xs">

@@ -235,7 +235,7 @@ const Feed = () => {
   }, [fetchContributions, projectFilter]);
 
   useEffect(() => {
-    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score").eq("status", "active").order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
+    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score").eq("status", "active").eq("is_private", false).order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
   }, []);
 
   const formatRelative = (iso: string) => {

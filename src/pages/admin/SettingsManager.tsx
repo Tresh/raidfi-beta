@@ -17,6 +17,7 @@ interface Settings {
   telegram_notify_tasks: boolean;
   scoring_delay_hours: number;
   referral_xp_per_signup: number;
+  auto_approve_beta?: boolean;
   project_referral_percent: number;
 }
 
@@ -86,6 +87,7 @@ const SettingsManager = () => {
       telegram_notify_tasks: settings.telegram_notify_tasks,
       scoring_delay_hours: settings.scoring_delay_hours,
       referral_xp_per_signup: settings.referral_xp_per_signup,
+      auto_approve_beta: !!settings.auto_approve_beta,
       project_referral_percent: settings.project_referral_percent,
       updated_at: new Date().toISOString(),
     };
@@ -177,6 +179,14 @@ const SettingsManager = () => {
             </div>
             <Switch checked={settings.auto_publish_contributions}
               onCheckedChange={(v) => setSettings({ ...settings, auto_publish_contributions: v })} />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">Automatic beta acceptance</p>
+              <p className="text-xs text-muted-foreground">New beta requests are approved instantly and can create an account right away.</p>
+            </div>
+            <Switch checked={!!settings.auto_approve_beta}
+              onCheckedChange={(v) => setSettings({ ...settings, auto_approve_beta: v })} />
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Scoring delay notice (hours)</label>
