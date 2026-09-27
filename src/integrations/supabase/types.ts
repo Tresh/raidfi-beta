@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       admin_settings: {
         Row: {
+          auto_approve_beta: boolean
           auto_publish_contributions: boolean
           id: string
           project_referral_percent: number
@@ -28,6 +29,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_approve_beta?: boolean
           auto_publish_contributions?: boolean
           id?: string
           project_referral_percent?: number
@@ -40,6 +42,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_approve_beta?: boolean
           auto_publish_contributions?: boolean
           id?: string
           project_referral_percent?: number
@@ -931,6 +934,7 @@ export type Database = {
           discord: string | null
           founder_name: string | null
           id: string
+          is_private: boolean
           name: string
           slug: string
           status: string
@@ -952,6 +956,7 @@ export type Database = {
           discord?: string | null
           founder_name?: string | null
           id?: string
+          is_private?: boolean
           name: string
           slug: string
           status?: string
@@ -973,6 +978,7 @@ export type Database = {
           discord?: string | null
           founder_name?: string | null
           id?: string
+          is_private?: boolean
           name?: string
           slug?: string
           status?: string
