@@ -202,9 +202,7 @@ const Login = () => {
       return;
     }
 
-    if (code) {
-      await supabase.rpc("consume_beta_code" as any, { _code: code, _email: cleanEmail });
-    }
+    await supabase.rpc("consume_beta_code" as any, { _code: code || null, _email: cleanEmail });
 
     setSentVerification(true);
     setLoading(false);
