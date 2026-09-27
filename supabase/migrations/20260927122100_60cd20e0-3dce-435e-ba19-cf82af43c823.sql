@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.handle_beta_auto_approve() FROM PUBLIC, anon, authenticated;
