@@ -49,34 +49,35 @@ export const MagicLinkEmail = ({
 
 export default MagicLinkEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'Inter', Arial, sans-serif" }
-const container = { padding: '32px 28px' }
-const logo = { borderRadius: '50%', marginBottom: '24px' }
+const main = { backgroundColor: '#071513', fontFamily: "'Inter', Arial, sans-serif" }
+const container = { backgroundColor: '#0e2421', border: '1px solid #1a3c37', borderRadius: '16px', padding: '32px 28px', maxWidth: '520px', margin: '40px auto' }
+const logo = { borderRadius: '50%', marginBottom: '20px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: '#ffffff',
   margin: '0 0 16px',
 }
 const text = {
   fontSize: '14px',
-  color: '#55575d',
+  color: '#a7f3d0',
   lineHeight: '1.6',
-  margin: '0 0 24px',
+  margin: '0 0 20px',
 }
 const codeContainer = {
-  backgroundColor: '#f4f4f5',
+  backgroundColor: '#081c19',
+  border: '1px dashed #14b8a6',
   borderRadius: '12px',
-  padding: '16px 24px',
+  padding: '16px',
   textAlign: 'center' as const,
-  margin: '0 0 24px',
+  margin: '18px 0',
 }
 const codeText = {
-  fontSize: '32px',
+  fontSize: '24px',
   fontWeight: 'bold' as const,
-  letterSpacing: '6px',
-  color: '#000000',
-  margin: '0',
-  fontFamily: "'Inter', monospace",
+  letterSpacing: '4px',
+  color: '#2dd4bf',
+  fontFamily: 'monospace',
+  margin: 0,
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '32px 0 0' }
+const footer = { fontSize: '12px', color: '#4a6b66', margin: '32px 0 0' }
