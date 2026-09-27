@@ -21,32 +21,33 @@ interface BetaAccessProps {
 }
 
 const main = {
-  backgroundColor: '#f7f9f9',
+  backgroundColor: '#071513',
   fontFamily: "Inter, -apple-system, 'Segoe UI', Arial, sans-serif",
-  padding: '32px 0',
+  padding: '40px 0',
 }
 
 const container = {
-  backgroundColor: '#ffffff',
-  border: '1px solid #e4e9e9',
-  borderRadius: '12px',
+  backgroundColor: '#0e2421',
+  border: '1px solid #1a3c37',
+  borderRadius: '16px',
   padding: '32px',
   maxWidth: '520px',
   margin: '0 auto',
 }
 
-const h1 = { color: '#0f1a1a', fontSize: '20px', margin: '0 0 12px', fontWeight: 600 }
-const text = { color: '#55605f', fontSize: '14px', lineHeight: '22px', margin: '0 0 14px' }
+const logoText = { color: '#2dd4bf', fontSize: '22px', fontWeight: 700, margin: '0 0 24px', letterSpacing: '-0.5px' }
+const h1 = { color: '#ffffff', fontSize: '20px', margin: '0 0 12px', fontWeight: 700 }
+const text = { color: '#a7f3d0', fontSize: '14px', lineHeight: '22px', margin: '0 0 14px' }
 const codeBox = {
-  backgroundColor: '#f0faf8',
+  backgroundColor: '#081c19',
   border: '1px dashed #14b8a6',
-  borderRadius: '10px',
+  borderRadius: '12px',
   padding: '16px',
   textAlign: 'center' as const,
   margin: '18px 0',
 }
 const codeText = {
-  color: '#0f766e',
+  color: '#2dd4bf',
   fontSize: '26px',
   letterSpacing: '6px',
   fontWeight: 700,
@@ -54,16 +55,16 @@ const codeText = {
   margin: 0,
 }
 const button = {
-  backgroundColor: '#0f766e',
+  backgroundColor: '#0d9488',
   color: '#ffffff',
-  borderRadius: '8px',
-  padding: '11px 22px',
+  borderRadius: '10px',
+  padding: '12px 24px',
   fontSize: '14px',
   fontWeight: 600,
   textDecoration: 'none',
   display: 'inline-block',
 }
-const small = { color: '#8a9694', fontSize: '12px', lineHeight: '18px', margin: '18px 0 0' }
+const small = { color: '#4a6b66', fontSize: '12px', lineHeight: '18px', margin: '24px 0 0', textAlign: 'center' as const }
 
 export const BetaAccessEmail = ({
   code = 'RAIDXXXX',
@@ -76,6 +77,7 @@ export const BetaAccessEmail = ({
     <Preview>Your RaidFi beta access code is here</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Text style={logoText}>RaidFi</Text>
         <Heading style={h1}>You're in the RaidFi beta</Heading>
         <Text style={text}>
           {name ? `Hey ${name}, ` : 'Hey, '}your beta access request was approved. Use the code below

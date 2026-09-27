@@ -53,22 +53,27 @@ export function betaAccessEmailHtml(params: {
   const { code, name, appUrl, expiresAt } = params;
   return `<!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#0b0d12;font-family:Arial,Helvetica,sans-serif;color:#e7eaf0;">
+<body style="margin:0;padding:0;background-color:#071513;font-family:'Inter',Arial,Helvetica,sans-serif;color:#e1f5f2;">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
-    <h1 style="font-size:22px;margin:0 0 16px;color:#ffffff;">You're in, ${name ? escapeHtml(name) : "there"}.</h1>
-    <p style="font-size:15px;line-height:1.6;color:#b9c0cc;margin:0 0 24px;">
-      Your RaidFi beta access has been approved. Use this access code to sign up:
-    </p>
-    <div style="background:#131722;border:1px solid #232a38;border-radius:10px;padding:20px;text-align:center;margin:0 0 24px;">
-      <span style="font-size:28px;letter-spacing:6px;font-weight:bold;color:#ffffff;">${code}</span>
+    <div style="margin-bottom:28px;">
+      <span style="font-size:22px;font-weight:700;color:#2dd4bf;letter-spacing:-0.5px;">RaidFi</span>
     </div>
-    <p style="font-size:14px;color:#b9c0cc;margin:0 0 24px;">
-      The code is valid until <strong style="color:#ffffff;">${expiresAt}</strong>.
-    </p>
-    <a href="${appUrl}/signup?code=${encodeURIComponent(code)}" style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 28px;border-radius:8px;">Redeem your code</a>
-    <p style="font-size:12px;color:#6b7482;margin:32px 0 0;">
-      RaidFi - contribution tracking and reputation infrastructure for Web3.<br/>
-      If you didn't request access, you can ignore this email.
+    <div style="background-color:#0e2421;border:1px solid #1a3c37;border-radius:16px;padding:32px;box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+      <h1 style="font-size:22px;margin:0 0 16px;color:#ffffff;font-weight:700;">You're in, ${name ? escapeHtml(name) : "there"}.</h1>
+      <p style="font-size:15px;line-height:1.6;color:#93c5fd;color:#a3e635;color:#94a3b8;color:#a7f3d0;margin:0 0 24px;">
+        Your RaidFi beta access has been approved. Use this access code to sign up:
+      </p>
+      <div style="background-color:#081c19;border:1px dashed #14b8a6;border-radius:12px;padding:20px;text-align:center;margin:0 0 24px;">
+        <span style="font-size:28px;letter-spacing:6px;font-weight:bold;color:#2dd4bf;font-family:monospace;">${code}</span>
+      </div>
+      <p style="font-size:14px;color:#94a3b8;margin:0 0 24px;">
+        The code is valid until <strong style="color:#ffffff;">${expiresAt}</strong>.
+      </p>
+      <a href="${appUrl}/signup?code=${encodeURIComponent(code)}" style="display:inline-block;background-color:#0d9488;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 28px;border-radius:10px;box-shadow:0 4px 12px rgba(13,148,136,0.3);">Redeem your code</a>
+    </div>
+    <p style="font-size:12px;color:#4a6b66;margin:28px 0 0;text-align:center;line-height:1.5;">
+      RaidFi — Reputation & Social Intelligence Layer for Web3.<br/>
+      If you didn't request access, you can safely ignore this email.
     </p>
   </div>
 </body>
