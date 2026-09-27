@@ -45,6 +45,7 @@ const ProjectDetail = () => {
         .from("projects" as any)
         .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at")
         .eq("slug", slug)
+        .eq("is_private", false)
         .maybeSingle();
       setProject((p as any) ?? null);
       if (p) {
