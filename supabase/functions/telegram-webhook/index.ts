@@ -109,20 +109,24 @@ Reply to a message with <code>/give 50 reason</code> to award the person you rep
 
 <i>Group commands work in the official RaidFi group and in a project's own connected group. Personal stuff stays in DM so your email isn't shared publicly.</i>`;
 
-const START_DM = `Hey - welcome to RaidFi 👋
+const START_DM = `<b>Welcome to RaidFi 👋</b>
 
-I'm the bot that keeps you in the loop: submit posts, check your XP, see open tasks, and get pinged when new ones drop. No dashboard needed.
+I'm your RaidFi assistant. From right here in Telegram you can:
 
-To use me, first link your RaidFi account (you need to be on the waitlist).
+📝 <b>Submit posts</b> - send <code>/submit https://x.com/you/status/123</code> (works here and in groups). I'll ask which project it's for.
+⭐ <b>Track your XP</b> - /mypoints shows your XP, rank and approved posts
+🎯 <b>Find tasks</b> - /tasks lists open tasks, and I'll DM you when new ones drop
+🏆 <b>Leaderboard</b> - /leaderboard shows top contributors
+📄 <b>Whitepaper</b> - /whitepaper
 
-<b>Fastest - code from the site</b>
-Grab your Telegram code at <a href="${SITE_ORIGIN}/dashboard/contributions">${ROOT_DOMAIN}/dashboard/contributions</a>, then send:
-<code>/link YOURCODE</code>
+<b>Step 1 - connect your account</b> (one time)
+• <b>Code:</b> get your code at <a href="${SITE_ORIGIN}/dashboard/contributions">${ROOT_DOMAIN}/dashboard/contributions</a> and send <code>/link YOURCODE</code>
+• <b>Email:</b> send <code>/link you@example.com</code>, then <code>/verify 123456</code> with the code we email you
 
-<b>Or use your email</b>
-Send <code>/link you@example.com</code>, then reply with the code we email you: <code>/verify 123456</code>
+<b>Step 2 - start contributing</b>
+Submit your first post with /submit and watch your XP grow.
 
-Once linked, try /tasks or /mypoints. Type /help to see everything.`;
+Other: /whoami · /subscribe · /unsubscribe · /help`;
 
 const START_GROUP = `Hey, I'm the RaidFi bot 👋
 
