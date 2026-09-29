@@ -27,6 +27,31 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const supabaseUrl0 = Deno.env.get("SUPABASE_URL")!;
+    const service0 = createClient(supabaseUrl0, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { sendResendEmail: send0, betaAccessEmailHtml: tpl0 } = await import("../_shared/resend-email.ts");
+    const mail = (r: any) => send0({
+      to: r.email,
+      subject: "Your RaidFi beta access code",
+      html: tpl0({ code: r.code, name: r.name ?? "", appUrl: SITE_ORIGIN, expiresAt: "No expiry" }),
+    });
+
+    const peek = await req.clone().json().catch(() => ({}));
+    // Public: email the code to a request that was just auto-approved (last 10 min, once).
+    if (peek.action === "welcome") {
+      const email = String(peek.email ?? "").trim().toLowerCase();
+      if (!email) return json({ error: "email required" }, 400);
+      const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      const { data: r } = await service0.from("beta_requests").select("*")
+        .eq("email", email).eq("status", "approved").gte("created_at", since)
+        .is("admin_notes", null).not("code", "is", null)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (!r) return json({ ok: true, skipped: true });
+      await service0.from("beta_requests").update({ admin_notes: "auto-approved, code emailed" }).eq("id", r.id);
+      const res = await mail(r);
+      return json({ ok: true, emailed: res.sent });
+    }
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
 
@@ -50,6 +75,18 @@ Deno.serve(async (req) => {
     if (!isAdmin) return json({ error: "Admin access required" }, 403);
 
     const body = await req.json().catch(() => ({}));
+    if (body.action === "resend_unused") {
+      const { data: list } = await admin.from("beta_requests").select("*")
+        .eq("status", "approved").not("code", "is", null);
+      const todo = (list ?? []).filter((r: any) => (r.uses_count ?? 0) < (r.max_uses ?? 1));
+      let sent = 0, failed = 0;
+      for (const r of todo) {
+        await admin.from("beta_requests").update({ expires_at: null }).eq("id", r.id);
+        const res = await mail(r);
+        res.sent ? sent++ : failed++;
+      }
+      return json({ ok: true, sent, failed });
+    }
     const requestId = String(body.request_id ?? "");
     const action = String(body.action ?? "approve");
     const daysValid = Number.isFinite(Number(body.days_valid)) ? Number(body.days_valid) : 14;
