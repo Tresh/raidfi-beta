@@ -380,6 +380,12 @@ async function handle(update: any, supabase: any) {
     return;
   }
   const message = update.message;
+  if (Array.isArray(message?.new_chat_members) && message.new_chat_members.some((u: any) => u?.is_bot && /raidficontributionbot/i.test(u?.username ?? ""))) {
+    await reply(message.chat.id,
+      `👋 Thanks for adding RaidFi!\n\n🆔 Group ID: <code>${message.chat.id}</code>\n\n<b>Project admin?</b> Make me a group admin, then send <code>/connectproject</code> here to link this group to your project in one step.`,
+      [], undefined);
+    return;
+  }
   if (!message?.text) return;
 
   const chatId: number = message.chat.id;
@@ -431,7 +437,7 @@ async function handle(update: any, supabase: any) {
 
   // ---- Chat-type gating ----
   // Commands allowed in groups (official RaidFi group or a project's own group):
-  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper", "give", "points", "submit"]);
+  const GROUP_ALLOWED = new Set(["start", "help", "tasks", "leaderboard", "whitepaper", "give", "points", "submit", "groupid", "connectproject"]);
   // Commands that ONLY work in DM (private chat):
   const DM_ONLY = new Set(["link", "verify", "whoami", "mypoints", "subscribe", "unsubscribe"]);
 
@@ -480,6 +486,33 @@ async function handle(update: any, supabase: any) {
 
 
   switch (cmd) {
+    case "groupid": {
+      await reply(chatId, `🆔 This chat's ID: <code>${chatId}</code>`, [], msgId);
+      return;
+    }
+    case "connectproject": {
+      if (!isGroup(chatType)) {
+        await reply(chatId, `Run <code>/connectproject</code> inside your project's group.`, [], msgId);
+        return;
+      }
+      if (!(await requireLink())) return;
+      const { data: mems } = await supabase.from("project_members")
+        .select("project_id, member_role, projects:project_id(name,slug)")
+        .ilike("email", link.email)
+        .in("member_role", ["owner", "project_admin", "manager"]);
+      const list = (mems ?? []) as any[];
+      const wanted = (arg ?? "").trim().toLowerCase();
+      const pick = wanted ? list.find((x) => x.projects?.slug?.toLowerCase() === wanted) : list[0];
+      if (!pick || (!wanted && list.length > 1)) {
+        await reply(chatId, list.length
+          ? `You manage several projects. Send <code>/connectproject slug</code>:\n${list.map((x) => `• <code>${escapeHtml(x.projects?.slug ?? "")}</code>`).join("\n")}`
+          : `❌ Your connected account isn't an admin of any RaidFi project.`, [], msgId);
+        return;
+      }
+      await supabase.from("projects").update({ telegram_group_id: String(chatId), telegram_bot_added: true }).eq("id", pick.project_id);
+      await reply(chatId, `✅ This group is now linked to <b>${escapeHtml(pick.projects?.name ?? "your project")}</b>. New contributions will be posted here.`, [], msgId);
+      return;
+    }
     case "start": {
       await reply(chatId, isPrivate(chatType) ? START_DM : START_GROUP, [], msgId);
       return;
