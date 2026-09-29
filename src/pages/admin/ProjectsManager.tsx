@@ -215,6 +215,18 @@ const ProjectsManager = () => {
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
+                  <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!r.is_private}
+                      onChange={async (e) => {
+                        const v = e.target.checked;
+                        const { error } = await supabase.from("projects").update({ is_private: v } as any).eq("id", r.id);
+                        if (!error) setRows((prev: any[]) => prev.map((x) => (x.id === r.id ? { ...x, is_private: v } : x)));
+                      }}
+                    />
+                    Private
+                  </label>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/admin/manage-projects/${r.id}`)}>Manage</Button>
                 </div>
               </div>

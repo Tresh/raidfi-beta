@@ -214,7 +214,7 @@ const Settings = () => {
   const xVerified = Boolean((data.profile as any)?.x_verified);
   const verifiedHandle = (data.profile as any)?.x_username as string | undefined;
   const challenge = data.profile?.referral_code ?? "";
-  const verificationPost = `Verifying my X account for @raidfi_app - building the credibility layer for Web3. ${challenge}`;
+  const verificationPost = `I'm building my Web3 contributor reputation on @raidfi_app 🚀\n\nEvery post, thread and raid I do for the projects I support now counts. Join me 👇\n${referralUrl ?? ""}\n\n${challenge}`;
 
   return (
     <DashboardLayout>
