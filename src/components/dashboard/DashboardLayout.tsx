@@ -1,3 +1,4 @@
+import PageTip from "@/components/PageTip";
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -248,7 +249,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 pb-2 lg:pb-3 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 pb-2 lg:pb-3 overflow-auto"><PageTip />{children}</main>
         {location.pathname !== "/dashboard/contributions" && <ContributeFab />}
       </div>
     </div>

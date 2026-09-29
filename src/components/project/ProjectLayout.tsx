@@ -1,3 +1,4 @@
+import PageTip from "@/components/PageTip";
 import { ReactNode, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -247,7 +248,7 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
         {fullBleed ? (
           <main className="h-[calc(100dvh-3.5rem)] lg:h-dvh overflow-hidden">{children}</main>
         ) : (
-          <main className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">{children}</main>
+          <main className="p-4 sm:p-6 lg:p-8 max-w-[1400px]"><PageTip />{children}</main>
         )}
       </div>
     </div>
