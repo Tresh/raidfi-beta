@@ -168,6 +168,18 @@ const BetaRequestsManager = () => {
       />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
+        <button
+          onClick={async () => {
+            if (!confirm("Email every approved person with an unused code again?")) return;
+            setBulkBusy(true);
+            const { data, error } = await supabase.functions.invoke("beta-approve", { body: { action: "resend_unused" } });
+            setBulkBusy(false);
+            toast({ title: error ? "Resend failed" : `Resent ${(data as any)?.sent ?? 0} codes`, description: error?.message ?? ((data as any)?.failed ? `${(data as any).failed} failed` : undefined), variant: error ? "destructive" : undefined });
+          }}
+          className="text-xs px-3 py-1.5 rounded-full border border-primary text-primary"
+        >
+          Resend unused codes
+        </button>
         {TABS.map((t) => (
           <button
             key={t}
