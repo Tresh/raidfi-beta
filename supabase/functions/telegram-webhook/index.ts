@@ -437,15 +437,7 @@ async function handle(update: any, supabase: any) {
 
 
   if (isGroup(chatType)) {
-    // Fetch the configured official RaidFi group id
-    const { data: settings } = await supabase
-      .from("admin_settings").select("telegram_chat_id").eq("id", "global").maybeSingle();
-    const officialId = settings?.telegram_chat_id ? String(settings.telegram_chat_id) : null;
-    const isOfficial = !!officialId && String(chatId) === officialId;
-    if (!isOfficial && !groupProject) {
-      // Silently ignore in unrecognised groups
-      return;
-    }
+    // Any group can use the bot; unrecognised groups are treated as RaidFi.
     if (DM_ONLY.has(cmd)) {
       await reply(chatId,
         `🤫 That's a personal command - please DM me instead.`,
