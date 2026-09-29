@@ -68,6 +68,7 @@ export type Database = {
           max_uses: number
           name: string | null
           reason: string | null
+          referred_by: string | null
           requested_role: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -86,6 +87,7 @@ export type Database = {
           max_uses?: number
           name?: string | null
           reason?: string | null
+          referred_by?: string | null
           requested_role?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           max_uses?: number
           name?: string | null
           reason?: string | null
+          referred_by?: string | null
           requested_role?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -603,6 +606,7 @@ export type Database = {
           name: string | null
           referral_code: string
           referral_count: number | null
+          referred_by: string | null
           total_points: number | null
           user_id: string
           waitlist_completed: boolean | null
@@ -619,6 +623,7 @@ export type Database = {
           name?: string | null
           referral_code?: string
           referral_count?: number | null
+          referred_by?: string | null
           total_points?: number | null
           user_id: string
           waitlist_completed?: boolean | null
@@ -635,6 +640,7 @@ export type Database = {
           name?: string | null
           referral_code?: string
           referral_count?: number | null
+          referred_by?: string | null
           total_points?: number | null
           user_id?: string
           waitlist_completed?: boolean | null
@@ -1526,7 +1532,7 @@ export type Database = {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       claim_project_memberships: { Args: never; Returns: number }
       consume_beta_code: {
-        Args: { _code: string; _email: string }
+        Args: { _code?: string | null; _email?: string | null; _referred_by?: string | null }
         Returns: Json
       }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }

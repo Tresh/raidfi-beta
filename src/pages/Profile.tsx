@@ -34,7 +34,7 @@ const stripMeta = (raw: string) => {
 const Profile = () => {
   const { code } = useParams<{ code: string }>();
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<{ email: string; name: string | null; total_points: number } | null>(null);
+  const [profile, setProfile] = useState<{ email: string; name: string | null; total_points: number; referred_by: string | null; referral_code: string } | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [rank, setRank] = useState<number | null>(null);
@@ -55,7 +55,7 @@ const Profile = () => {
     (async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("email, name, total_points, user_id")
+        .select("email, name, total_points, user_id, referred_by, referral_code")
         .eq("referral_code", code)
         .maybeSingle();
       if (!p) { setNotFound(true); setLoading(false); return; }
@@ -140,8 +140,13 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {tags.length > 0 && (
+                  {(tags.length > 0 || profile.referred_by) && (
                     <div className="flex flex-wrap gap-1.5 mt-4">
+                      {profile.referred_by && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-pink-500/10 text-pink-400 border border-pink-500/20 font-medium">
+                          Referred by: {profile.referred_by}
+                        </span>
+                      )}
                       {tags.map(t => (
                         <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-primary/10 text-primary border border-primary/20 font-medium">
                           <Sparkles className="w-2.5 h-2.5" /> {t}

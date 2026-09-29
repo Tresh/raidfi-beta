@@ -31,6 +31,7 @@ export interface ContributorProfile {
   name: string | null;
   referral_code: string | null;
   referral_count: number | null;
+  referred_by: string | null;
   total_points: number | null;
   created_at: string | null;
 }

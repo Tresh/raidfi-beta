@@ -12,6 +12,8 @@ type Profile = {
   x_verified: boolean;
   total_points: number | null;
   referral_count: number | null;
+  referral_code: string | null;
+  referred_by: string | null;
   created_at: string | null;
 };
 
@@ -30,7 +32,7 @@ const ContributorsManager = () => {
       const [{ data: p }, { data: c }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id,email,name,x_username,x_verified,total_points,referral_count,created_at")
+          .select("id,email,name,x_username,x_verified,total_points,referral_count,referral_code,referred_by,created_at")
           .order("total_points", { ascending: false })
           .limit(1000),
         supabase.from("contributions").select("user_email,status,created_at").limit(5000),
@@ -127,6 +129,7 @@ const ContributorsManager = () => {
                 <th className="px-4 py-2.5 font-medium text-right">Posts</th>
                 <th className="px-4 py-2.5 font-medium text-right">Approved</th>
                 <th className="px-4 py-2.5 font-medium text-right">Referrals</th>
+                <th className="px-4 py-2.5 font-medium">Referred By</th>
                 <th className="px-4 py-2.5 font-medium text-right">Last post</th>
               </tr>
             </thead>
@@ -159,6 +162,7 @@ const ContributorsManager = () => {
                     <td className="px-4 py-2.5 text-right tabular-nums">{a?.total ?? 0}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{a?.approved ?? 0}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{p.referral_count ?? 0}</td>
+                    <td className="px-4 py-2.5 text-xs font-mono text-muted-foreground">{p.referred_by || "-"}</td>
                     <td className="px-4 py-2.5 text-right text-[11px] text-muted-foreground">
                       {a?.last ? new Date(a.last).toLocaleDateString() : "-"}
                     </td>

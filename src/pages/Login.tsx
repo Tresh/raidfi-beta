@@ -43,6 +43,10 @@ const Login = () => {
   useEffect(() => {
     const codeParam = searchParams.get("code");
     const modeParam = searchParams.get("mode");
+    const refParam = searchParams.get("ref") || searchParams.get("referred_by");
+    if (refParam) {
+      sessionStorage.setItem("raidfi_ref_code", refParam.trim());
+    }
     const isSignupPath = window.location.pathname === "/signup" || window.location.pathname === "/beta-access";
     if (codeParam) {
       setBetaCode(codeParam.trim().toUpperCase());
@@ -101,6 +105,8 @@ const Login = () => {
     }
 
     if (data.session) {
+      const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
@@ -112,16 +118,32 @@ const Login = () => {
           user_id: data.session.user.id,
           email: cleanEmail,
           waitlist_completed: true,
-        });
-      } else if (!(profile as any).referral_code) {
-        const { data: codeData } = await supabase.rpc("generate_referral_code");
-        if (codeData) {
+          referred_by: refCode,
+          beta_code: "AUTO_ACCEPTED",
+        } as any);
+      } else {
+        const updates: any = {};
+        if (!(profile as any).referral_code) {
+          const { data: codeData } = await supabase.rpc("generate_referral_code");
+          if (codeData) updates.referral_code = codeData;
+        }
+        if (!(profile as any).referred_by && refCode) {
+          updates.referred_by = refCode;
+        }
+        if (Object.keys(updates).length > 0) {
           await supabase
             .from("profiles")
-            .update({ referral_code: codeData } as any)
+            .update(updates)
             .eq("user_id", data.session.user.id);
         }
       }
+
+      await supabase.rpc("consume_beta_code" as any, {
+        _code: null,
+        _email: cleanEmail,
+        _referred_by: refCode,
+      });
+
       await routeAfterLogin(data.session.user.id);
     }
     setLoading(false);
@@ -202,7 +224,12 @@ const Login = () => {
       return;
     }
 
-    await supabase.rpc("consume_beta_code" as any, { _code: code || null, _email: cleanEmail });
+    const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
+    await supabase.rpc("consume_beta_code" as any, {
+      _code: code || null,
+      _email: cleanEmail,
+      _referred_by: refCode,
+    });
 
     setSentVerification(true);
     setLoading(false);
