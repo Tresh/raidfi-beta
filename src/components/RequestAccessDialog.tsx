@@ -52,6 +52,7 @@ const RequestAccessDialog = ({
       toast({ title: "Couldn't send request", description: error.message, variant: "destructive" });
       return;
     }
+    supabase.functions.invoke("beta-approve", { body: { action: "welcome", email: email.trim().toLowerCase() } });
     setDone(true);
   };
 
