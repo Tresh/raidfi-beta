@@ -30,11 +30,12 @@ const ProjectSettings = () => {
   const [xPostUrl, setXPostUrl] = useState("");
   const [verifyingX, setVerifyingX] = useState(false);
   const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
-  const postText = `We're done guessing who actually shows up for ${project?.name ?? "us"}.
+  const postText = `🤝 Partnership announcement: ${project?.name ?? "We"} x @raidfi_app
 
-We're now on @RaidFi - contribution tracking and reputation for our community. Real contribution, measured over time. Not likes. Not follower counts.
+We're partnering with RaidFi to recognise the people who actually build our community. Every real contribution to ${project?.name ?? "us"} is now tracked and rewarded with on-chain-ready reputation.
 
-If you build with us, your record follows you.
+Contributors: start earning for what you already do 👇
+${window.location.origin}/beta
 
 ${challenge}`;
 
@@ -162,8 +163,9 @@ ${challenge}`;
               <Label htmlFor="p-tgid">Telegram group ID</Label>
               <Input id="p-tgid" value={groupId} onChange={(e) => setGroupId(e.target.value)} disabled={!canEdit} placeholder="-1001234567890" />
               <p className="text-[11px] text-muted-foreground">
-                Add <a className="text-primary" href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">@raidficontributionbot</a>{" "}
-                to your group as an admin, then paste the group ID here to receive contribution and task alerts.
+                Easiest way:{" "}
+                <a className="text-primary" href="https://t.me/raidficontributionbot?startgroup=connect" target="_blank" rel="noreferrer">add the bot to your group</a>,
+                make it admin, then send <code>/connectproject</code> in the group. The bot also posts the group ID when added, or send <code>/groupid</code>.
               </p>
             </div>
             <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
