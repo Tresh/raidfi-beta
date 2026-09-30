@@ -38,9 +38,17 @@ const BetaRequest = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
-  
+  const [referredBy, setReferredBy] = useState("");
+
   const [platforms, setPlatforms] = useState<string[]>(["X"]);
   const [reason, setReason] = useState("");
+
+  useEffect(() => {
+    const ref = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code");
+    if (ref) {
+      setReferredBy(ref.trim());
+    }
+  }, [searchParams]);
 
   const toggle = (list: string[], setList: (v: string[]) => void, value: string) =>
     setList(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
@@ -59,7 +67,7 @@ const BetaRequest = () => {
       .filter(Boolean)
       .join("\n");
 
-    const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
+    const refCode = referredBy.trim() || searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
 
     const payload: any = {
       name: name.trim(),
@@ -128,6 +136,10 @@ const BetaRequest = () => {
               <div className="space-y-1.5">
                 <Label htmlFor="beta-x">X handle</Label>
                 <Input id="beta-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="beta-ref">Referral or invite code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Input id="beta-ref" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} placeholder="e.g. RF-123456" />
               </div>
 
 
