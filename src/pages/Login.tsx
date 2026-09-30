@@ -36,6 +36,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [betaCode, setBetaCode] = useState("");
+  const [referredBy, setReferredBy] = useState("");
   const [loading, setLoading] = useState(false);
   const [sentVerification, setSentVerification] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
@@ -43,8 +44,9 @@ const Login = () => {
   useEffect(() => {
     const codeParam = searchParams.get("code");
     const modeParam = searchParams.get("mode");
-    const refParam = searchParams.get("ref") || searchParams.get("referred_by");
+    const refParam = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code");
     if (refParam) {
+      setReferredBy(refParam.trim());
       sessionStorage.setItem("raidfi_ref_code", refParam.trim());
     }
     const isSignupPath = window.location.pathname === "/signup" || window.location.pathname === "/beta-access";
@@ -105,7 +107,7 @@ const Login = () => {
     }
 
     if (data.session) {
-      const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
+      const refCode = referredBy.trim() || searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -224,7 +226,7 @@ const Login = () => {
       return;
     }
 
-    const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
+    const refCode = referredBy.trim() || searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
     await supabase.rpc("consume_beta_code" as any, {
       _code: code || null,
       _email: cleanEmail,
@@ -359,6 +361,14 @@ const Login = () => {
                           onChange={(e) => setBetaCode(e.target.value)}
                           className="bg-white/[0.05] border-white/[0.1] text-foreground h-11 text-sm mt-3 tracking-widest uppercase font-mono"
                           aria-label="Beta access code"
+                        />
+                        <Input
+                          type="text"
+                          placeholder="Referral or invite code (optional)"
+                          value={referredBy}
+                          onChange={(e) => setReferredBy(e.target.value)}
+                          className="bg-white/[0.05] border-white/[0.1] text-foreground h-11 text-sm mt-3 font-mono"
+                          aria-label="Referral code"
                         />
                       </>
                     )}
