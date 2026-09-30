@@ -61,15 +61,28 @@ const BetaRequest = () => {
 
     const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
 
-    const { error } = await supabase.from("beta_requests").insert({
+    const payload: any = {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       x_handle: xHandle.trim().replace(/^@/, "") || null,
       requested_role: "user",
       reason: notes || null,
       status: "pending",
-      referred_by: refCode,
-    } as any);
+    };
+    if (refCode) {
+      payload.referred_by = refCode;
+    }
+
+    let { error } = await supabase.from("beta_requests").insert(payload as any);
+
+    if (error && error.message?.toLowerCase().includes("referred_by")) {
+      delete payload.referred_by;
+      if (refCode) {
+        payload.reason = [notes, `Referred by: ${refCode}`].filter(Boolean).join("\n");
+      }
+      const res = await supabase.from("beta_requests").insert(payload as any);
+      error = res.error;
+    }
     setSending(false);
     if (error) {
       toast({ title: "Couldn't send request", description: error.message, variant: "destructive" });
