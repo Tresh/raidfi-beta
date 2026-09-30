@@ -1531,12 +1531,10 @@ export type Database = {
         | { Args: { _code: string; _email?: string }; Returns: Json }
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       claim_project_memberships: { Args: never; Returns: number }
-      consume_beta_code:
-        | {
-            Args: { _code?: string; _email?: string; _referred_by?: string }
-            Returns: Json
-          }
-        | { Args: { _code: string; _email: string }; Returns: Json }
+      consume_beta_code: {
+        Args: { _code?: string; _email?: string; _referred_by?: string }
+        Returns: Json
+      }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
