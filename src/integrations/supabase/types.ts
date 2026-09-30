@@ -1532,7 +1532,7 @@ export type Database = {
       check_email_exists: { Args: { check_email: string }; Returns: boolean }
       claim_project_memberships: { Args: never; Returns: number }
       consume_beta_code: {
-        Args: { _code?: string | null; _email?: string | null; _referred_by?: string | null }
+        Args: { _code?: string; _email?: string; _referred_by?: string }
         Returns: Json
       }
       contact_email_exists: { Args: { _email: string }; Returns: boolean }
