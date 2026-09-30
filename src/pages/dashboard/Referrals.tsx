@@ -48,6 +48,7 @@ const Referrals = () => {
         const { data: tableCodes } = await supabase
           .from("invite_codes" as any)
           .select("*")
+          .eq("owner_user_id", session.user.id)
           .order("created_at", { ascending: true });
         if (Array.isArray(tableCodes) && tableCodes.length > 0) {
           myCodes = tableCodes;
