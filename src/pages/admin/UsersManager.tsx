@@ -296,7 +296,7 @@ const UsersManager = () => {
                 <p className="text-xs text-foreground font-mono">{userResult.user_id.slice(0, 12)}...</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-3">
               <div className="p-2 rounded-lg bg-muted">
                 <p className="text-sm font-semibold text-foreground">{userResult.total_points || 0}</p>
                 <p className="text-[10px] text-muted-foreground">Total XP</p>
@@ -313,6 +313,11 @@ const UsersManager = () => {
                 <p className="text-sm font-semibold text-foreground">{new Date(userResult.created_at).toLocaleDateString()}</p>
                 <p className="text-[10px] text-muted-foreground">Joined</p>
               </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-3 border-t border-border/60 text-muted-foreground">
+              <div><span className="font-medium text-foreground">Referral Code:</span> <code className="font-mono">{userResult.referral_code || "-"}</code></div>
+              <div><span className="font-medium text-foreground">Referred By:</span> <code className="font-mono">{userResult.referred_by || "None"}</code></div>
+              <div><span className="font-medium text-foreground">Beta Code:</span> <code className="font-mono">{userResult.beta_code || "-"}</code></div>
             </div>
           </div>
 

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,15 @@ const BetaRequest = () => {
     path: "/beta",
   });
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    const ref = searchParams.get("ref") || searchParams.get("referred_by");
+    if (ref) {
+      sessionStorage.setItem("raidfi_ref_code", ref.trim());
+    }
+  }, [searchParams]);
   const [done, setDone] = useState(false);
 
   const [name, setName] = useState("");
@@ -50,6 +59,8 @@ const BetaRequest = () => {
       .filter(Boolean)
       .join("\n");
 
+    const refCode = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
+
     const { error } = await supabase.from("beta_requests").insert({
       name: name.trim(),
       email: email.trim().toLowerCase(),
@@ -57,6 +68,7 @@ const BetaRequest = () => {
       requested_role: "user",
       reason: notes || null,
       status: "pending",
+      referred_by: refCode,
     } as any);
     setSending(false);
     if (error) {
