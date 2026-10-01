@@ -137,10 +137,6 @@ const BetaRequest = () => {
                 <Label htmlFor="beta-x">X handle</Label>
                 <Input id="beta-x" value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@handle" />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="beta-ref">Referral or invite code <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                <Input id="beta-ref" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} placeholder="e.g. RF-123456" />
-              </div>
 
 
               <div className="space-y-2">
