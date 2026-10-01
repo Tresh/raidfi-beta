@@ -4,7 +4,6 @@ import {
   Award,
   BarChart3,
   Building2,
-  ClipboardList,
   Coins,
   Home,
   KeyRound,
@@ -44,14 +43,11 @@ const allNavItems = [
   { label: "Beta Requests", to: "/admin/beta", permKey: "beta", icon: KeyRound },
   { label: "Analytics", to: "/admin/analytics", permKey: "dashboard", icon: BarChart3 },
   { label: "Contribute Tasks", to: "/admin/contribute-tasks", permKey: "contribute-tasks", icon: Award },
+  { label: "Tasks & Onboarding", to: "/admin/tasks", permKey: "tasks", icon: ListChecks },
   { label: "Points Manager", to: "/admin/points", permKey: "points", icon: Coins },
   { label: "Reports", to: "/admin/reports", permKey: "reports", icon: MessageSquareWarning },
   { label: "User Roles", to: "/admin/users", permKey: "users", icon: ShieldCheck, adminOnly: true },
   { label: "Contacts", to: "/admin/contacts", permKey: "contacts", icon: Mail },
-  { label: "Waitlist", to: "/admin/waitlist", permKey: "waitlist", icon: Users },
-  { label: "Waitlist Tasks", to: "/admin/tasks", permKey: "tasks", icon: ListChecks },
-  { label: "Validations", to: "/admin/validations", permKey: "validations", icon: ClipboardList },
-  { label: "Whitepaper", to: "/admin/whitepaper", permKey: "whitepaper", icon: ClipboardList },
   { label: "Settings", to: "/admin/settings", permKey: "settings", icon: SettingsIcon, adminOnly: true },
 ];
 

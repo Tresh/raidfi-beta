@@ -114,8 +114,8 @@ const TasksManager = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Waitlist Tasks</h1>
-          <p className="text-sm text-muted-foreground">Manage tasks users must complete to join the waitlist.</p>
+          <h1 className="text-2xl font-bold text-foreground">Tasks & Onboarding</h1>
+          <p className="text-sm text-muted-foreground">Manage onboarding tasks and social actions users complete on RaidFi.</p>
         </div>
         <Button onClick={handleAdd} size="sm"><Plus className="w-4 h-4 mr-1" /> Add Task</Button>
       </div>

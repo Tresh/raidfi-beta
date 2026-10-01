@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Users, TrendingUp, Award, Share2, BarChart3, ArrowUpRight, ArrowDownRight,
-  Zap, Target, UserCheck, MessageSquare, Clock,
+  Users, TrendingUp, Award, Share2, BarChart3, ArrowUpRight,
+  Zap, Target, UserCheck, Clock, KeyRound,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -35,7 +35,7 @@ interface OverviewStats {
   pendingContributions: number;
   approvedContributions: number;
   rejectedContributions: number;
-  totalWaitlist: number;
+  totalBetaRequests: number;
   totalValidations: number;
   totalContacts: number;
   totalXPDistributed: number;
@@ -48,8 +48,8 @@ const AnalyticsPage = () => {
   const [stats, setStats] = useState<OverviewStats | null>(null);
   const [topReferrers, setTopReferrers] = useState<TopReferrer[]>([]);
   const [topContributors, setTopContributors] = useState<TopContributor[]>([]);
-  const [recentGrowth, setRecentGrowth] = useState<{ waitlist: GrowthData[]; contributions: GrowthData[] }>({
-    waitlist: [],
+  const [recentGrowth, setRecentGrowth] = useState<{ beta: GrowthData[]; contributions: GrowthData[] }>({
+    beta: [],
     contributions: [],
   });
   const [topContributionUsers, setTopContributionUsers] = useState<{ email: string; count: number; approved: number }[]>([]);
@@ -75,7 +75,7 @@ const AnalyticsPage = () => {
 
   const fetchOverview = async () => {
     const [
-      { count: totalWaitlist },
+      { count: totalBetaRequests },
       { count: totalValidations },
       { count: totalContacts },
       { count: totalContributions },
@@ -86,7 +86,7 @@ const AnalyticsPage = () => {
       { data: profiles },
       { count: totalTaskCompletions },
     ] = await Promise.all([
-      supabase.from("waitlist_submissions").select("id", { count: "exact", head: true }),
+      supabase.from("beta_requests" as any).select("id", { count: "exact", head: true }),
       supabase.from("validation_submissions").select("id", { count: "exact", head: true }),
       supabase.from("contact_submissions").select("id", { count: "exact", head: true }),
       supabase.from("contributions").select("id", { count: "exact", head: true }),
@@ -99,7 +99,7 @@ const AnalyticsPage = () => {
     ]);
 
     const totalXP = (leaderboard || []).reduce((s, r) => s + (r.total_xp || 0), 0);
-    const userCount = (leaderboard || []).length;
+    const userCount = (profiles || []).length || (leaderboard || []).length;
     const totalReferrals = (profiles || []).reduce((s, r) => s + (r.referral_count || 0), 0);
 
     setStats({
@@ -108,7 +108,7 @@ const AnalyticsPage = () => {
       pendingContributions: pendingContributions || 0,
       approvedContributions: approvedContributions || 0,
       rejectedContributions: rejectedContributions || 0,
-      totalWaitlist: totalWaitlist || 0,
+      totalBetaRequests: totalBetaRequests || 0,
       totalValidations: totalValidations || 0,
       totalContacts: totalContacts || 0,
       totalXPDistributed: totalXP,
@@ -140,9 +140,9 @@ const AnalyticsPage = () => {
   const fetchGrowth = async () => {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-    const [{ data: wData }, { data: cData }] = await Promise.all([
+    const [{ data: bData }, { data: cData }] = await Promise.all([
       supabase
-        .from("waitlist_submissions")
+        .from("beta_requests" as any)
         .select("created_at")
         .gte("created_at", thirtyDaysAgo)
         .order("created_at", { ascending: true }),
@@ -163,7 +163,7 @@ const AnalyticsPage = () => {
     };
 
     setRecentGrowth({
-      waitlist: groupByDay(wData || []),
+      beta: groupByDay(bData || []),
       contributions: groupByDay(cData || []),
     });
   };
@@ -210,8 +210,8 @@ const AnalyticsPage = () => {
   const s = stats!;
 
   const overviewCards = [
-    { label: "Total Users", value: s.totalUsers, icon: Users, color: "text-primary" },
-    { label: "Waitlist Signups", value: s.totalWaitlist, icon: UserCheck, color: "text-primary" },
+    { label: "Total Contributors", value: s.totalUsers, icon: Users, color: "text-primary" },
+    { label: "Beta Requests", value: s.totalBetaRequests, icon: KeyRound, color: "text-purple-400" },
     { label: "Validations", value: s.totalValidations, icon: Target, color: "text-amber-400" },
     { label: "Total XP Distributed", value: s.totalXPDistributed.toLocaleString(), icon: Zap, color: "text-purple-400" },
     { label: "Avg XP / User", value: s.avgXPPerUser, icon: TrendingUp, color: "text-blue-400" },
@@ -428,21 +428,21 @@ const AnalyticsPage = () => {
             <Card className="bg-card border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-primary" /> Waitlist Signups (30d)
+                  <ArrowUpRight className="w-4 h-4 text-primary" /> Beta Requests (30d)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {recentGrowth.waitlist.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No signups in the last 30 days.</p>
+                {recentGrowth.beta.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No beta requests in the last 30 days.</p>
                 ) : (
                   <div className="space-y-1.5">
-                    {recentGrowth.waitlist.map((d) => (
+                    {recentGrowth.beta.map((d) => (
                       <div key={d.date} className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">{d.date}</span>
                         <div className="flex items-center gap-2">
                           <div
                             className="h-2 bg-primary rounded-full"
-                            style={{ width: `${Math.max(20, (d.count / Math.max(...recentGrowth.waitlist.map((x) => x.count))) * 120)}px` }}
+                            style={{ width: `${Math.max(20, (d.count / Math.max(...recentGrowth.beta.map((x) => x.count))) * 120)}px` }}
                           />
                           <span className="text-foreground font-medium w-8 text-right">{d.count}</span>
                         </div>
