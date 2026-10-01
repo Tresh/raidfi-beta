@@ -161,7 +161,7 @@ const BetaRequest = () => {
               </Button>
               <p className="text-center text-xs text-muted-foreground">
                 Representing a project?{" "}
-                <a href="/project-request" className="text-primary underline underline-offset-4">Open the project form</a>
+                <a href="/project-request" className="text-primary underline underline-offset-4">Open project application form</a>
               </p>
             </form>
           </>

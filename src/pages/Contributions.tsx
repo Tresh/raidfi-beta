@@ -799,7 +799,7 @@ const Contributions = () => {
                               {tgCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                             </Button>
                             <Button size="sm" className="h-9 px-3" asChild>
-                              <a href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">Open Bot</a>
+                              <a href="https://t.me/raidficontributionbot" target="_blank" rel="noreferrer">Open Telegram bot</a>
                             </Button>
                           </div>
                           <p className="text-[11px] text-muted-foreground mt-2">

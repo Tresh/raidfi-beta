@@ -98,7 +98,7 @@ const RequestAccessDialog = ({
                     {sending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Request beta access
                   </Button>
                   <p className="text-center text-xs text-muted-foreground">
-                    Representing a project? <a href="/project-request" className="text-primary underline underline-offset-4">Open the project form</a>
+                    Representing a project? <a href="/project-request" className="text-primary underline underline-offset-4">Open project application form</a>
                   </p>
                 </form>
           </>

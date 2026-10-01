@@ -65,7 +65,7 @@ const ProjectLayout = ({ children, fullBleed = false }: { children: ReactNode; f
             This account isn't linked to a project. Request project access from the homepage - once approved, your
             workspace shows up here.
           </p>
-          <a href="/" className="text-sm text-primary underline underline-offset-4">Back to RaidFi</a>
+          <a href="/" className="text-sm text-primary underline underline-offset-4">Back to RaidFi home page</a>
         </div>
       </div>
     );
