@@ -26,12 +26,9 @@ const DashFeedback = lazy(() => import("./pages/dashboard/Feedback"));
 
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
-const WaitlistManager = lazy(() => import("./pages/admin/WaitlistManager"));
-const ValidationsManager = lazy(() => import("./pages/admin/ValidationsManager"));
 const ContactsManager = lazy(() => import("./pages/admin/ContactsManager"));
 const WhitepaperManager = lazy(() => import("./pages/admin/WhitepaperManager"));
 const ContributionsManager = lazy(() => import("./pages/admin/ContributionsManager"));
-const TasksManager = lazy(() => import("./pages/admin/TasksManager"));
 const ContributeTasksManager = lazy(() => import("./pages/admin/ContributeTasksManager"));
 const PointsManager = lazy(() => import("./pages/admin/PointsManager"));
 const UsersManager = lazy(() => import("./pages/admin/UsersManager"));
@@ -131,10 +128,7 @@ const App = () => (
 
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
-            <Route path="/admin/waitlist" element={<AdminLayout requiredPermission="waitlist"><WaitlistManager /></AdminLayout>} />
-            <Route path="/admin/tasks" element={<AdminLayout requiredPermission="tasks"><TasksManager /></AdminLayout>} />
             <Route path="/admin/contribute-tasks" element={<AdminLayout requiredPermission="contribute-tasks"><ContributeTasksManager /></AdminLayout>} />
-            <Route path="/admin/validations" element={<AdminLayout requiredPermission="validations"><ValidationsManager /></AdminLayout>} />
             <Route path="/admin/contacts" element={<AdminLayout requiredPermission="contacts"><ContactsManager /></AdminLayout>} />
             <Route path="/admin/whitepaper" element={<AdminLayout requiredPermission="whitepaper"><WhitepaperManager /></AdminLayout>} />
             <Route path="/admin/contributions" element={<AdminLayout requiredPermission="contributions"><ContributionsManager /></AdminLayout>} />
