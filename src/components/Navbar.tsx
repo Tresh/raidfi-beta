@@ -3,15 +3,29 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import logo from "/logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const navLinks = [
@@ -42,13 +56,21 @@ const Navbar = () => {
               </a>
             ))}
             <Button size="sm" asChild className="h-9 px-5 text-xs">
-              <a href="/login">Sign in</a>
+              {isAuthenticated ? (
+                <a href="/dashboard">Dashboard</a>
+              ) : (
+                <a href="/login">Sign in</a>
+              )}
             </Button>
           </div>
 
           <div className="flex items-center gap-1 md:hidden">
             <Button size="sm" asChild className="h-9 px-5 text-xs">
-              <a href="/login">Sign in</a>
+              {isAuthenticated ? (
+                <a href="/dashboard">Dashboard</a>
+              ) : (
+                <a href="/login">Sign in</a>
+              )}
             </Button>
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
