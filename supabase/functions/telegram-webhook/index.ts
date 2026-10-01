@@ -543,8 +543,8 @@ async function handle(update: any, supabase: any) {
         const { data: exists } = await supabase.rpc("check_email_exists", { check_email: email });
         if (!exists) {
           await reply(chatId,
-            `❌ This email isn't on the RaidFi waitlist.\nJoin first:`,
-            [[{ text: "🚀 Join Waitlist", url: `${SITE_ORIGIN}/waitlist` }]],
+            `❌ No RaidFi account found for this email.\n\nRequest beta access or sign up on the site first:`,
+            [[{ text: "🚀 Request Beta Access", url: `${SITE_ORIGIN}/#beta-access` }]],
             msgId,
           );
           return;
