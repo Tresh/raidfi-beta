@@ -1,521 +1,459 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PageHeader, Panel, StatCard } from "@/components/dashboard/Primitives";
+import { Loader2 } from "lucide-react";
 import {
-  Users, TrendingUp, Award, Share2, BarChart3, ArrowUpRight,
-  Zap, Target, UserCheck, Clock, KeyRound,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
-interface TopReferrer {
+const tooltipStyle = {
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: 8,
+  fontSize: 12,
+};
+
+const weekKey = (d: Date) => {
+  const start = new Date(d);
+  start.setDate(d.getDate() - d.getDay());
+  return `${start.getMonth() + 1}/${start.getDate()}`;
+};
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const pieColors = [
+  "hsl(var(--primary))",
+  "hsl(var(--muted-foreground))",
+  "hsl(var(--destructive))",
+  "hsl(var(--primary) / 0.5)",
+];
+
+interface ProfileRow {
+  id: string;
   email: string;
   name: string | null;
-  referral_count: number;
-  referral_code: string;
+  x_username: string | null;
+  x_verified: boolean;
+  total_points: number | null;
+  referral_count: number | null;
+  referral_code: string | null;
+  created_at: string | null;
 }
 
-interface TopContributor {
-  email: string;
-  display_name: string;
-  total_xp: number;
-  contribution_xp: number;
+interface ContributionRow {
+  id: string;
+  user_email: string;
+  project_id: string | null;
+  content_type: string | null;
+  status: string;
+  points_earned: number | null;
+  manual_score: number | null;
+  ai_score: number | null;
+  created_at: string;
 }
 
-interface GrowthData {
-  date: string;
-  count: number;
-}
-
-interface OverviewStats {
-  totalUsers: number;
-  totalContributions: number;
-  pendingContributions: number;
-  approvedContributions: number;
-  rejectedContributions: number;
-  totalBetaRequests: number;
-  totalValidations: number;
-  totalContacts: number;
-  totalXPDistributed: number;
-  avgXPPerUser: number;
-  totalReferrals: number;
-  totalTaskCompletions: number;
+interface ProjectRow {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
 }
 
 const AnalyticsPage = () => {
-  const [stats, setStats] = useState<OverviewStats | null>(null);
-  const [topReferrers, setTopReferrers] = useState<TopReferrer[]>([]);
-  const [topContributors, setTopContributors] = useState<TopContributor[]>([]);
-  const [recentGrowth, setRecentGrowth] = useState<{ beta: GrowthData[]; contributions: GrowthData[] }>({
-    beta: [],
-    contributions: [],
-  });
-  const [topContributionUsers, setTopContributionUsers] = useState<{ email: string; count: number; approved: number }[]>([]);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profiles, setProfiles] = useState<ProfileRow[]>([]);
+  const [contributions, setContributions] = useState<ContributionRow[]>([]);
+  const [projects, setProjects] = useState<ProjectRow[]>([]);
+  const [betaRequestsCount, setBetaRequestsCount] = useState(0);
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    const loadAll = async () => {
+      setLoading(true);
+      const [
+        { data: profs },
+        { data: contribs },
+        { data: projs },
+        { count: betaCount },
+      ] = await Promise.all([
+        supabase.from("profiles").select("id, email, name, x_username, x_verified, total_points, referral_count, referral_code, created_at").limit(2000),
+        supabase.from("contributions").select("id, user_email, project_id, content_type, status, points_earned, manual_score, ai_score, created_at").order("created_at", { ascending: true }).limit(5000),
+        supabase.from("projects" as any).select("id, name, slug, status"),
+        supabase.from("beta_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
 
-  const fetchAll = async () => {
-    setLoading(true);
-    await Promise.all([
-      fetchOverview(),
-      fetchTopReferrers(),
-      fetchTopContributors(),
-      fetchGrowth(),
-      fetchTopContributionUsers(),
-      fetchRecentActivity(),
-    ]);
-    setLoading(false);
-  };
-
-  const fetchOverview = async () => {
-    const [
-      { count: totalBetaRequests },
-      { count: totalValidations },
-      { count: totalContacts },
-      { count: totalContributions },
-      { count: pendingContributions },
-      { count: approvedContributions },
-      { count: rejectedContributions },
-      { data: leaderboard },
-      { data: profiles },
-      { count: totalTaskCompletions },
-    ] = await Promise.all([
-      supabase.from("beta_requests" as any).select("id", { count: "exact", head: true }),
-      supabase.from("validation_submissions").select("id", { count: "exact", head: true }),
-      supabase.from("contact_submissions").select("id", { count: "exact", head: true }),
-      supabase.from("contributions").select("id", { count: "exact", head: true }),
-      supabase.from("contributions").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("contributions").select("id", { count: "exact", head: true }).eq("status", "approved"),
-      supabase.from("contributions").select("id", { count: "exact", head: true }).eq("status", "rejected"),
-      supabase.from("leaderboard_scores").select("total_xp"),
-      supabase.from("profiles").select("referral_count"),
-      supabase.from("contribute_task_completions").select("id", { count: "exact", head: true }),
-    ]);
-
-    const totalXP = (leaderboard || []).reduce((s, r) => s + (r.total_xp || 0), 0);
-    const userCount = (profiles || []).length || (leaderboard || []).length;
-    const totalReferrals = (profiles || []).reduce((s, r) => s + (r.referral_count || 0), 0);
-
-    setStats({
-      totalUsers: userCount,
-      totalContributions: totalContributions || 0,
-      pendingContributions: pendingContributions || 0,
-      approvedContributions: approvedContributions || 0,
-      rejectedContributions: rejectedContributions || 0,
-      totalBetaRequests: totalBetaRequests || 0,
-      totalValidations: totalValidations || 0,
-      totalContacts: totalContacts || 0,
-      totalXPDistributed: totalXP,
-      avgXPPerUser: userCount > 0 ? Math.round(totalXP / userCount) : 0,
-      totalReferrals,
-      totalTaskCompletions: totalTaskCompletions || 0,
-    });
-  };
-
-  const fetchTopReferrers = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("email, name, referral_count, referral_code")
-      .gt("referral_count", 0)
-      .order("referral_count", { ascending: false })
-      .limit(10);
-    setTopReferrers(data || []);
-  };
-
-  const fetchTopContributors = async () => {
-    const { data } = await supabase
-      .from("leaderboard_scores")
-      .select("email, display_name, total_xp, contribution_xp")
-      .order("total_xp", { ascending: false })
-      .limit(10);
-    setTopContributors(data || []);
-  };
-
-  const fetchGrowth = async () => {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-
-    const [{ data: bData }, { data: cData }] = await Promise.all([
-      supabase
-        .from("beta_requests" as any)
-        .select("created_at")
-        .gte("created_at", thirtyDaysAgo)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("contributions")
-        .select("created_at")
-        .gte("created_at", thirtyDaysAgo)
-        .order("created_at", { ascending: true }),
-    ]);
-
-    const groupByDay = (rows: any[]): GrowthData[] => {
-      const map: Record<string, number> = {};
-      (rows || []).forEach((r) => {
-        const day = new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        map[day] = (map[day] || 0) + 1;
-      });
-      return Object.entries(map).map(([date, count]) => ({ date, count }));
+      setProfiles((profs as any) || []);
+      setContributions((contribs as any) || []);
+      setProjects((projs as any) || []);
+      setBetaRequestsCount(betaCount || 0);
+      setLoading(false);
     };
 
-    setRecentGrowth({
-      beta: groupByDay(bData || []),
-      contributions: groupByDay(cData || []),
-    });
-  };
+    loadAll();
+  }, []);
 
-  const fetchTopContributionUsers = async () => {
-    const { data } = await supabase
-      .from("contributions")
-      .select("user_email, status");
+  // Time-series Weekly bucket data (past 12 weeks)
+  const series = useMemo(() => {
+    const buckets = new Map<
+      string,
+      { label: string; submissions: number; xp: number; quality: number; n: number; contributors: Set<string> }
+    >();
 
-    if (!data) return;
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 7 * 86_400_000);
+      const key = weekKey(d);
+      buckets.set(key, { label: key, submissions: 0, xp: 0, quality: 0, n: 0, contributors: new Set() });
+    }
 
-    const map: Record<string, { count: number; approved: number }> = {};
-    data.forEach((r) => {
-      if (!map[r.user_email]) map[r.user_email] = { count: 0, approved: 0 };
-      map[r.user_email].count++;
-      if (r.status === "approved") map[r.user_email].approved++;
-    });
+    for (const c of contributions) {
+      const key = weekKey(new Date(c.created_at));
+      const b = buckets.get(key);
+      if (!b) continue;
+      b.submissions += 1;
+      if (c.user_email) b.contributors.add(c.user_email.toLowerCase());
+      if (c.status === "approved") b.xp += c.points_earned ?? 0;
+      const score = c.manual_score ?? c.ai_score ?? 0;
+      if (score > 0) {
+        b.quality = (b.quality * b.n + score) / (b.n + 1);
+        b.n += 1;
+      }
+    }
 
-    const sorted = Object.entries(map)
-      .map(([email, v]) => ({ email, ...v }))
+    return [...buckets.values()].map((b) => ({
+      label: b.label,
+      submissions: b.submissions,
+      xp: b.xp,
+      contributors: b.contributors.size,
+      quality: Number(b.quality.toFixed(1)),
+    }));
+  }, [contributions]);
+
+  // Totals & Ratios
+  const totals = useMemo(() => {
+    const totalSubmissions = contributions.length;
+    const approvedList = contributions.filter((c) => c.status === "approved");
+    const totalApproved = approvedList.length;
+    const totalXP = approvedList.reduce((acc, c) => acc + (c.points_earned || 0), 0);
+    const approvalRate = totalSubmissions > 0 ? Math.round((totalApproved / totalSubmissions) * 100) : 0;
+
+    const scored = contributions.filter((c) => (c.manual_score ?? c.ai_score ?? 0) > 0);
+    const avgQuality = scored.length
+      ? (scored.reduce((s, c) => s + (c.manual_score ?? c.ai_score ?? 0), 0) / scored.length).toFixed(1)
+      : "0";
+
+    const activeContributorsCount = new Set(
+      contributions
+        .filter((c) => Date.now() - new Date(c.created_at).getTime() < 30 * 86_400_000)
+        .map((c) => (c.user_email || "").toLowerCase())
+    ).size;
+
+    return {
+      totalSubmissions,
+      totalApproved,
+      totalXP,
+      approvalRate,
+      avgQuality,
+      activeContributorsCount,
+      totalProfiles: profiles.length,
+      activeProjects: projects.filter((p) => p.status === "active").length,
+    };
+  }, [contributions, profiles, projects]);
+
+  // Breakdown by Status
+  const statusSplit = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const c of contributions) counts[c.status] = (counts[c.status] ?? 0) + 1;
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [contributions]);
+
+  // Breakdown by Content Type
+  const typeSplit = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const c of contributions) {
+      const type = (c.content_type || "post").replace(/_/g, " ");
+      counts[type] = (counts[type] ?? 0) + 1;
+    }
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [contributions]);
+
+  // Breakdown by Day of Week
+  const dayOfWeek = useMemo(() => {
+    const counts = DAYS.map((label) => ({ label, posts: 0 }));
+    for (const c of contributions) counts[new Date(c.created_at).getDay()].posts += 1;
+    return counts;
+  }, [contributions]);
+
+  // Top Projects by Activity
+  const topProjectsByActivity = useMemo(() => {
+    const projMap = new Map<string, string>();
+    projects.forEach((p) => projMap.set(p.id, p.name));
+
+    const counts: Record<string, { name: string; count: number; xp: number }> = {};
+    for (const c of contributions) {
+      if (!c.project_id) continue;
+      const name = projMap.get(c.project_id) || "Workspace";
+      if (!counts[c.project_id]) counts[c.project_id] = { name, count: 0, xp: 0 };
+      counts[c.project_id].count += 1;
+      if (c.status === "approved") counts[c.project_id].xp += c.points_earned || 0;
+    }
+
+    return Object.values(counts)
       .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
+      .slice(0, 7);
+  }, [contributions, projects]);
 
-    setTopContributionUsers(sorted);
-  };
+  // Top Contributors by XP
+  const topContributors = useMemo(() => {
+    const map = new Map<string, { email: string; name: string; xp: number; posts: number }>();
+    for (const p of profiles) {
+      map.set(p.email.toLowerCase(), {
+        email: p.email,
+        name: p.name || p.x_username || p.email.split("@")[0],
+        xp: p.total_points || 0,
+        posts: 0,
+      });
+    }
 
-  const fetchRecentActivity = async () => {
-    const { data } = await supabase
-      .from("user_activities")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(15);
-    setRecentActivity(data || []);
-  };
+    for (const c of contributions) {
+      const emailKey = (c.user_email || "").toLowerCase();
+      const entry = map.get(emailKey);
+      if (entry) {
+        entry.posts += 1;
+      }
+    }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
+    return [...map.values()]
+      .sort((a, b) => b.xp - a.xp)
+      .slice(0, 8);
+  }, [profiles, contributions]);
 
-  const s = stats!;
-
-  const overviewCards = [
-    { label: "Total Contributors", value: s.totalUsers, icon: Users, color: "text-primary" },
-    { label: "Beta Requests", value: s.totalBetaRequests, icon: KeyRound, color: "text-purple-400" },
-    { label: "Validations", value: s.totalValidations, icon: Target, color: "text-amber-400" },
-    { label: "Total XP Distributed", value: s.totalXPDistributed.toLocaleString(), icon: Zap, color: "text-purple-400" },
-    { label: "Avg XP / User", value: s.avgXPPerUser, icon: TrendingUp, color: "text-blue-400" },
-    { label: "Total Referrals", value: s.totalReferrals, icon: Share2, color: "text-pink-400" },
-    { label: "Contributions", value: s.totalContributions, icon: BarChart3, color: "text-cyan-400" },
-    { label: "Task Completions", value: s.totalTaskCompletions, icon: Award, color: "text-orange-400" },
-  ];
-
-  const contributionBreakdown = [
-    { label: "Pending", value: s.pendingContributions, color: "text-yellow-400" },
-    { label: "Approved", value: s.approvedContributions, color: "text-primary" },
-    { label: "Rejected", value: s.rejectedContributions, color: "text-red-400" },
-  ];
+  // Top Referrers
+  const topReferrers = useMemo(() => {
+    return profiles
+      .filter((p) => (p.referral_count || 0) > 0)
+      .sort((a, b) => (b.referral_count || 0) - (a.referral_count || 0))
+      .slice(0, 8);
+  }, [profiles]);
 
   return (
-    <div className="w-full min-w-0 overflow-x-hidden">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-        <p className="text-muted-foreground text-sm mt-1">Platform data insights and metrics</p>
-      </div>
+    <div>
+      <PageHeader
+        title="Platform Analytics"
+        subtitle="Comprehensive metrics on RaidFi Beta activity, contribution volume, quality trends, and community growth."
+      />
 
-      {/* Overview Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {overviewCards.map((card) => (
-          <Card key={card.label} className="bg-card border-border">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground">{card.label}</span>
-                <card.icon className={`w-4 h-4 ${card.color}`} />
-              </div>
-              <p className="text-2xl font-bold text-foreground">{card.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Contribution Status Breakdown */}
-      <Card className="bg-card border-border mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Contribution Status Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            {contributionBreakdown.map((item) => (
-              <div key={item.label} className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${item.color.replace("text-", "bg-")}`} />
-                <span className="text-sm text-muted-foreground">{item.label}:</span>
-                <span className="text-sm font-semibold text-foreground">{item.value}</span>
-              </div>
-            ))}
+      {loading ? (
+        <div className="py-20 flex justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      ) : (
+        <>
+          {/* Stat Cards Overview */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+            <StatCard
+              label="Active Contributors"
+              value={totals.activeContributorsCount}
+              hint={`out of ${totals.totalProfiles} total registered accounts`}
+              accent
+            />
+            <StatCard
+              label="Live Projects"
+              value={totals.activeProjects}
+              hint={`${projects.length} total workspaces in platform`}
+            />
+            <StatCard
+              label="Total Contributions"
+              value={totals.totalSubmissions}
+              hint={`${totals.totalApproved} approved contributions`}
+            />
+            <StatCard
+              label="XP Distributed"
+              value={totals.totalXP.toLocaleString()}
+              hint={`Approval rate ${totals.approvalRate}%`}
+            />
           </div>
-          {s.totalContributions > 0 && (
-            <div className="mt-3 flex h-3 rounded-full overflow-hidden bg-muted">
-              {s.approvedContributions > 0 && (
-                <div
-                  className="bg-primary h-full"
-                  style={{ width: `${(s.approvedContributions / s.totalContributions) * 100}%` }}
-                />
-              )}
-              {s.pendingContributions > 0 && (
-                <div
-                  className="bg-yellow-500 h-full"
-                  style={{ width: `${(s.pendingContributions / s.totalContributions) * 100}%` }}
-                />
-              )}
-              {s.rejectedContributions > 0 && (
-                <div
-                  className="bg-destructive h-full"
-                  style={{ width: `${(s.rejectedContributions / s.totalContributions) * 100}%` }}
-                />
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      <Tabs defaultValue="referrers" className="space-y-4 w-full min-w-0">
-        <TabsList className="flex w-full min-w-0 flex-wrap gap-1 h-auto p-1">
-          <TabsTrigger value="referrers" className="text-xs">Referrers</TabsTrigger>
-          <TabsTrigger value="leaderboard" className="text-xs">Top XP</TabsTrigger>
-          <TabsTrigger value="posters" className="text-xs">Posters</TabsTrigger>
-          <TabsTrigger value="growth" className="text-xs">Growth</TabsTrigger>
-          <TabsTrigger value="activity" className="text-xs">Activity</TabsTrigger>
-        </TabsList>
-
-        {/* Top Referrers */}
-        <TabsContent value="referrers">
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Share2 className="w-4 h-4 text-pink-400" /> Top 10 Referrers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {topReferrers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No referrals yet.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>User</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead className="text-right">Referrals</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topReferrers.map((r, i) => (
-                      <TableRow key={r.email}>
-                        <TableCell className="font-medium">{i + 1}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="text-sm text-foreground">{r.name || "-"}</p>
-                            <p className="text-xs text-muted-foreground">{r.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">{r.referral_code}</TableCell>
-                        <TableCell className="text-right font-semibold text-primary">{r.referral_count}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Top XP */}
-        <TabsContent value="leaderboard">
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-400" /> Top 10 by XP
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {topContributors.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No data yet.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>User</TableHead>
-                      <TableHead className="text-right">Contribution XP</TableHead>
-                      <TableHead className="text-right">Total XP</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topContributors.map((c, i) => (
-                      <TableRow key={c.email}>
-                        <TableCell className="font-medium">{i + 1}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="text-sm text-foreground">{c.display_name}</p>
-                            <p className="text-xs text-muted-foreground">{c.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">{c.contribution_xp}</TableCell>
-                        <TableCell className="text-right font-semibold text-primary">{c.total_xp}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Most Active Posters */}
-        <TabsContent value="posters">
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-cyan-400" /> Most Active Posters
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {topContributionUsers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No contributions yet.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="text-right">Total Posts</TableHead>
-                      <TableHead className="text-right">Approved</TableHead>
-                      <TableHead className="text-right">Approval Rate</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topContributionUsers.map((u, i) => (
-                      <TableRow key={u.email}>
-                        <TableCell className="font-medium">{i + 1}</TableCell>
-                        <TableCell className="text-sm">{u.email}</TableCell>
-                        <TableCell className="text-right">{u.count}</TableCell>
-                        <TableCell className="text-right text-primary">{u.approved}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {u.count > 0 ? Math.round((u.approved / u.count) * 100) : 0}%
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Growth */}
-        <TabsContent value="growth">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-primary" /> Beta Requests (30d)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {recentGrowth.beta.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No beta requests in the last 30 days.</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {recentGrowth.beta.map((d) => (
-                      <div key={d.date} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{d.date}</span>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-2 bg-primary rounded-full"
-                            style={{ width: `${Math.max(20, (d.count / Math.max(...recentGrowth.beta.map((x) => x.count))) * 120)}px` }}
-                          />
-                          <span className="text-foreground font-medium w-8 text-right">{d.count}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-cyan-400" /> Contributions (30d)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {recentGrowth.contributions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No contributions in the last 30 days.</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {recentGrowth.contributions.map((d) => (
-                      <div key={d.date} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{d.date}</span>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-2 bg-cyan-500 rounded-full"
-                            style={{ width: `${Math.max(20, (d.count / Math.max(...recentGrowth.contributions.map((x) => x.count))) * 120)}px` }}
-                          />
-                          <span className="text-foreground font-medium w-8 text-right">{d.count}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <StatCard
+              label="Average Quality"
+              value={totals.avgQuality}
+              hint="Reviewed score out of 10"
+            />
+            <StatCard
+              label="Beta Queue"
+              value={betaRequestsCount}
+              hint="Pending invite requests"
+            />
+            <StatCard
+              label="Referrals Made"
+              value={profiles.reduce((a, b) => a + (b.referral_count || 0), 0)}
+              hint="Organic invite loops"
+            />
+            <StatCard
+              label="X Verified Accounts"
+              value={profiles.filter((p) => p.x_verified).length}
+              hint={`${Math.round((profiles.filter((p) => p.x_verified).length / (profiles.length || 1)) * 100)}% identity verified`}
+            />
           </div>
-        </TabsContent>
 
-        {/* Recent Activity */}
-        <TabsContent value="activity">
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted-foreground" /> Recent Platform Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentActivity.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No activity yet.</p>
+          {/* Main Visual Panels */}
+          <div className="grid lg:grid-cols-2 gap-4 mb-6">
+            <Panel title="Weekly Submissions & XP Released" description="Global contribution volume vs awarded XP over time.">
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={series}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Area type="monotone" name="Submissions" dataKey="submissions" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.15)" />
+                    <Area type="monotone" name="XP Released" dataKey="xp" stroke="hsl(var(--muted-foreground))" fill="transparent" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+
+            <Panel title="Contribution Quality Trend" description="Average quality score across reviewed contributions.">
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={series}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Area type="monotone" name="Avg Quality" dataKey="quality" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.12)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+
+            <Panel title="Contribution Status Mix" description="Distribution of pending, approved, and rejected submissions.">
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={statusSplit} dataKey="value" nameKey="name" innerRadius={45} outerRadius={80} paddingAngle={2}>
+                      {statusSplit.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend wrapperStyle={{ fontSize: 11, textTransform: "capitalize" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+
+            <Panel title="Activity by Day of Week" description="When contributors post across the ecosystem.">
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dayOfWeek}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar name="Posts" dataKey="posts" fill="hsl(var(--primary) / 0.8)" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+          </div>
+
+          {/* Project Activity & Content Mix */}
+          <div className="grid lg:grid-cols-2 gap-4 mb-6">
+            <Panel title="Most Active Projects" description="Projects receiving the highest volume of community contributions.">
+              {topProjectsByActivity.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-8 text-center">No project contributions recorded yet.</p>
               ) : (
-                <div className="space-y-2">
-                  {recentActivity.map((a) => (
-                    <div key={a.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground truncate">{a.user_email}</p>
-                        <p className="text-xs text-muted-foreground">{a.description} · {a.activity_type}</p>
-                      </div>
-                      <div className="text-right ml-3 shrink-0">
-                        <span className="text-sm font-semibold text-primary">+{a.points} XP</span>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(a.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={topProjectsByActivity} layout="vertical" margin={{ left: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip contentStyle={tooltipStyle} />
+                      <Bar name="Contributions" dataKey="count" fill="hsl(var(--primary))" radius={[0, 3, 3, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </Panel>
+
+            <Panel title="Content Mix" description="Types of contributions submitted by ecosystem raiders.">
+              <ul className="grid sm:grid-cols-2 gap-2 mt-2">
+                {typeSplit.map((t) => (
+                  <li key={t.name} className="border border-border rounded-lg p-3 bg-card">
+                    <p className="text-xs text-muted-foreground capitalize">{t.name}</p>
+                    <p className="text-xl font-bold text-foreground mt-0.5 tabular-nums">
+                      {t.value}
+                      <span className="text-xs font-normal text-muted-foreground ml-2">
+                        ({Math.round((t.value / (totals.totalSubmissions || 1)) * 100)}%)
+                      </span>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </div>
+
+          {/* Leaderboards */}
+          <div className="grid lg:grid-cols-2 gap-4">
+            <Panel title="Top Contributors by XP" description="Highest earning contributors on RaidFi.">
+              <div className="space-y-2">
+                {topContributors.map((c, i) => (
+                  <div key={c.email} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-muted-foreground w-4">#{i + 1}</span>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{c.name}</p>
+                        <p className="text-xs text-muted-foreground">{c.email}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-primary">{c.xp.toLocaleString()} XP</span>
+                      <p className="text-[11px] text-muted-foreground">{c.posts} posts</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+
+            <Panel title="Top Referrers" description="Contributors driving growth through invite codes.">
+              <div className="space-y-2">
+                {topReferrers.length === 0 ? (
+                  <p className="text-xs text-muted-foreground py-8 text-center">No referrals yet.</p>
+                ) : (
+                  topReferrers.map((r, i) => (
+                    <div key={r.email} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground w-4">#{i + 1}</span>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{r.name || r.x_username || "Contributor"}</p>
+                          <p className="text-xs text-muted-foreground">{r.email}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-primary">{r.referral_count} invites</span>
+                        <p className="text-[11px] font-mono text-muted-foreground">{r.referral_code}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Panel>
+          </div>
+        </>
+      )}
     </div>
   );
 };
