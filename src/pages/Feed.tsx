@@ -153,7 +153,7 @@ const TweetEmbed = ({ tweetId, postUrl }: { tweetId: string; postUrl: string }) 
       {loading && (
         <div className="flex items-center justify-center py-6">
           <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-          <a href={postUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs text-muted-foreground hover:text-primary">Open post</a>
+          <a href={postUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs text-muted-foreground hover:text-primary">Open post on X</a>
         </div>
       )}
     </div>
@@ -256,6 +256,7 @@ const Feed = () => {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Explore - RaidFi", "description": "Quality Web3 contributions and projects on RaidFi.", "url": `${BASE_URL}/explore` }) }} />
       <main className="flex-1 pt-16 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
+          <h1 className="text-2xl font-bold tracking-tight my-4">Explore</h1>
           <div className="sticky top-14 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-background/90 backdrop-blur border-b border-border mb-3">
             <div className="flex gap-1 py-2">
               <button
@@ -299,7 +300,7 @@ const Feed = () => {
                 <Card key={project.id} className="hover:border-primary/40 transition-colors"><CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3"><div><Link to={`/p/${project.slug}`} className="text-sm font-semibold hover:underline">{project.name}</Link><p className="text-[11px] text-muted-foreground">{project.verification} · Trust {project.trust_score}</p></div><FolderKanban className="w-4 h-4 text-primary" /></div>
                   {project.description && <p className="text-xs text-muted-foreground mt-3 line-clamp-3">{project.description}</p>}
-                  <div className="mt-3 flex gap-3 text-xs"><Link to={`/p/${project.slug}`} className="text-primary font-medium">View project</Link>{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">Website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
+                  <div className="mt-3 flex gap-3 text-xs"><Link to={`/p/${project.slug}`} className="text-primary font-medium">View {project.name}</Link>{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">{project.name} website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
                 </CardContent></Card>
               )) : <p className="text-sm text-muted-foreground py-10 text-center col-span-2">Project listings will appear here after verification.</p>}
             </div>
@@ -388,7 +389,7 @@ const Feed = () => {
                         </div>
                         <a href={c.post_url} target="_blank" rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 hover:text-primary shrink-0">
-                          Open <ExternalLink className="w-3 h-3" />
+                          View post on X <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
 

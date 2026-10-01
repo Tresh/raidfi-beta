@@ -117,7 +117,7 @@ const ProjectDetail = () => {
             </p>
             {project.description && <p className="text-sm text-muted-foreground max-w-2xl">{project.description}</p>}
             <div className="flex flex-wrap gap-3 text-xs pt-1">
-              {project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary inline-flex items-center gap-1">Website <ExternalLink className="w-3 h-3" /></a>}
+              {project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary inline-flex items-center gap-1">{project.name} website <ExternalLink className="w-3 h-3" /></a>}
               {handle && <a href={`https://x.com/${handle}`} target="_blank" rel="noreferrer" className="text-primary">@{handle}</a>}
               {project.telegram && <a href={project.telegram} target="_blank" rel="noreferrer" className="text-primary">Telegram</a>}
             </div>
@@ -178,7 +178,7 @@ const ProjectDetail = () => {
                         {r.post_text && <p className="text-[13px] text-foreground mt-2 line-clamp-5 whitespace-pre-wrap break-words">{r.post_text}</p>}
                         <div className="mt-2 flex items-center justify-between text-[10.5px] text-muted-foreground">
                           <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(r.created_at).toLocaleDateString()}</span>
-                          <a href={r.post_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-primary">Open <ExternalLink className="w-3 h-3" /></a>
+                          <a href={r.post_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-primary">View post on X <ExternalLink className="w-3 h-3" /></a>
                         </div>
                       </CardContent></Card>
                     );

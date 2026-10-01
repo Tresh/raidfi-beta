@@ -383,7 +383,7 @@ const Settings = () => {
         </Panel>
 
         <Panel title="Referrals" description="Your invite codes and referral links now live on their own page.">
-          <Button asChild variant="outline" className="h-9 text-sm"><a href="/dashboard/referrals">Open referrals</a></Button>
+          <Button asChild variant="outline" className="h-9 text-sm"><a href="/dashboard/referrals">View referral program</a></Button>
         </Panel>
 
         <Panel title="Password" description="Change your password, or get a reset link by email.">
