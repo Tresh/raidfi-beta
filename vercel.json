@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/~oauth/:path*", "destination": "https://raidfi-vib-test-1235289432418338.lovable.app/~oauth/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
