@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Link2, Loader2, Send } from "lucide-react";
+import { AlertTriangle, Link2, Loader2, Send, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/;
 
@@ -54,6 +55,14 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [types, setTypes] = useState<{ value: string; label: string }[]>(DEFAULT_TYPES);
   const [submitting, setSubmitting] = useState(false);
+  const [celebrate, setCelebrate] = useState<string | null>(null);
+  const [xProfile, setXProfile] = useState<{ x_username: string | null; x_verified: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase.from("profiles").select("x_username,x_verified").eq("user_id", session.user.id).maybeSingle()
+      .then(({ data }) => setXProfile((data as any) ?? null));
+  }, [session?.user?.id]);
 
   useEffect(() => {
     supabase
@@ -119,12 +128,33 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
     setPostUrl("");
     setUrlTouched(false);
     setAiGenerated(false);
-    toast({ title: "Contribution tracked", description: "Your post was added to your record." });
-    onSubmitted?.();
+    const pts = (data as any)?.points_earned ?? (data as any)?.contribution?.points_earned;
+    setCelebrate(typeof pts === "number" && pts > 0 ? `+${pts} XP` : "Tracked!");
+    setTimeout(() => { setCelebrate(null); onSubmitted?.(); }, 1600);
   };
 
   const trimmedPostUrl = postUrl.trim();
   const urlIsInvalid = trimmedPostUrl.length > 0 && !TWEET_URL_REGEX.test(trimmedPostUrl);
+  const match = trimmedPostUrl.match(/^https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)/);
+  const postHandle = match?.[1];
+  const myHandle = xProfile?.x_username?.replace(/^@/, "").toLowerCase();
+  const notVerified = xProfile && !xProfile.x_verified;
+  const notMine = !!(postHandle && myHandle && postHandle.toLowerCase() !== myHandle);
+
+  if (celebrate) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center animate-in zoom-in-50 fade-in duration-300">
+        <div className="relative">
+          <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold shadow-lg shadow-primary/40">
+            <Sparkles className="h-8 w-8" />
+          </div>
+        </div>
+        <p className="mt-5 text-2xl font-bold text-primary animate-in slide-in-from-bottom-2 duration-500">{celebrate}</p>
+        <p className="mt-1 text-xs text-muted-foreground">Contribution added to your record.</p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={submit} className="space-y-4 text-left">
@@ -156,6 +186,31 @@ export const ContributionComposer = ({ onSubmitted }: { onSubmitted?: () => void
           <p role="alert" className="mt-1 text-[11px] text-destructive">
             Use a public x.com or twitter.com post link.
           </p>
+        )}
+        {match && (
+          <div className="mt-2 flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-2.5 animate-in fade-in slide-in-from-top-1">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold uppercase text-primary">
+              {postHandle?.[0]}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-foreground">@{postHandle}</p>
+              <p className="truncate font-mono text-[10px] text-muted-foreground">Post {match[2]}</p>
+            </div>
+            <a href={trimmedPostUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] text-primary hover:underline">Open</a>
+          </div>
+        )}
+        {match && (notVerified || notMine) && (
+          <div className="mt-2 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-2.5 text-[11px] text-foreground">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" />
+            <div className="flex-1">
+              {notVerified
+                ? "Your X account isn't verified yet, so this post can't be tracked."
+                : `This post is by @${postHandle}, but your verified account is @${myHandle}.`}
+              {notVerified && (
+                <Link to="/dashboard/settings" className="ml-1 font-semibold text-primary hover:underline">Verify X now →</Link>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
