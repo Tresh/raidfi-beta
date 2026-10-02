@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
           founder_name: request.founder_name,
           contact_email: request.email,
           description: request.why,
+          logo_data_url: request.logo_data_url,
         },
         { onConflict: "slug" },
       )

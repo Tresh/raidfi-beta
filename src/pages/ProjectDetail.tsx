@@ -41,12 +41,25 @@ const ProjectDetail = () => {
     if (!slug) return;
     (async () => {
       setLoading(true);
-      const { data: p } = await supabase
+      let { data: p } = await supabase
         .from("projects" as any)
         .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
-        .eq("slug", slug)
-        .eq("is_private", false)
+        .ilike("slug", slug)
+        .neq("is_private", true)
         .maybeSingle();
+
+      if (!p) {
+        const cleanSlug = slug.replace(/-+$/, "");
+        const { data: fallback } = await supabase
+          .from("projects" as any)
+          .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
+          .ilike("slug", `${cleanSlug}%`)
+          .neq("is_private", true)
+          .limit(1)
+          .maybeSingle();
+        p = fallback;
+      }
+
       setProject((p as any) ?? null);
       if (p) {
         const { data: c } = await supabase

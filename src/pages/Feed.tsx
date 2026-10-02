@@ -235,7 +235,7 @@ const Feed = () => {
   }, [fetchContributions, projectFilter]);
 
   useEffect(() => {
-    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score").eq("status", "active").eq("is_private", false).order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
+    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score,logo_data_url").eq("status", "active").neq("is_private", true).order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
   }, []);
 
   const formatRelative = (iso: string) => {
@@ -298,7 +298,22 @@ const Feed = () => {
             <div className="grid sm:grid-cols-2 gap-3">
               {projects.length ? projects.map((project) => (
                 <Card key={project.id} className="hover:border-primary/40 transition-colors"><CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3"><div><Link to={`/p/${project.slug}`} className="text-sm font-semibold hover:underline">{project.name}</Link><p className="text-[11px] text-muted-foreground">{project.verification} · Trust {project.trust_score}</p></div><FolderKanban className="w-4 h-4 text-primary" /></div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {project.logo_data_url ? (
+                        <img src={project.logo_data_url} alt={project.name} className="w-10 h-10 rounded-lg object-cover border border-border shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center font-semibold text-foreground text-sm shrink-0">
+                          {project.name ? project.name.charAt(0).toUpperCase() : "P"}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <Link to={`/p/${project.slug}`} className="text-sm font-semibold hover:underline block truncate">{project.name}</Link>
+                        <p className="text-[11px] text-muted-foreground capitalize">{project.verification} · Trust {project.trust_score}</p>
+                      </div>
+                    </div>
+                    <FolderKanban className="w-4 h-4 text-primary shrink-0" />
+                  </div>
                   {project.description && <p className="text-xs text-muted-foreground mt-3 line-clamp-3">{project.description}</p>}
                   <div className="mt-3 flex gap-3 text-xs"><Link to={`/p/${project.slug}`} className="text-primary font-medium">View {project.name}</Link>{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">{project.name} website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
                 </CardContent></Card>
