@@ -41,23 +41,49 @@ const ProjectDetail = () => {
     if (!slug) return;
     (async () => {
       setLoading(true);
-      let { data: p } = await supabase
+      let { data: p, error } = await supabase
         .from("projects" as any)
-        .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
+        .select("id,name,slug,website,x_handle,telegram,contact_email,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
         .ilike("slug", slug)
-        .neq("is_private", true)
+        .eq("is_private", false)
         .maybeSingle();
+
+      if (error || !p) {
+        const res = await supabase
+          .from("projects" as any)
+          .select("id,name,slug,website,x_handle,telegram,contact_email,description,verification,status,trust_score,x_verified,created_at")
+          .ilike("slug", slug)
+          .eq("is_private", false)
+          .maybeSingle();
+        p = res.data;
+      }
 
       if (!p) {
         const cleanSlug = slug.replace(/-+$/, "");
-        const { data: fallback } = await supabase
+        const res = await supabase
           .from("projects" as any)
-          .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
+          .select("id,name,slug,website,x_handle,telegram,contact_email,description,verification,status,trust_score,x_verified,created_at")
           .ilike("slug", `${cleanSlug}%`)
-          .neq("is_private", true)
           .limit(1)
           .maybeSingle();
-        p = fallback;
+        p = res.data;
+      }
+
+      if (p && !(p as any).logo_data_url) {
+        const { data: reqs } = await supabase
+          .from("project_requests" as any)
+          .select("project_name,email,logo_data_url")
+          .not("logo_data_url", "is", null);
+
+        if (reqs && reqs.length > 0) {
+          const req = reqs.find((r: any) =>
+            (r.project_name && String(r.project_name).toLowerCase().trim() === String((p as any).name).toLowerCase().trim()) ||
+            (r.email && (p as any).contact_email && String(r.email).toLowerCase().trim() === String((p as any).contact_email).toLowerCase().trim())
+          );
+          if (req?.logo_data_url) {
+            (p as any).logo_data_url = req.logo_data_url;
+          }
+        }
       }
 
       setProject((p as any) ?? null);

@@ -235,7 +235,56 @@ const Feed = () => {
   }, [fetchContributions, projectFilter]);
 
   useEffect(() => {
-    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score,logo_data_url").eq("status", "active").neq("is_private", true).order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
+    (async () => {
+      let { data, error } = await supabase
+        .from("projects" as any)
+        .select("id,name,slug,website,x_handle,contact_email,description,verification,trust_score,logo_data_url")
+        .eq("status", "active")
+        .eq("is_private", false)
+        .order("trust_score", { ascending: false })
+        .limit(20);
+
+      if (error || !data) {
+        const res = await supabase
+          .from("projects" as any)
+          .select("id,name,slug,website,x_handle,contact_email,description,verification,trust_score")
+          .eq("status", "active")
+          .eq("is_private", false)
+          .order("trust_score", { ascending: false })
+          .limit(20);
+        data = res.data;
+      }
+
+      const list = ((data as any[]) ?? []).map((p) => ({ ...p }));
+
+      const missingLogos = list.filter((p) => !p.logo_data_url);
+      if (missingLogos.length > 0) {
+        const { data: reqs } = await supabase
+          .from("project_requests" as any)
+          .select("project_name,email,logo_data_url")
+          .not("logo_data_url", "is", null);
+
+        if (reqs && reqs.length > 0) {
+          const reqMap = new Map<string, string>();
+          reqs.forEach((r: any) => {
+            if (r.logo_data_url) {
+              if (r.project_name) reqMap.set(String(r.project_name).toLowerCase().trim(), r.logo_data_url);
+              if (r.email) reqMap.set(String(r.email).toLowerCase().trim(), r.logo_data_url);
+            }
+          });
+
+          list.forEach((p) => {
+            if (!p.logo_data_url) {
+              const byName = reqMap.get(String(p.name || "").toLowerCase().trim());
+              const byEmail = reqMap.get(String(p.contact_email || "").toLowerCase().trim());
+              p.logo_data_url = byName || byEmail || null;
+            }
+          });
+        }
+      }
+
+      setProjects(list);
+    })();
   }, []);
 
   const formatRelative = (iso: string) => {
