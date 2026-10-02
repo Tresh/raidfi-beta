@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, ScoreMeter, StatCard } from "@/components/dashboard/Primitives";
 import { TIERS } from "@/lib/reputation";
 import { Loader2, ShieldCheck } from "lucide-react";
+import RaidCard from "@/components/dashboard/RaidCard";
 
 const Reputation = () => {
   useSEO({
@@ -30,6 +31,9 @@ const Reputation = () => {
         </div>
       ) : (
         <div className="space-y-4">
+          <Panel title="Your RaidCard" description="Your contributor ID. Share it on X with your invite link.">
+            <RaidCard data={data} />
+          </Panel>
           <div className="bg-card border border-border rounded-lg p-5 lg:p-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-5">
               <div>
