@@ -43,7 +43,7 @@ const ProjectDetail = () => {
       setLoading(true);
       const { data: p } = await supabase
         .from("projects" as any)
-        .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at")
+        .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
         .eq("slug", slug)
         .eq("is_private", false)
         .maybeSingle();
@@ -106,15 +106,30 @@ const ProjectDetail = () => {
       <Navbar />
       <main className="flex-1 pt-20 pb-20">
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl space-y-6">
-          <header className="space-y-2">
-            <Link to="/explore" className="text-[11px] text-muted-foreground hover:text-foreground">← Explore</Link>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              {project.name}
-              {project.x_verified && <ShieldCheck className="w-5 h-5 text-primary" />}
-            </h1>
-            <p className="text-xs text-muted-foreground capitalize">
-              {project.verification} · trust {project.trust_score} · {project.status}
-            </p>
+          <header className="space-y-3">
+            <Link to="/explore" className="text-[11px] text-muted-foreground hover:text-foreground inline-block">← Explore</Link>
+            <div className="flex items-start gap-4">
+              {project.logo_data_url ? (
+                <img
+                  src={project.logo_data_url}
+                  alt={project.name}
+                  className="w-12 h-12 rounded-lg object-cover border border-border shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center font-semibold text-foreground text-lg shrink-0">
+                  {project.name ? project.name.charAt(0).toUpperCase() : "P"}
+                </div>
+              )}
+              <div className="space-y-1 min-w-0">
+                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                  {project.name}
+                  {project.x_verified && <ShieldCheck className="w-5 h-5 text-primary shrink-0" />}
+                </h1>
+                <p className="text-xs text-muted-foreground capitalize">
+                  {project.verification} · trust {project.trust_score} · {project.status}
+                </p>
+              </div>
+            </div>
             {project.description && <p className="text-sm text-muted-foreground max-w-2xl">{project.description}</p>}
             <div className="flex flex-wrap gap-3 text-xs pt-1">
               {project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary inline-flex items-center gap-1">{project.name} website <ExternalLink className="w-3 h-3" /></a>}
