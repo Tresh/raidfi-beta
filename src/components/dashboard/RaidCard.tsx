@@ -17,7 +17,7 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
   const { toast } = useToast();
   const [projects, setProjects] = useState<{ name: string; count: number }[]>([]);
   const [busy, setBusy] = useState(false);
-  const p = data.profile;
+  const p = data.profile as (ContributorData["profile"] & { x_username?: string | null }) | null;
   const rep = data.reputation;
 
   useEffect(() => {
