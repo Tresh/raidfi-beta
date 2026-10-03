@@ -104,8 +104,13 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 border-y border-border/60 py-2">
-            {[["Total XP", data.totalXp.toLocaleString()], ["Rank", data.rank ? `#${data.rank}` : "—"], ["Raids", raids]].map(([l, v]) => (
+          <div className="grid grid-cols-4 gap-2 border-y border-border/60 py-2">
+            {[
+              ["Total XP", data.totalXp.toLocaleString()],
+              ["Consistency", `${rep.activeWeeks}/12w`],
+              ["Streak", `${rep.currentStreakWeeks}w`],
+              ["Raids", raids],
+            ].map(([l, v]) => (
               <div key={l as string}>
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{l}</p>
                 <p className="text-sm font-semibold tabular-nums sm:text-base">{v}</p>
