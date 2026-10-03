@@ -4,8 +4,9 @@ import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, ScoreMeter, StatCard } from "@/components/dashboard/Primitives";
 import { TIERS } from "@/lib/reputation";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, CreditCard } from "lucide-react";
 import RaidCard from "@/components/dashboard/RaidCard";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const Reputation = () => {
   useSEO({
@@ -31,9 +32,6 @@ const Reputation = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <Panel title="Your RaidCard" description="Your contributor ID. Share it on X with your invite link.">
-            <RaidCard data={data} />
-          </Panel>
           <div className="bg-card border border-border rounded-lg p-5 lg:p-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-5">
               <div>
@@ -115,6 +113,25 @@ const Reputation = () => {
               ))}
             </ul>
           </Panel>
+
+          <Accordion type="single" collapsible className="w-full bg-card border border-border rounded-lg px-5">
+            <AccordionItem value="raid-card" className="border-none">
+              <AccordionTrigger className="hover:no-underline py-4">
+                <div className="flex items-center gap-2 text-left">
+                  <CreditCard className="w-4 h-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Get RaidCard</p>
+                    <p className="text-xs text-muted-foreground font-normal">
+                      Preview, download, or share your digital contributor ID card.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-2 pb-5">
+                <RaidCard data={data} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       )}
     </DashboardLayout>
