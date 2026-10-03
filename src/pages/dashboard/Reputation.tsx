@@ -31,7 +31,7 @@ const Reputation = () => {
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-24">
           <div className="bg-card border border-border rounded-lg p-5 lg:p-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-5">
               <div>
