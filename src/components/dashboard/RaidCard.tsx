@@ -62,7 +62,7 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
 
   const share = () => {
     const top = projects.slice(0, 3).map((x) => x.name).join(", ");
-    const text = `My Web3 contributor ID on @RaidFi 🪪\n\n🏆 ${rep.score}/1000 · ${rep.tier.name}\n⚡ ${raids} raids${top ? ` across ${top}` : ""}\n\nGet your card in the beta:`;
+    const text = `My Web3 contributor ID on @RaidFi 🪪\n\n🏆 ${rep.score}/1000 · ${rep.tier.name}\n⚡ ${raids} contributions${top ? ` across ${top}` : ""}\n\nGet your card in the beta:`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(refUrl)}`, "_blank", "noopener");
   };
 
@@ -105,7 +105,7 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
           </div>
 
           <div className="grid grid-cols-3 gap-2 border-y border-border/60 py-2">
-            {[["Total XP", data.totalXp.toLocaleString()], ["Rank", data.rank ? `#${data.rank}` : "—"], ["Raids", raids]].map(([l, v]) => (
+            {[["Total XP", data.totalXp.toLocaleString()], ["Rank", data.rank ? `#${data.rank}` : "—"], ["Contributions", raids]].map(([l, v]) => (
               <div key={l as string}>
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{l}</p>
                 <p className="text-sm font-semibold tabular-nums sm:text-base">{v}</p>
@@ -120,7 +120,7 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
                 <span key={x.name} className="rounded-md border border-border bg-background/60 px-2 py-0.5 text-[10px]">
                   {x.name} <span className="text-muted-foreground">· {x.count}</span>
                 </span>
-              )) : <span className="text-[10px] text-muted-foreground">No raids yet</span>}
+              )) : <span className="text-[10px] text-muted-foreground">No contributions yet</span>}
             </div>
           </div>
         </div>

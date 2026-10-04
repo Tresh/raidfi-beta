@@ -40,7 +40,7 @@ const changelogData: ChangelogEntry[] = [
     changes: [
       {
         label: "Telegram Bot",
-        description: "Community raid tracking, activity logging, and notification bot for Telegram.",
+        description: "Community contribution tracking, activity logging, and notification bot for Telegram.",
       },
       {
         label: "Social Contribution Tracking",
