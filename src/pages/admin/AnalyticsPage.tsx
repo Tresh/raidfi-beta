@@ -389,7 +389,7 @@ const AnalyticsPage = () => {
               )}
             </Panel>
 
-            <Panel title="Content Mix" description="Types of contributions submitted by ecosystem raiders.">
+            <Panel title="Content Mix" description="Types of contributions submitted by ecosystem contributors.">
               <ul className="grid sm:grid-cols-2 gap-2 mt-2">
                 {typeSplit.map((t) => (
                   <li key={t.name} className="border border-border rounded-lg p-3 bg-card">
