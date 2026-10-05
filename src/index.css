@@ -1,10 +1,3 @@
-/*
-  Performance & CSS standard optimization: @import rules must precede all other statements
-  (besides @charset or empty @layer) according to CSS specifications. Placing imports at the top
-  avoids browser parsing delays and resolves build-time PostCSS/Vite warnings.
-*/
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
