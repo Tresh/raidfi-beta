@@ -4,9 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import AdminLayout from "./components/admin/AdminLayout";
 
 // Route Code Splitting: Lazy load page components to minimize initial JS bundle size
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Index = lazy(() => import("./pages/Index"));
 const BetaRequest = lazy(() => import("./pages/BetaRequest"));
 const Contact = lazy(() => import("./pages/Contact"));
