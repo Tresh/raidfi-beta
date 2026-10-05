@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
 
 const Hero = () => {
   return (
@@ -10,38 +9,24 @@ const Hero = () => {
 
       <div className="container mx-auto sm:px-6 relative z-10 px-[24px]">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}>
-
+          <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-card text-xs font-medium text-muted-foreground mb-6 md:mb-8 tracking-wide">
               CONTRIBUTION INTELLIGENCE FOR WEB3
             </div>
-          </motion.div>
+          </div>
 
-          <h1 className="md:text-5xl lg:text-6xl mb-5 text-foreground tracking-tight leading-[1.08] text-4xl font-bold">
+          <h1 className="md:text-5xl lg:text-6xl mb-5 text-foreground tracking-tight leading-[1.08] text-4xl font-bold animate-in fade-in slide-in-from-bottom-4 duration-500">
             See who actually{" "}
             <span className="text-gradient">contributes</span> to your ecosystem
           </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed font-light">
-
+          <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed font-light animate-in fade-in slide-in-from-bottom-5 duration-500 delay-100">
             RaidFi tracks contribution across X, Discord and Telegram, turns it into
             structured data, and builds a reputation record that shows who consistently
             adds value - not who posts the most.
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mx-0">
-
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mx-0 animate-in fade-in slide-in-from-bottom-6 duration-500 delay-150">
             <Button size="lg" asChild className="h-11 px-7 text-sm w-full sm:w-auto">
               <a href="/beta" className="group">
                 Request beta access
@@ -56,7 +41,7 @@ const Hero = () => {
             >
               <a href="/project-request">Apply as a project</a>
             </Button>
-          </motion.div>
+          </div>
 
           {/* <p className="mt-4 text-xs text-muted-foreground">
             No token. No wallet needed to get started.
