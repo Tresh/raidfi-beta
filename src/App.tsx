@@ -62,7 +62,7 @@ const queryClient = new QueryClient();
 const PageLoader = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
     <div className="flex items-center gap-2">
-      <img src="/logo.png" alt="RaidFi" className="w-8 h-8" />
+      <img src="/logo.png" alt="RaidFi" className="w-8 h-8" width="32" height="32" />
       <span className="text-xl font-bold text-gradient tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
         RaidFi
       </span>

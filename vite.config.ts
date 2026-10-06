@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: "esnext",
     cssCodeSplit: true,
+    sourcemap: "hidden",
     chunkSizeWarningLimit: 1000,
     modulePreload: false,
     rollupOptions: {

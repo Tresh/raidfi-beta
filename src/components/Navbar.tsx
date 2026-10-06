@@ -43,7 +43,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <img src={logo} alt="RaidFi" className="w-7 h-7" />
+            <img src={logo} alt="RaidFi" className="w-7 h-7" width="28" height="28" />
             <span className="text-base font-semibold text-gradient tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               RaidFi
             </span>
