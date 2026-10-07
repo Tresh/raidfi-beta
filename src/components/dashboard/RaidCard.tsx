@@ -70,66 +70,81 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
     <div className="space-y-3">
       <div
         ref={ref}
-        className="relative min-h-[280px] w-full max-w-2xl overflow-hidden rounded-2xl border border-primary/30 bg-card p-5 sm:p-6 text-foreground shadow-xl"
-        style={{ backgroundImage: "radial-gradient(circle at 85% 15%, hsl(var(--primary) / 0.22), transparent 45%), linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px)", backgroundSize: "100% 100%, 24px 24px, 24px 24px" }}
+        className="relative aspect-video w-full max-w-2xl overflow-hidden rounded-2xl border border-primary/30 bg-card p-4 sm:p-6 text-foreground shadow-xl flex flex-col justify-between"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 85% 15%, hsl(var(--primary) / 0.22), transparent 45%), linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px)",
+          backgroundSize: "100% 100%, 24px 24px, 24px 24px",
+        }}
       >
-        <div className="flex h-full flex-col justify-between gap-3 sm:gap-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="" className="h-7 w-7 rounded-md" crossOrigin="anonymous" />
-              <div>
-                <p className="text-sm font-bold leading-none">RaidFi</p>
-                <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Contributor ID</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="font-mono text-[11px] text-primary">#{idNo}</p>
-              <p className="text-[9px] text-muted-foreground">Since {joined}</p>
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="" className="h-6 w-6 sm:h-7 sm:w-7 rounded-md" crossOrigin="anonymous" />
+            <div>
+              <p className="text-xs sm:text-sm font-bold leading-none">RaidFi</p>
+              <p className="mt-0.5 text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Contributor ID</p>
             </div>
           </div>
+          <div className="text-right">
+            <p className="font-mono text-[10px] sm:text-[11px] text-primary">#{idNo}</p>
+            <p className="text-[8px] sm:text-[9px] text-muted-foreground">Since {joined}</p>
+          </div>
+        </div>
 
-          <div className="flex items-end justify-between gap-4">
-            <div className="min-w-0">
-              <p className="truncate text-xl font-bold sm:text-2xl">{name}</p>
-              <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                {handle && <span>{handle}</span>}
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
-                  <ShieldCheck className="h-3 w-3" /> {rep.tier.name}
+        {/* Identity & Rep Score */}
+        <div className="flex items-end justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-lg font-bold sm:text-2xl">{name}</p>
+            <div className="mt-0.5 sm:mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+              {handle && <span className="truncate">{handle}</span>}
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[9px] sm:text-[10px] font-medium text-primary">
+                <ShieldCheck className="h-3 w-3" /> {rep.tier.name}
+              </span>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="text-2xl font-bold tabular-nums leading-none sm:text-4xl">{rep.score}</p>
+            <p className="text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground">Rep / 1000</p>
+          </div>
+        </div>
+
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-4 gap-1 sm:gap-2 border-y border-border/60 py-1.5 sm:py-2">
+          {[
+            ["Total XP", data.totalXp.toLocaleString()],
+            ["Contributions", raids],
+            ["Consistency", `${rep.activeWeeks}/12 wks`],
+            ["Streak", `${rep.currentStreakWeeks}w`],
+          ].map(([l, v]) => (
+            <div key={l as string} className="min-w-0">
+              <p className="truncate text-[8px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">{l}</p>
+              <p className="truncate text-xs font-semibold tabular-nums sm:text-base">{v}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Top Projects */}
+        <div className="min-w-0">
+          <p className="mb-1 text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground">Top projects</p>
+          <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
+            {projects.length ? (
+              projects.map((x) => (
+                <span
+                  key={x.name}
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background/60 px-2 py-0.5 text-[9px] sm:text-[10px] whitespace-nowrap"
+                >
+                  <span>{x.name}</span>
+                  <span className="text-muted-foreground">· {x.count}</span>
                 </span>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold tabular-nums leading-none sm:text-4xl">{rep.score}</p>
-              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Rep / 1000</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-2 border-y border-border/60 py-2">
-            {[
-              ["Total XP", data.totalXp.toLocaleString()],
-              ["Contributions", raids],
-              ["Consistency", `${rep.activeWeeks}/12 wks`],
-              ["Streak", `${rep.currentStreakWeeks}w`],
-            ].map(([l, v]) => (
-              <div key={l as string}>
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{l}</p>
-                <p className="text-sm font-semibold tabular-nums sm:text-base">{v}</p>
-              </div>
-            ))}
-          </div>
-
-          <div>
-            <p className="mb-1 text-[9px] uppercase tracking-widest text-muted-foreground">Top projects</p>
-            <div className="flex flex-wrap gap-1">
-              {projects.length ? projects.map((x) => (
-                <span key={x.name} className="rounded-md border border-border bg-background/60 px-2 py-0.5 text-[10px]">
-                  {x.name} <span className="text-muted-foreground">· {x.count}</span>
-                </span>
-              )) : <span className="text-[10px] text-muted-foreground">No contributions yet</span>}
-            </div>
+              ))
+            ) : (
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground">No contributions yet</span>
+            )}
           </div>
         </div>
       </div>
+
       <div className="flex flex-wrap gap-2">
         <Button size="sm" onClick={share}><XIcon />Share on X</Button>
         <Button size="sm" variant="outline" onClick={download} disabled={busy}>
