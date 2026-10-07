@@ -70,10 +70,10 @@ export const RaidCard = ({ data }: { data: ContributorData }) => {
     <div className="space-y-3">
       <div
         ref={ref}
-        className="relative aspect-video w-full max-w-2xl overflow-hidden rounded-2xl border border-primary/30 bg-card p-[4%] text-foreground shadow-xl"
+        className="relative min-h-[280px] w-full max-w-2xl overflow-hidden rounded-2xl border border-primary/30 bg-card p-5 sm:p-6 text-foreground shadow-xl"
         style={{ backgroundImage: "radial-gradient(circle at 85% 15%, hsl(var(--primary) / 0.22), transparent 45%), linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px)", backgroundSize: "100% 100%, 24px 24px, 24px 24px" }}
       >
-        <div className="flex h-full flex-col justify-between">
+        <div className="flex h-full flex-col justify-between gap-3 sm:gap-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="" className="h-7 w-7 rounded-md" crossOrigin="anonymous" />
