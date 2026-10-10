@@ -4,8 +4,14 @@ import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, ScoreMeter, StatCard } from "@/components/dashboard/Primitives";
 import { TIERS } from "@/lib/reputation";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { CreditCard, Loader2, ShieldCheck } from "lucide-react";
 import RaidCard from "@/components/dashboard/RaidCard";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const Reputation = () => {
   useSEO({
@@ -30,10 +36,8 @@ const Reputation = () => {
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <div className="space-y-4">
-          <Panel title="Your RaidCard" description="Your contributor ID. Share it on X with your invite link.">
-            <RaidCard data={data} />
-          </Panel>
+        <div className="space-y-4 pb-16">
+          {/* Reputation score and tier card - Primary focus at top */}
           <div className="bg-card border border-border rounded-lg p-5 lg:p-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-5">
               <div>
@@ -115,6 +119,30 @@ const Reputation = () => {
               ))}
             </ul>
           </Panel>
+
+          {/* Contributor Card in an accordion collapsible section */}
+          <div className="bg-card border border-border rounded-lg p-4 lg:p-5">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="raidcard" className="border-none">
+                <AccordionTrigger className="hover:no-underline py-1">
+                  <div className="flex items-center gap-2.5 text-left">
+                    <div className="p-2 rounded-md bg-primary/10 text-primary">
+                      <CreditCard className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Contributor RaidCard</p>
+                      <p className="text-xs text-muted-foreground font-normal">
+                        Preview, download, or share your RaidFi contributor ID card on X.
+                      </p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-4 pb-0">
+                  <RaidCard data={data} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </div>
       )}
     </DashboardLayout>
