@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ProjectLayout from "@/components/project/ProjectLayout";
+import DeveloperApiPanel from "@/components/project/DeveloperApiPanel";
 import { PageHeader, Panel } from "@/components/dashboard/Primitives";
 import { useProject } from "@/hooks/useProject";
 import { supabase } from "@/integrations/supabase/client";
@@ -286,6 +287,7 @@ ${challenge}`;
           </p>
         </Panel>
 
+        {project?.id && <DeveloperApiPanel projectId={project.id} canEdit={!!canEdit} />}
       </div>
     </ProjectLayout>
   );
