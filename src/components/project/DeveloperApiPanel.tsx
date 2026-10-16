@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ApiUsagePanel from "./ApiUsagePanel";
 
 type Key = { id: string; name: string; key_prefix: string; scope: string; created_at: string; last_used_at: string | null; revoked_at: string | null };
 
@@ -36,6 +37,7 @@ export default function DeveloperApiPanel({ projectId, canEdit }: { projectId: s
   const copy = (t: string) => { navigator.clipboard.writeText(t); toast({ title: "Copied" }); };
 
   return (
+    <div className="space-y-4">
     <Panel title="Developer API">
       <div className="space-y-4 text-sm">
         <p className="text-muted-foreground text-xs">
@@ -82,9 +84,12 @@ GET   /leaderboard?limit=25
 GET   /contributions?status=pending   (full)
 POST  /contributions {"email","post_url"}   (full)
 PATCH /contributions/:id/verify {"status","points"}   (full)
-GET   /metrics   (full)`}</pre>
+GET   /metrics   (full)
+Idempotency-Key: <uuid>   (optional, on writes)`}</pre>
         </div>
       </div>
     </Panel>
+    <ApiUsagePanel projectId={projectId} keyNames={Object.fromEntries(keys.map((k) => [k.id, k.name]))} />
+    </div>
   );
 }
