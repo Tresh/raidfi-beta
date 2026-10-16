@@ -87,10 +87,11 @@ Deno.serve(async (req) => {
   }
 
   const res = await handle(req, url, path, key);
+  const copy = res.clone();
   const out = new Response(res.body, { status: res.status, headers: { ...Object.fromEntries(res.headers), ...rl } });
   log(res.status);
   if (write && idem && res.status < 500) {
-    const body = await res.clone().json().catch(() => ({}));
+    const body = await copy.json().catch(() => ({}));
     await db.from("project_api_idempotency").upsert({ api_key_id: key.id, idem_key: idem, status_code: res.status, response: body }, { onConflict: "api_key_id,idem_key", ignoreDuplicates: true });
   }
   return out;
@@ -172,4 +173,4 @@ async function handle(req: Request, url: URL, path: string, key: any): Promise<R
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
-});
+}
