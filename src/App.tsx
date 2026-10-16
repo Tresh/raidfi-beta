@@ -11,6 +11,7 @@ const Index = lazy(() => import("./pages/Index"));
 const BetaRequest = lazy(() => import("./pages/BetaRequest"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Login = lazy(() => import("./pages/Login"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const EmailVerified = lazy(() => import("./pages/EmailVerified"));
@@ -91,6 +92,7 @@ const App = () => (
             <Route path="/waitlist/confirmed" element={<Navigate to="/beta" replace />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/signup" element={<Login />} />
             <Route path="/beta-access" element={<BetaAccessRedirect />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
