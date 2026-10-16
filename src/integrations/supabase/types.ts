@@ -695,6 +695,38 @@ export type Database = {
           },
         ]
       }
+      project_api_idempotency: {
+        Row: {
+          api_key_id: string
+          created_at: string
+          idem_key: string
+          response: Json
+          status_code: number
+        }
+        Insert: {
+          api_key_id: string
+          created_at?: string
+          idem_key: string
+          response: Json
+          status_code: number
+        }
+        Update: {
+          api_key_id?: string
+          created_at?: string
+          idem_key?: string
+          response?: Json
+          status_code?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_api_idempotency_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "project_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_api_keys: {
         Row: {
           created_at: string
@@ -738,6 +770,89 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_api_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          endpoint: string
+          id: number
+          idempotency_key: string | null
+          method: string
+          project_id: string
+          rate_limited: boolean
+          response_time_ms: number
+          status_code: number
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint: string
+          id?: never
+          idempotency_key?: string | null
+          method: string
+          project_id: string
+          rate_limited?: boolean
+          response_time_ms?: number
+          status_code: number
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: never
+          idempotency_key?: string | null
+          method?: string
+          project_id?: string
+          rate_limited?: boolean
+          response_time_ms?: number
+          status_code?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_api_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "project_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_api_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_api_rate: {
+        Row: {
+          api_key_id: string
+          bucket: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          api_key_id: string
+          bucket: string
+          hits?: number
+          window_start: string
+        }
+        Update: {
+          api_key_id?: string
+          bucket?: string
+          hits?: number
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_api_rate_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "project_api_keys"
             referencedColumns: ["id"]
           },
         ]
@@ -1573,6 +1688,7 @@ export type Database = {
       }
     }
     Functions: {
+      api_rate_hit: { Args: { _bucket: string; _key: string }; Returns: number }
       check_beta_code:
         | { Args: { _code: string }; Returns: Json }
         | { Args: { _code: string; _email?: string }; Returns: Json }

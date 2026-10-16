@@ -46,8 +46,11 @@ async function reputationFor(identifier: string) {
   };
 }
 
+const LIMITS = { read: 60, write: 30 };
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  const t0 = Date.now();
   const raw = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "") || req.headers.get("x-api-key") || "";
   if (!raw.startsWith("rf_live_")) return json({ error: "Missing API key" }, 401);
   const { data: key } = await db.from("project_api_keys").select("*").eq("key_hash", await sha256(raw)).is("revoked_at", null).maybeSingle();
@@ -56,9 +59,50 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*\/public-api/, "").replace(/\/+$/, "") || "/";
+  const idem = req.headers.get("idempotency-key")?.slice(0, 200) || null;
+  const write = req.method === "POST" && path !== "/reputation/batch" || req.method === "PATCH";
+  const limit = write ? LIMITS.write : LIMITS.read;
+
+  const log = (status: number, limited = false) =>
+    db.from("project_api_logs").insert({
+      project_id: key.project_id, api_key_id: key.id, endpoint: path.replace(/\/[0-9a-f-]{36}/g, "/:id").slice(0, 120),
+      method: req.method, status_code: status, response_time_ms: Date.now() - t0, rate_limited: limited, idempotency_key: idem,
+    }).then(() => {});
+
+  const { data: hits } = await db.rpc("api_rate_hit", { _key: key.id, _bucket: write ? "write" : "read" });
+  const reset = 60 - new Date().getUTCSeconds();
+  const rl = { "X-RateLimit-Limit": String(limit), "X-RateLimit-Remaining": String(Math.max(0, limit - (hits ?? 0))), "X-RateLimit-Reset": String(reset) };
+  if ((hits ?? 0) > limit) {
+    log(429, true);
+    return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_after: reset }), {
+      status: 429, headers: { ...cors, ...rl, "Retry-After": String(reset), "Content-Type": "application/json" } });
+  }
+
+  if (write && idem) {
+    const { data: prev } = await db.from("project_api_idempotency").select("status_code,response").eq("api_key_id", key.id).eq("idem_key", idem).maybeSingle();
+    if (prev) {
+      log(prev.status_code);
+      return new Response(JSON.stringify(prev.response), { status: prev.status_code, headers: { ...cors, ...rl, "Idempotent-Replay": "true", "Content-Type": "application/json" } });
+    }
+  }
+
+  const res = await handle(req, url, path, key);
+  const copy = res.clone();
+  const out = new Response(res.body, { status: res.status, headers: { ...Object.fromEntries(res.headers), ...rl } });
+  log(res.status);
+  if (write && idem && res.status < 500) {
+    const body = await copy.json().catch(() => ({}));
+    await db.from("project_api_idempotency").upsert({ api_key_id: key.id, idem_key: idem, status_code: res.status, response: body }, { onConflict: "api_key_id,idem_key", ignoreDuplicates: true });
+  }
+  return out;
+});
+
+// deno-lint-ignore no-explicit-any
+async function handle(req: Request, url: URL, path: string, key: any): Promise<Response> {
   const parts = path.split("/").filter(Boolean);
   const full = key.scope === "full";
   const needFull = () => json({ error: "This key only has the reputation scope" }, 403);
+
 
   try {
     // ---- Reputation scope ----
@@ -129,4 +173,4 @@ Deno.serve(async (req) => {
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
-});
+}
