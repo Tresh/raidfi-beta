@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://wuxptfqxiymierorbfzz.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "raidfi",
+      "version": "0.1.0",
+      "title": "RaidFi"
+    },
+    "tools": [
+      {
+        "name": "get_my_profile",
+        "title": "Get my RaidFi profile",
+        "description": "Return the signed-in contributor's RaidFi profile: name, X handle, verification, XP and referral code.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_contributions",
+        "title": "List my contributions",
+        "description": "List the signed-in contributor's tracked X posts with status, score and XP earned.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Only return posts with this status.",
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            },
+            "limit": {
+              "default": 20,
+              "description": "Maximum posts to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_leaderboard",
+        "title": "Get leaderboard",
+        "description": "Return the RaidFi contributor leaderboard for a period.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "period": {
+              "default": "all",
+              "description": "Time period.",
+              "type": "string",
+              "enum": [
+                "all",
+                "day",
+                "week",
+                "month"
+              ]
+            },
+            "limit": {
+              "default": 25,
+              "description": "Number of entries.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

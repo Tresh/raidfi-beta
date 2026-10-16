@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PasswordInput from "@/components/auth/PasswordInput";
@@ -43,6 +44,8 @@ const Login = () => {
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   useEffect(() => {
+    const nextParam = searchParams.get("next");
+    if (nextParam) sessionStorage.setItem("raidfi_next", oauthReturnPath(nextParam));
     const codeParam = searchParams.get("code");
     const modeParam = searchParams.get("mode");
     const refParam = searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code");
@@ -71,6 +74,8 @@ const Login = () => {
 
   const routeAfterLogin = async (userId: string) => {
     const { data: isProjectAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "project_admin" as any });
+    const next = oauthReturnPath(sessionStorage.getItem("raidfi_next"));
+    if (next !== "/") { sessionStorage.removeItem("raidfi_next"); window.location.href = next; return; }
     navigate(isProjectAdmin ? "/project" : "/dashboard");
   };
 
@@ -188,7 +193,7 @@ const Login = () => {
     const pwErr = validatePassword(password);
     if (pwErr) { setLoading(false); toast({ title: "Weak password", description: pwErr, variant: "destructive" }); return; }
     const { error: suErr } = await supabase.auth.signUp({
-      email: cleanEmail, password, options: { emailRedirectTo: `${window.location.origin}/email-verified` },
+      email: cleanEmail, password, options: { emailRedirectTo: oauthReturnPath(sessionStorage.getItem("raidfi_next")) !== "/" ? new URL(oauthReturnPath(sessionStorage.getItem("raidfi_next")), window.location.origin).href : `${window.location.origin}/email-verified` },
     });
     if (suErr) {
       setLoading(false);
