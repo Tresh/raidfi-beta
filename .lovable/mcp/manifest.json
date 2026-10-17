@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "raidfi",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "RaidFi"
     },
     "tools": [
@@ -99,6 +99,210 @@
               "maximum": 100
             }
           },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "submit_contribution",
+        "title": "Submit an X post",
+        "description": "Submit one of your X posts to RaidFi for review, optionally for a specific project (by slug).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "post_url": {
+              "type": "string",
+              "pattern": "^https:\\/\\/(x|twitter)\\.com\\/[^/]+\\/status\\/\\d+"
+            },
+            "project_slug": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "post_url"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "analyze_my_performance",
+        "title": "Analyze my performance",
+        "description": "Summarize your contribution history: acceptance rate, average score, best content types, recent rejection notes and concrete tips to improve your reputation.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_project_analytics",
+        "title": "Project analytics",
+        "description": "30-day contribution analytics for a project: submissions, accepted, unique contributors, XP awarded, acceptance rate and pending queue size. Needs a full-access project key.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "pattern": "^rf_live_",
+              "description": "Your project's RaidFi API key (rf_live_...), from Project Settings → Developer API."
+            }
+          },
+          "required": [
+            "api_key"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_project_contributions",
+        "title": "List project contributions",
+        "description": "List a project's submissions with post text, author, status, scores and review notes. Use status=pending to get the review queue.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "pattern": "^rf_live_",
+              "description": "Your project's RaidFi API key (rf_live_...), from Project Settings → Developer API."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            },
+            "limit": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "required": [
+            "api_key"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "review_contribution",
+        "title": "Approve or reject a contribution",
+        "description": "Approve or reject one of your project's submissions, optionally setting XP, a 0-100 quality score and a note the contributor will see explaining the decision. Lets an AI agent review submissions automatically.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "pattern": "^rf_live_",
+              "description": "Your project's RaidFi API key (rf_live_...), from Project Settings → Developer API."
+            },
+            "contribution_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "approved",
+                "rejected"
+              ]
+            },
+            "points": {
+              "description": "XP to award when approving.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "score": {
+              "description": "Quality score 0-100.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "notes": {
+              "description": "Feedback for the contributor, e.g. why it was rejected.",
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "api_key",
+            "contribution_id",
+            "decision"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_contributor_reputation",
+        "title": "Contributor reputation",
+        "description": "Look up a contributor's RaidFi reputation (0-1000 score, tier, XP, acceptance rate, verified X) by X handle or email. Works with any project key.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "pattern": "^rf_live_",
+              "description": "Your project's RaidFi API key (rf_live_...), from Project Settings → Developer API."
+            },
+            "identifier": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "X handle or email."
+            }
+          },
+          "required": [
+            "api_key",
+            "identifier"
+          ],
           "additionalProperties": false
         },
         "outputSchema": null
