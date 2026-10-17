@@ -128,7 +128,7 @@ async function handle(req: Request, url: URL, path: string, key: any): Promise<R
     if (parts[0] === "contributions" && req.method === "GET") {
       if (!full) return needFull();
       const limit = Math.min(200, Math.max(1, Number(url.searchParams.get("limit") ?? 50)));
-      let q = db.from("contributions").select("id,user_email,post_url,post_text,status,content_type,points_earned,ai_score,manual_score,created_at")
+      let q = db.from("contributions").select("id,user_email,post_url,post_text,post_author,status,content_type,points_earned,ai_score,manual_score,ai_feedback,admin_notes,created_at")
         .eq("project_id", key.project_id).order("created_at", { ascending: false }).limit(limit);
       const st = url.searchParams.get("status");
       if (st) q = q.eq("status", st);
@@ -153,6 +153,8 @@ async function handle(req: Request, url: URL, path: string, key: any): Promise<R
       if (!["approved", "rejected"].includes(b?.status)) return json({ error: "status must be approved or rejected" }, 400);
       const upd: Record<string, unknown> = { status: b.status };
       if (Number.isInteger(b.points)) upd.points_earned = Math.max(0, Math.min(1000, b.points));
+      if (typeof b.notes === "string") upd.admin_notes = b.notes.slice(0, 1000);
+      if (typeof b.score === "number") upd.manual_score = Math.max(0, Math.min(100, b.score));
       const { data, error } = await db.from("contributions").update(upd).eq("id", parts[1]).eq("project_id", key.project_id).select("id,status,points_earned").maybeSingle();
       if (error || !data) return json({ error: "Contribution not found for this project" }, 404);
       return json(data);

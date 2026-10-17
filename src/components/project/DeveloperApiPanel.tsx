@@ -9,7 +9,7 @@ import ApiUsagePanel from "./ApiUsagePanel";
 
 type Key = { id: string; name: string; key_prefix: string; scope: string; created_at: string; last_used_at: string | null; revoked_at: string | null };
 
-const BASE = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/public-api`;
+const BASE = "https://beta.raidfi.site/api/v1";
 
 export default function DeveloperApiPanel({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
   const { toast } = useToast();
