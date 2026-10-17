@@ -25,7 +25,7 @@ export const submitContribution = defineTool({
     const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
     if (dup) throw new ToolError("This post was already submitted.");
     const { data, error } = await db.from("contributions")
-      .insert({ post_url, user_email: email.toLowerCase(), user_id: ctx.getUserId?.() ?? null, project_id, status: "pending" })
+      .insert({ post_url, user_email: email.toLowerCase(), user_id: ctx.getUserId() ?? null, project_id, status: "pending" })
       .select("id,status").single();
     if (error) throw new ToolError(error.message);
     return out({ ...data, message: "Submitted. It will be reviewed shortly." });
