@@ -137,18 +137,177 @@ var get_leaderboard_default = defineTool3({
   }
 });
 
+// src/lib/mcp/tools/project-tools.ts
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z4 } from "npm:zod@^4.6.7";
+
+// src/lib/mcp/api.ts
+import { ToolError as ToolError4 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z3 } from "npm:zod@^4.6.7";
+var env = (n) => globalThis.Deno?.env?.get?.(n) ?? globalThis.process?.env?.[n];
+var apiKeySchema = z3.string().regex(/^rf_live_/).describe("Your project's RaidFi API key (rf_live_...), from Project Settings \u2192 Developer API.");
+async function callApi(key, path, init = {}) {
+  const base = (env("SUPABASE_URL") ?? env("VITE_SUPABASE_URL") ?? "").replace(/\/$/, "");
+  const res = await fetch(`${base}/functions/v1/public-api${path}`, {
+    method: init.method ?? "GET",
+    headers: { "x-api-key": key, "Content-Type": "application/json", ...init.idem ? { "Idempotency-Key": init.idem } : {} },
+    body: init.body ? JSON.stringify(init.body) : void 0
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ToolError4(data.error ?? `RaidFi API error ${res.status}`);
+  return data;
+}
+var out = (data) => ({ content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: data });
+
+// src/lib/mcp/tools/project-tools.ts
+var getProjectAnalytics = defineTool4({
+  name: "get_project_analytics",
+  title: "Project analytics",
+  description: "30-day contribution analytics for a project: submissions, accepted, unique contributors, XP awarded, acceptance rate and pending queue size. Needs a full-access project key.",
+  inputSchema: { api_key: apiKeySchema },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ api_key }) => {
+    const m = await callApi(api_key, "/metrics");
+    const pending = await callApi(api_key, "/contributions?status=pending&limit=200");
+    return out({ ...m, acceptance_rate: m.contributions ? Math.round(m.accepted / m.contributions * 100) : 0, pending_review: pending.contributions.length });
+  }
+});
+var listProjectContributions = defineTool4({
+  name: "list_project_contributions",
+  title: "List project contributions",
+  description: "List a project's submissions with post text, author, status, scores and review notes. Use status=pending to get the review queue.",
+  inputSchema: {
+    api_key: apiKeySchema,
+    status: z4.enum(["pending", "approved", "rejected"]).optional(),
+    limit: z4.number().int().min(1).max(200).default(50)
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ api_key, status, limit }) => out(await callApi(api_key, `/contributions?limit=${limit}${status ? `&status=${status}` : ""}`))
+});
+var reviewContribution = defineTool4({
+  name: "review_contribution",
+  title: "Approve or reject a contribution",
+  description: "Approve or reject one of your project's submissions, optionally setting XP, a 0-100 quality score and a note the contributor will see explaining the decision. Lets an AI agent review submissions automatically.",
+  inputSchema: {
+    api_key: apiKeySchema,
+    contribution_id: z4.string().uuid(),
+    decision: z4.enum(["approved", "rejected"]),
+    points: z4.number().int().min(0).max(1e3).optional().describe("XP to award when approving."),
+    score: z4.number().min(0).max(100).optional().describe("Quality score 0-100."),
+    notes: z4.string().max(1e3).optional().describe("Feedback for the contributor, e.g. why it was rejected.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  handler: async ({ api_key, contribution_id, decision, points, score, notes }) => out(await callApi(api_key, `/contributions/${contribution_id}/verify`, {
+    method: "PATCH",
+    body: { status: decision, points, score, notes },
+    idem: `mcp-${contribution_id}-${decision}`
+  }))
+});
+var getContributorReputation = defineTool4({
+  name: "get_contributor_reputation",
+  title: "Contributor reputation",
+  description: "Look up a contributor's RaidFi reputation (0-1000 score, tier, XP, acceptance rate, verified X) by X handle or email. Works with any project key.",
+  inputSchema: { api_key: apiKeySchema, identifier: z4.string().min(1).max(200).describe("X handle or email.") },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ api_key, identifier }) => out(await callApi(api_key, `/reputation/${encodeURIComponent(identifier.replace(/^@/, ""))}`))
+});
+
+// src/lib/mcp/tools/contributor-tools.ts
+import { defineTool as defineTool5, ToolError as ToolError5 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z5 } from "npm:zod@^4.6.7";
+var submitContribution = defineTool5({
+  name: "submit_contribution",
+  title: "Submit an X post",
+  description: "Submit one of your X posts to RaidFi for review, optionally for a specific project (by slug).",
+  inputSchema: {
+    post_url: z5.string().regex(/^https:\/\/(x|twitter)\.com\/[^/]+\/status\/\d+/, "Must be an X post link"),
+    project_slug: z5.string().max(100).optional()
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  handler: async ({ post_url, project_slug }, ctx) => {
+    const db = supabaseForUser(ctx);
+    const email = ctx.getUserEmail();
+    if (!email) throw new ToolError5("Your account has no email.");
+    let project_id = null;
+    if (project_slug) {
+      const { data: data2 } = await db.from("projects").select("id").eq("slug", project_slug).maybeSingle();
+      if (!data2) throw new ToolError5(`No project with slug "${project_slug}".`);
+      project_id = data2.id;
+    }
+    const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
+    if (dup) throw new ToolError5("This post was already submitted.");
+    const { data, error } = await db.from("contributions").insert({ post_url, user_email: email.toLowerCase(), user_id: ctx.getUserId() ?? null, project_id, status: "pending" }).select("id,status").single();
+    if (error) throw new ToolError5(error.message);
+    return out({ ...data, message: "Submitted. It will be reviewed shortly." });
+  }
+});
+var analyzeMyPerformance = defineTool5({
+  name: "analyze_my_performance",
+  title: "Analyze my performance",
+  description: "Summarize your contribution history: acceptance rate, average score, best content types, recent rejection notes and concrete tips to improve your reputation.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async (_i, ctx) => {
+    const db = supabaseForUser(ctx);
+    const { data, error } = await db.from("contributions").select("status,content_type,points_earned,ai_score,manual_score,ai_feedback,admin_notes,created_at").ilike("user_email", ctx.getUserEmail() ?? "").order("created_at", { ascending: false }).limit(300);
+    if (error) throw new ToolError5(error.message);
+    const rows = data ?? [];
+    const done = rows.filter((r) => r.status !== "pending");
+    const ok = rows.filter((r) => r.status === "approved");
+    const scores = ok.map((r) => r.manual_score ?? r.ai_score).filter((s) => s != null);
+    const byType = {};
+    for (const r of rows) {
+      const t = byType[r.content_type] ??= { total: 0, approved: 0, xp: 0 };
+      t.total++;
+      if (r.status === "approved") {
+        t.approved++;
+        t.xp += r.points_earned ?? 0;
+      }
+    }
+    const rejection_notes = rows.filter((r) => r.status === "rejected").map((r) => r.admin_notes || r.ai_feedback).filter(Boolean).slice(0, 10);
+    const acceptance = done.length ? Math.round(ok.length / done.length * 100) : 0;
+    const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+    const tips = [];
+    if (!rows.length) tips.push("Submit your first X post about a project to start building reputation.");
+    if (acceptance < 60 && done.length >= 3) tips.push("Many posts are rejected \u2014 read the notes below and focus on original, detailed posts about the project.");
+    if (avg != null && avg < 60) tips.push("Your quality score is low \u2014 add your own analysis, visuals or threads instead of short reposts.");
+    const best = Object.entries(byType).sort((a, b) => b[1].xp - a[1].xp)[0];
+    if (best) tips.push(`Your "${best[0]}" posts earn the most XP \u2014 do more of these.`);
+    return out({
+      total: rows.length,
+      pending: rows.length - done.length,
+      acceptance_rate: acceptance,
+      average_score: avg,
+      xp_earned: ok.reduce((s, r) => s + (r.points_earned ?? 0), 0),
+      by_content_type: byType,
+      rejection_notes,
+      tips
+    });
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "wuxptfqxiymierorbfzz";
 var mcp_default = defineMcp({
   name: "raidfi",
   title: "RaidFi",
-  version: "0.1.0",
-  instructions: "Tools for RaidFi contributors: read your profile and XP, list your tracked X posts, and view the leaderboard.",
+  version: "0.2.0",
+  instructions: "RaidFi contribution intelligence. Contributors: submit X posts, list your submissions with review notes, analyze your performance, check profile and leaderboard. Projects: pass your project API key (rf_live_...) to read analytics, list submissions, approve or reject them with XP and notes, and check any contributor's reputation.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [get_my_profile_default, list_my_contributions_default, get_leaderboard_default]
+  tools: [
+    get_my_profile_default,
+    list_my_contributions_default,
+    get_leaderboard_default,
+    submitContribution,
+    analyzeMyPerformance,
+    getProjectAnalytics,
+    listProjectContributions,
+    reviewContribution,
+    getContributorReputation
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts
