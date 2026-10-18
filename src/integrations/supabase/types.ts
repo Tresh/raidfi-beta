@@ -378,6 +378,27 @@ export type Database = {
           },
         ]
       }
+      docs_content: {
+        Row: {
+          body: string
+          slug: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body: string
+          slug: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body?: string
+          slug?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1759,6 +1780,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_docs_admin: { Args: never; Returns: boolean }
       is_project_admin: {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
