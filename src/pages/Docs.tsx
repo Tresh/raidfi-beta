@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Loader2, Menu } from "lucide-react";
+import { Check, Copy, Loader2, Menu } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,7 @@ const SideNav = ({ active, onPick }: { active: string; onPick?: () => void }) =>
       </div>
     ))}
     <div className="border-t border-border pt-4">
-      <Link to="/changelog" onClick={onPick} className="block px-2 py-1.5 text-muted-foreground hover:text-foreground">Changelog</Link>
+      <Link to="/docs/changelog" onClick={onPick} className="block px-2 py-1.5 text-muted-foreground hover:text-foreground">Changelog</Link>
     </div>
   </nav>
 );
@@ -39,6 +39,15 @@ const Docs = () => {
   const [open, setOpen] = useState(false);
   const [wp, setWp] = useState<string | null>(null);
   const [wpLoading, setWpLoading] = useState(false);
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [copied, setCopied] = useState(false);
+
+  const loadOverride = useCallback(async (slug: string) => {
+    const { data } = await supabase.from("docs_content").select("body").eq("slug", slug).maybeSingle();
+    if (data?.body) setOverrides((prev) => ({ ...prev, [slug]: data.body }));
+  }, []);
+
+  useEffect(() => { loadOverride(slug); }, [slug, loadOverride]);
 
   useSEO({ title: `${doc?.title ?? "Docs"} - RaidFi Docs`, description: doc?.summary ?? "RaidFi documentation", path: `/docs/${slug}` });
 
@@ -53,7 +62,17 @@ const Docs = () => {
   if (!doc) return <Navigate to="/docs/introduction" replace />;
   const idx = DOCS.indexOf(doc);
   const prev = DOCS[idx - 1], next = DOCS[idx + 1];
-  const body = slug === "whitepaper" ? wp ?? "" : doc.body;
+  const body = overrides[slug] ?? (slug === "whitepaper" ? wp ?? "" : doc.body);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(body);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,7 +90,20 @@ const Docs = () => {
               <SheetContent side="left" className="w-72 overflow-y-auto pt-10"><SideNav active={slug} onPick={() => setOpen(false)} /></SheetContent>
             </Sheet>
           </div>
-          <p className="mb-2 text-xs text-muted-foreground">{doc.section}</p>
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground">{doc.section}</p>
+            {wpLoading ? null : (
+              <button
+                type="button"
+                onClick={handleCopy}
+                aria-label="Copy this page"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Copied" : "Copy page"}
+              </button>
+            )}
+          </div>
           {wpLoading ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : (
             <article className="prose prose-invert max-w-none whitepaper-content">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ href, children }) => <a href={sanitizeUrl(href)}>{children}</a> }}>

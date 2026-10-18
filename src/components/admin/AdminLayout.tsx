@@ -5,6 +5,7 @@ import {
   BarChart3,
   Building2,
   Coins,
+  FileText,
   Home,
   KeyRound,
   LayoutDashboard,
@@ -35,6 +36,7 @@ import logo from "@/assets/logo.png";
 
 const allNavItems = [
   { label: "Dashboard", to: "/admin", permKey: "dashboard", icon: LayoutDashboard, end: true },
+  { label: "Docs", to: "/admin/whitepaper", permKey: "whitepaper", icon: FileText },
   { label: "Contributors", to: "/admin/contributors", permKey: "contributors", icon: Users },
   { label: "Manage Projects", to: "/admin/manage-projects", permKey: "manage-projects", icon: Building2 },
   { label: "Project Requests", to: "/admin/projects", permKey: "projects", icon: Building2 },
