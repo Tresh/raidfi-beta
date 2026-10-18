@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "raidfi",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "RaidFi"
     },
     "tools": [
@@ -302,6 +302,49 @@
           "required": [
             "api_key",
             "identifier"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_docs",
+        "title": "List docs",
+        "description": "List every RaidFi documentation page (slug, section, title, summary).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "read_doc",
+        "title": "Read doc",
+        "description": "Read one RaidFi documentation page as Markdown, including the live whitepaper (slug 'whitepaper').",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Doc slug from list_docs."
+            }
+          },
+          "required": [
+            "slug"
           ],
           "additionalProperties": false
         },

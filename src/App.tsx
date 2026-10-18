@@ -49,7 +49,7 @@ const ProjectAnalytics = lazy(() => import("./pages/project/ProjectAnalytics"));
 const ProjectAIAnalyst = lazy(() => import("./pages/project/ProjectAIAnalyst"));
 const ProjectSettings = lazy(() => import("./pages/project/ProjectSettings"));
 
-const Whitepaper = lazy(() => import("./pages/Whitepaper"));
+const Docs = lazy(() => import("./pages/Docs"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -98,7 +98,9 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-verified" element={<EmailVerified />} />
-            <Route path="/whitepaper" element={<Whitepaper />} />
+            <Route path="/whitepaper" element={<Navigate to="/docs/whitepaper" replace />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/docs/:slug" element={<Docs />} />
             <Route path="/changelog" element={<Changelog />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

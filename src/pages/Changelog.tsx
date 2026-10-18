@@ -15,6 +15,19 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    date: "October 18, 2026",
+    version: "v0.3.0-beta",
+    title: "Docs, Developer API & AI Assistants",
+    changes: [
+      { label: "Docs", description: "New docs hub with guides, the whitepaper, the Developer API reference and Build with AI." },
+      { label: "Developer API", description: "Project keys to read reputation, list and review submissions, award XP and read analytics, with rate limits and idempotency." },
+      { label: "AI assistants (MCP)", description: "Connect Claude, ChatGPT or Cursor to submit posts, review submissions, analyze performance and read the docs." },
+      { label: "Project-linked submissions", description: "Every submission is linked to a project on the site, in Telegram, the API and MCP." },
+      { label: "RaidCard & composer", description: "Shareable contributor ID card, post preview and instant X verification prompts." },
+      { label: "Sign-in", description: "One sign-in and sign-up form with Google, plus referral invite codes." },
+    ],
+  },
+  {
     date: "October 1, 2026",
     version: "v0.2.0-beta",
     title: "Google Sign-Up & Referral System Fixes",

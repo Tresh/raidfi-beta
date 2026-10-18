@@ -137,15 +137,232 @@ var get_leaderboard_default = defineTool3({
   }
 });
 
-// src/lib/mcp/tools/project-tools.ts
+// src/lib/mcp/tools/list-docs.ts
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@3.1.0";
-import { z as z4 } from "npm:zod@^4.6.7";
+
+// src/lib/docs/content.ts
+var API = "https://beta.raidfi.site/api/v1";
+var DOCS = [
+  {
+    slug: "introduction",
+    section: "Getting started",
+    title: "Introduction",
+    summary: "What RaidFi is and who it is for.",
+    body: `# Introduction
+
+RaidFi is a contribution intelligence and reputation layer for Web3 communities.
+
+- **Contributors** submit the X posts they publish about projects, earn XP when submissions are approved and build a portable reputation score.
+- **Projects** see who genuinely supports them, review submissions, award XP and read analytics.
+
+Every submission is linked to a **project** (or to RaidFi itself), so projects only see the work done for them.`
+  },
+  {
+    slug: "contributors",
+    section: "Getting started",
+    title: "For contributors",
+    summary: "Sign up, connect accounts, submit posts and grow reputation.",
+    body: `# For contributors
+
+1. **Sign up** at beta.raidfi.site/login with Google or email. New members enter a beta code (or are accepted automatically when auto-accept is on).
+2. **Connect X** in Dashboard \u2192 Settings so we can confirm your posts are yours.
+3. **Connect Telegram** to submit from the bot with \`/submit <link>\`.
+4. **Submit a post** with the + button. Pick the project the post is about.
+5. **Get reviewed**. Approved posts earn XP; rejected posts include notes on what to improve.
+6. **Share your RaidCard** from the Reputation page.
+7. **Invite friends** with your five one-time codes on the Referrals page.`
+  },
+  {
+    slug: "projects",
+    section: "Getting started",
+    title: "For projects",
+    summary: "Join, manage submissions, analytics and the AI Analyst.",
+    body: `# For projects
+
+1. **Request access** through the project request form.
+2. **Project workspace** (/project): overview, contributors, activity, evaluation, analytics and the AI Analyst.
+3. **Review submissions**: approve or reject, award XP and leave notes.
+4. **Telegram**: add the bot to your group and send \`/connectproject\` to post new submissions there.
+5. **Developer API & AI**: create API keys in Project Settings \u2192 Developer API, or connect your AI assistant through MCP.`
+  },
+  {
+    slug: "submissions",
+    section: "Getting started",
+    title: "Submissions & projects",
+    summary: "How a submission is linked to a project.",
+    body: `# Submissions & projects
+
+Each submission carries a \`project_id\`. Contributors choose the project on the website, in the Telegram bot, through the API or through MCP. Posts made in a connected project's Telegram group are linked to that project automatically. Submissions without a project belong to RaidFi.
+
+Projects can only list, review and read analytics for their own submissions.`
+  },
+  {
+    slug: "whitepaper",
+    section: "Whitepaper",
+    title: "Whitepaper",
+    summary: "The live RaidFi whitepaper.",
+    body: ""
+    // loaded live from the whitepaper editor
+  },
+  {
+    slug: "api-overview",
+    section: "Developer API",
+    title: "Overview & authentication",
+    summary: "Base URL, keys, scopes, limits and idempotency.",
+    body: `# Developer API
+
+**Base URL:** \`${API}\`
+
+## Authentication
+Send your project key in \`x-api-key: rf_live_...\` or \`Authorization: Bearer rf_live_...\`. Create and revoke keys in Project Settings \u2192 Developer API.
+
+## Scopes
+- **Reputation only** \u2014 read reputation and leaderboard.
+- **Full access** \u2014 also list, submit and review your project's submissions and read metrics.
+
+## Limits
+Read and write requests are rate limited per key. A limited request returns \`429\`.
+
+## Idempotency
+Send \`Idempotency-Key: <unique>\` on POST requests. Retrying with the same key returns the original result instead of creating a duplicate.
+
+## Errors
+JSON \`{ "error": "message" }\` with status 400, 401, 403, 404 or 429.`
+  },
+  {
+    slug: "api-reputation",
+    section: "Developer API",
+    title: "Reputation",
+    summary: "Read a contributor's reputation and the leaderboard.",
+    body: `# Reputation
+
+RaidFi owns the scoring model; every project reads the same score.
+
+\`\`\`bash
+curl ${API}/reputation/<x_handle> -H "x-api-key: rf_live_..."
+curl -X POST ${API}/reputation/batch -H "x-api-key: rf_live_..." \\
+  -H "Content-Type: application/json" -d '{"handles":["alice","bob"]}'
+curl "${API}/leaderboard?period=week" -H "x-api-key: rf_live_..."
+\`\`\``
+  },
+  {
+    slug: "api-contributions",
+    section: "Developer API",
+    title: "Submissions",
+    summary: "List, submit, approve and reject your project's submissions.",
+    body: `# Submissions (full access)
+
+\`\`\`bash
+# List (filter by status: pending, approved, rejected)
+curl "${API}/contributions?status=pending" -H "x-api-key: rf_live_..."
+
+# Approve with XP, score and notes
+curl -X POST ${API}/contributions/<id>/verify -H "x-api-key: rf_live_..." \\
+  -H "Content-Type: application/json" -H "Idempotency-Key: review-123" \\
+  -d '{"status":"approved","points":50,"score":80,"notes":"Clear breakdown"}'
+
+# Reject with feedback
+curl -X POST ${API}/contributions/<id>/verify -H "x-api-key: rf_live_..." \\
+  -H "Content-Type: application/json" -d '{"status":"rejected","notes":"Off-topic"}'
+\`\`\`
+
+Points are clamped to 0\u20131000 and score to 0\u2013100. Submissions are always linked to the key's project.`
+  },
+  {
+    slug: "api-metrics",
+    section: "Developer API",
+    title: "Analytics",
+    summary: "30-day project metrics.",
+    body: `# Analytics
+
+\`\`\`bash
+curl ${API}/metrics -H "x-api-key: rf_live_..."
+\`\`\`
+
+Returns submission counts by status, active contributors and XP awarded over the last 30 days. Usage of your keys (volume, errors, limits) is shown in Project Settings.`
+  },
+  {
+    slug: "mcp",
+    section: "Build with AI",
+    title: "Connect an AI assistant (MCP)",
+    summary: "Use RaidFi from Claude, ChatGPT, Cursor and other MCP clients.",
+    body: `# Connect an AI assistant (MCP)
+
+**Server URL:** \`https://beta.raidfi.site/mcp\`
+
+Add it as a custom connector in your AI client and sign in with your RaidFi account.
+
+## Contributor tools
+- \`get_my_profile\`, \`list_my_contributions\` (with review notes), \`submit_contribution\` (choose a project), \`analyze_my_performance\`, \`get_leaderboard\`.
+
+## Project tools (pass your rf_live_ key)
+- \`get_project_analytics\`, \`list_project_contributions\`, \`review_contribution\` (approve/reject with XP and notes), \`get_contributor_reputation\`.
+
+## Docs tools
+- \`list_docs\` and \`read_doc\` let your assistant read these docs, including the whitepaper.
+
+Example prompt: *"List my pending submissions and approve the ones that explain our product clearly with 40 XP."*`
+  },
+  {
+    slug: "build-with-ai",
+    section: "Build with AI",
+    title: "Build with AI",
+    summary: "Ideas for agents and apps built on RaidFi.",
+    body: `# Build with AI
+
+- **Review agent** \u2014 an assistant that reads pending submissions, scores them against your guidelines and approves or rejects with notes.
+- **Community dashboard** \u2014 your own admin view built on the Submissions and Analytics endpoints.
+- **Reputation gate** \u2014 check a wallet holder's X handle reputation before allowlists or roles.
+- **Coach** \u2014 contributors ask their assistant what to improve based on past review notes.
+
+Point your coding assistant at the MCP server so it can read these docs while it builds.`
+  }
+];
+var getDoc = (slug) => DOCS.find((d) => d.slug === slug);
+
+// src/lib/mcp/tools/list-docs.ts
+var list_docs_default = defineTool4({
+  name: "list_docs",
+  title: "List docs",
+  description: "List every RaidFi documentation page (slug, section, title, summary).",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: () => {
+    const docs = DOCS.map(({ slug, section, title, summary }) => ({ slug, section, title, summary }));
+    return { content: [{ type: "text", text: JSON.stringify(docs) }], structuredContent: { docs } };
+  }
+});
+
+// src/lib/mcp/tools/read-doc.ts
+import { defineTool as defineTool5, ToolError as ToolError4 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z3 } from "npm:zod@^4.6.7";
+var read_doc_default = defineTool5({
+  name: "read_doc",
+  title: "Read doc",
+  description: "Read one RaidFi documentation page as Markdown, including the live whitepaper (slug 'whitepaper').",
+  inputSchema: { slug: z3.string().min(1).describe("Doc slug from list_docs.") },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ slug }, ctx) => {
+    const doc = getDoc(slug);
+    if (!doc) throw new ToolError4(`Unknown doc '${slug}'. Use list_docs.`);
+    let body = doc.body;
+    if (slug === "whitepaper") {
+      const { data } = await supabaseForUser(ctx).from("whitepaper_live").select("content").eq("id", "live").maybeSingle();
+      body = data?.content ?? "Whitepaper not available.";
+    }
+    return { content: [{ type: "text", text: body }], structuredContent: { slug, title: doc.title, markdown: body } };
+  }
+});
+
+// src/lib/mcp/tools/project-tools.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z5 } from "npm:zod@^4.6.7";
 
 // src/lib/mcp/api.ts
-import { ToolError as ToolError4 } from "npm:@lovable.dev/mcp-js@3.1.0";
-import { z as z3 } from "npm:zod@^4.6.7";
+import { ToolError as ToolError5 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z4 } from "npm:zod@^4.6.7";
 var env = (n) => globalThis.Deno?.env?.get?.(n) ?? globalThis.process?.env?.[n];
-var apiKeySchema = z3.string().regex(/^rf_live_/).describe("Your project's RaidFi API key (rf_live_...), from Project Settings \u2192 Developer API.");
+var apiKeySchema = z4.string().regex(/^rf_live_/).describe("Your project's RaidFi API key (rf_live_...), from Project Settings \u2192 Developer API.");
 async function callApi(key, path, init = {}) {
   const base = (env("SUPABASE_URL") ?? env("VITE_SUPABASE_URL") ?? "").replace(/\/$/, "");
   const res = await fetch(`${base}/functions/v1/public-api${path}`, {
@@ -154,13 +371,13 @@ async function callApi(key, path, init = {}) {
     body: init.body ? JSON.stringify(init.body) : void 0
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ToolError4(data.error ?? `RaidFi API error ${res.status}`);
+  if (!res.ok) throw new ToolError5(data.error ?? `RaidFi API error ${res.status}`);
   return data;
 }
 var out = (data) => ({ content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: data });
 
 // src/lib/mcp/tools/project-tools.ts
-var getProjectAnalytics = defineTool4({
+var getProjectAnalytics = defineTool6({
   name: "get_project_analytics",
   title: "Project analytics",
   description: "30-day contribution analytics for a project: submissions, accepted, unique contributors, XP awarded, acceptance rate and pending queue size. Needs a full-access project key.",
@@ -172,29 +389,29 @@ var getProjectAnalytics = defineTool4({
     return out({ ...m, acceptance_rate: m.contributions ? Math.round(m.accepted / m.contributions * 100) : 0, pending_review: pending.contributions.length });
   }
 });
-var listProjectContributions = defineTool4({
+var listProjectContributions = defineTool6({
   name: "list_project_contributions",
   title: "List project contributions",
   description: "List a project's submissions with post text, author, status, scores and review notes. Use status=pending to get the review queue.",
   inputSchema: {
     api_key: apiKeySchema,
-    status: z4.enum(["pending", "approved", "rejected"]).optional(),
-    limit: z4.number().int().min(1).max(200).default(50)
+    status: z5.enum(["pending", "approved", "rejected"]).optional(),
+    limit: z5.number().int().min(1).max(200).default(50)
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ api_key, status, limit }) => out(await callApi(api_key, `/contributions?limit=${limit}${status ? `&status=${status}` : ""}`))
 });
-var reviewContribution = defineTool4({
+var reviewContribution = defineTool6({
   name: "review_contribution",
   title: "Approve or reject a contribution",
   description: "Approve or reject one of your project's submissions, optionally setting XP, a 0-100 quality score and a note the contributor will see explaining the decision. Lets an AI agent review submissions automatically.",
   inputSchema: {
     api_key: apiKeySchema,
-    contribution_id: z4.string().uuid(),
-    decision: z4.enum(["approved", "rejected"]),
-    points: z4.number().int().min(0).max(1e3).optional().describe("XP to award when approving."),
-    score: z4.number().min(0).max(100).optional().describe("Quality score 0-100."),
-    notes: z4.string().max(1e3).optional().describe("Feedback for the contributor, e.g. why it was rejected.")
+    contribution_id: z5.string().uuid(),
+    decision: z5.enum(["approved", "rejected"]),
+    points: z5.number().int().min(0).max(1e3).optional().describe("XP to award when approving."),
+    score: z5.number().min(0).max(100).optional().describe("Quality score 0-100."),
+    notes: z5.string().max(1e3).optional().describe("Feedback for the contributor, e.g. why it was rejected.")
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   handler: async ({ api_key, contribution_id, decision, points, score, notes }) => out(await callApi(api_key, `/contributions/${contribution_id}/verify`, {
@@ -203,45 +420,45 @@ var reviewContribution = defineTool4({
     idem: `mcp-${contribution_id}-${decision}`
   }))
 });
-var getContributorReputation = defineTool4({
+var getContributorReputation = defineTool6({
   name: "get_contributor_reputation",
   title: "Contributor reputation",
   description: "Look up a contributor's RaidFi reputation (0-1000 score, tier, XP, acceptance rate, verified X) by X handle or email. Works with any project key.",
-  inputSchema: { api_key: apiKeySchema, identifier: z4.string().min(1).max(200).describe("X handle or email.") },
+  inputSchema: { api_key: apiKeySchema, identifier: z5.string().min(1).max(200).describe("X handle or email.") },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ api_key, identifier }) => out(await callApi(api_key, `/reputation/${encodeURIComponent(identifier.replace(/^@/, ""))}`))
 });
 
 // src/lib/mcp/tools/contributor-tools.ts
-import { defineTool as defineTool5, ToolError as ToolError5 } from "npm:@lovable.dev/mcp-js@3.1.0";
-import { z as z5 } from "npm:zod@^4.6.7";
-var submitContribution = defineTool5({
+import { defineTool as defineTool7, ToolError as ToolError6 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { z as z6 } from "npm:zod@^4.6.7";
+var submitContribution = defineTool7({
   name: "submit_contribution",
   title: "Submit an X post",
   description: "Submit one of your X posts to RaidFi for review, optionally for a specific project (by slug).",
   inputSchema: {
-    post_url: z5.string().regex(/^https:\/\/(x|twitter)\.com\/[^/]+\/status\/\d+/, "Must be an X post link"),
-    project_slug: z5.string().max(100).optional()
+    post_url: z6.string().regex(/^https:\/\/(x|twitter)\.com\/[^/]+\/status\/\d+/, "Must be an X post link"),
+    project_slug: z6.string().max(100).optional()
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   handler: async ({ post_url, project_slug }, ctx) => {
     const db = supabaseForUser(ctx);
     const email = ctx.getUserEmail();
-    if (!email) throw new ToolError5("Your account has no email.");
+    if (!email) throw new ToolError6("Your account has no email.");
     let project_id = null;
     if (project_slug) {
       const { data: data2 } = await db.from("projects").select("id").eq("slug", project_slug).maybeSingle();
-      if (!data2) throw new ToolError5(`No project with slug "${project_slug}".`);
+      if (!data2) throw new ToolError6(`No project with slug "${project_slug}".`);
       project_id = data2.id;
     }
     const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
-    if (dup) throw new ToolError5("This post was already submitted.");
+    if (dup) throw new ToolError6("This post was already submitted.");
     const { data, error } = await db.from("contributions").insert({ post_url, user_email: email.toLowerCase(), user_id: ctx.getUserId() ?? null, project_id, status: "pending" }).select("id,status").single();
-    if (error) throw new ToolError5(error.message);
+    if (error) throw new ToolError6(error.message);
     return out({ ...data, message: "Submitted. It will be reviewed shortly." });
   }
 });
-var analyzeMyPerformance = defineTool5({
+var analyzeMyPerformance = defineTool7({
   name: "analyze_my_performance",
   title: "Analyze my performance",
   description: "Summarize your contribution history: acceptance rate, average score, best content types, recent rejection notes and concrete tips to improve your reputation.",
@@ -250,7 +467,7 @@ var analyzeMyPerformance = defineTool5({
   handler: async (_i, ctx) => {
     const db = supabaseForUser(ctx);
     const { data, error } = await db.from("contributions").select("status,content_type,points_earned,ai_score,manual_score,ai_feedback,admin_notes,created_at").ilike("user_email", ctx.getUserEmail() ?? "").order("created_at", { ascending: false }).limit(300);
-    if (error) throw new ToolError5(error.message);
+    if (error) throw new ToolError6(error.message);
     const rows = data ?? [];
     const done = rows.filter((r) => r.status !== "pending");
     const ok = rows.filter((r) => r.status === "approved");
@@ -291,8 +508,8 @@ var projectRef = "wuxptfqxiymierorbfzz";
 var mcp_default = defineMcp({
   name: "raidfi",
   title: "RaidFi",
-  version: "0.2.0",
-  instructions: "RaidFi contribution intelligence. Contributors: submit X posts, list your submissions with review notes, analyze your performance, check profile and leaderboard. Projects: pass your project API key (rf_live_...) to read analytics, list submissions, approve or reject them with XP and notes, and check any contributor's reputation.",
+  version: "0.3.0",
+  instructions: "RaidFi contribution intelligence. Contributors: submit X posts, list your submissions with review notes, analyze your performance, check profile and leaderboard. Projects: pass your project API key (rf_live_...) to read analytics, list submissions, approve or reject them with XP and notes, and check any contributor's reputation. Use list_docs and read_doc to read the RaidFi docs, API reference and whitepaper.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
@@ -306,7 +523,9 @@ var mcp_default = defineMcp({
     getProjectAnalytics,
     listProjectContributions,
     reviewContribution,
-    getContributorReputation
+    getContributorReputation,
+    list_docs_default,
+    read_doc_default
   ]
 });
 
