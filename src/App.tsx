@@ -87,6 +87,7 @@ const App = () => (
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/beta" element={<BetaRequest />} />
             <Route path="/waitlist" element={<Navigate to="/beta" replace />} />
             <Route path="/waitlist/confirmed" element={<Navigate to="/beta" replace />} />
