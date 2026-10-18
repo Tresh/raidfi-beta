@@ -147,15 +147,42 @@ var DOCS = [
     slug: "introduction",
     section: "Getting started",
     title: "Introduction",
-    summary: "What RaidFi is and who it is for.",
-    body: `# Introduction
+    summary: "What RaidFi is, how it works and how to get started.",
+    body: `# Welcome to RaidFi
 
-RaidFi is a contribution intelligence and reputation layer for Web3 communities.
+RaidFi helps Web3 projects see **who genuinely contributes** to their community, and helps contributors turn their work into a **reputation that follows them**.
 
-- **Contributors** submit the X posts they publish about projects, earn XP when submissions are approved and build a portable reputation score.
-- **Projects** see who genuinely supports them, review submissions, award XP and read analytics.
+Instead of counting who posts the most, RaidFi looks at the quality and consistency of what people share about a project.
 
-Every submission is linked to a **project** (or to RaidFi itself), so projects only see the work done for them.`
+## How it works in 4 steps
+
+1. **You post** about a project on X \u2014 a thread, an explainer, a review, a video.
+2. **You submit the link** on RaidFi (website or Telegram bot) and choose the project it is about.
+3. **The project reviews it.** Approved posts earn XP. Rejected posts come with notes so you know what to improve.
+4. **Your reputation grows.** Every approved submission adds to your reputation score (0\u20131,000), your tier and your rank on the leaderboard.
+
+## Who is RaidFi for?
+
+| | Contributors | Projects |
+|---|---|---|
+| **Goal** | Get recognised for real work | Find and reward real supporters |
+| **Use** | Submit posts, earn XP, build reputation | Review submissions, award XP, read analytics |
+| **Tools** | Dashboard, Telegram bot, RaidCard, AI assistant | Project workspace, AI Analyst, API, AI assistant |
+
+## Quick start
+
+- **Contributor?** Read [For contributors](/docs/contributors).
+- **Project?** Read [For projects](/docs/projects).
+- **Developer?** Go to the [Developer API](/docs/api-overview) or [Connect an AI assistant](/docs/mcp).
+- **Want the full vision?** Read the [Whitepaper](/docs/whitepaper).
+
+## Useful links
+
+- Website: [beta.raidfi.site](https://beta.raidfi.site)
+- Request beta access: [beta.raidfi.site/beta](https://beta.raidfi.site/beta)
+- Telegram community: [t.me/raidfi_community](https://t.me/raidfi_community)
+- X: [@raidfi_app](https://x.com/raidfi_app)
+- Email: hello.raidfi@gmail.com`
   },
   {
     slug: "contributors",
@@ -164,13 +191,72 @@ Every submission is linked to a **project** (or to RaidFi itself), so projects o
     summary: "Sign up, connect accounts, submit posts and grow reputation.",
     body: `# For contributors
 
-1. **Sign up** at beta.raidfi.site/login with Google or email. New members enter a beta code (or are accepted automatically when auto-accept is on).
-2. **Connect X** in Dashboard \u2192 Settings so we can confirm your posts are yours.
-3. **Connect Telegram** to submit from the bot with \`/submit <link>\`.
-4. **Submit a post** with the + button. Pick the project the post is about.
-5. **Get reviewed**. Approved posts earn XP; rejected posts include notes on what to improve.
-6. **Share your RaidCard** from the Reputation page.
-7. **Invite friends** with your five one-time codes on the Referrals page.`
+## 1. Get access
+RaidFi is in beta. Request access at **/beta**. You will get a beta code by email (or be accepted instantly when auto-accept is on). A friend can also give you one of their invite codes.
+
+## 2. Sign in
+Go to **/login**. Use **Continue with Google** or email and password. New members enter their beta code once \u2014 before or right after signing in.
+
+## 3. Connect your accounts
+On your first visit a welcome box asks you to connect:
+- **X** (Dashboard \u2192 Settings) \u2014 proves the posts you submit are yours. Unverified accounts can't earn XP.
+- **Telegram** \u2014 lets you submit and check XP from the bot.
+
+## 4. Submit a post
+Press the **+** button, paste your X post link and choose the project it is about (or RaidFi). You will see a preview and a warning if the post isn't from your account.
+
+In Telegram, send \`/submit <link>\` to the bot or in a project's group. The bot asks which project it is about.
+
+## 5. Review & XP
+The project approves or rejects your submission. Approved = XP. Rejected = notes on what to improve. You get notified in the bell icon.
+
+## 6. Grow your reputation
+- **Reputation page:** your score, tier, rank and your **RaidCard** \u2014 a shareable ID card with your top projects. Share it on X or download it.
+- **Contributions page:** every submission with its status and notes.
+- **Analytics:** your activity over time.
+
+## 7. Invite friends
+On **Referrals** you have five one-time invite codes and a referral link. You earn XP when a friend joins. You can also recommend a project.
+
+## Telegram bot commands
+- \`/start\` \u2014 connect your account
+- \`/submit <link>\` \u2014 submit a post
+- \`/xp\` \u2014 check your XP
+- \`/tasks\` \u2014 see open tasks
+- \`/leaderboard\` \u2014 top contributors`
+  },
+  {
+    slug: "projects",
+    section: "Getting started",
+    title: "For projects",
+    summary: "Join, manage submissions, analytics and the AI Analyst.",
+    body: `# For projects
+
+## 1. Apply
+Fill in the project request form at **/project-request**. Once approved, sign in and open your **Project workspace** at **/project**.
+
+## 2. Your workspace
+- **Overview** \u2014 headline numbers for your community.
+- **Contributors** \u2014 who submits for you, their XP and reputation.
+- **Activity** \u2014 the latest submissions.
+- **Evaluate** \u2014 approve or reject submissions, award XP and leave notes.
+- **Analytics** \u2014 trends over time.
+- **AI Analyst** \u2014 ask questions about your community in plain language.
+- **Settings** \u2014 profile, verification on X, Telegram and Developer API keys.
+
+## 3. Reviewing submissions
+Every submission is linked to your project. Approve good work with XP, reject with a short note so the contributor can improve. RaidFi turns approved work into the shared reputation score.
+
+## 4. Connect your Telegram group
+1. Add the RaidFi bot to your group as admin.
+2. Send \`/connectproject\` in the group (add your project slug if you run more than one).
+3. New submissions are announced in your group, and members can submit with \`/submit <link>\`.
+
+## 5. Private partner
+Projects can be marked private by RaidFi admins: they don't appear on Explore and their page isn't public.
+
+## 6. Developers & AI
+Create API keys in **Settings \u2192 Developer API** to build your own dashboard or tools, or connect your AI assistant to review submissions for you. See [Developer API](/docs/api-overview) and [MCP](/docs/mcp).`
   },
   {
     slug: "projects",
@@ -316,6 +402,36 @@ Example prompt: *"List my pending submissions and approve the ones that explain 
 - **Coach** \u2014 contributors ask their assistant what to improve based on past review notes.
 
 Point your coding assistant at the MCP server so it can read these docs while it builds.`
+  },
+  {
+    slug: "changelog",
+    section: "Changelog",
+    title: "Changelog",
+    summary: "Release history of RaidFi Beta.",
+    body: `# Changelog
+
+## v0.3.0-beta \u2014 October 18, 2026
+**Docs, Developer API & AI assistants**
+- **Docs:** one place for guides, the whitepaper, the Developer API and Build with AI.
+- **Developer API:** project keys to read reputation, list and review submissions, award XP and read analytics, with rate limits and idempotency.
+- **AI assistants (MCP):** connect Claude, ChatGPT or Cursor to submit posts, review submissions, analyze performance and read the docs.
+- **Project-linked submissions:** every submission is linked to a project on the site, in Telegram, the API and MCP.
+- **RaidCard & composer:** shareable contributor ID card, post preview and instant X verification prompts.
+- **Sign-in:** one sign-in and sign-up form with Google, plus referral invite codes.
+
+## v0.2.0-beta \u2014 October 1, 2026
+**Google sign-up & referral fixes**
+- Google sign-up and sign-in.
+- Referral links and invite codes now credit the right person.
+- Public changelog.
+
+## v0.1.0-beta \u2014 September 26, 2026
+**Initial beta release**
+- Telegram bot for submissions, XP and notifications.
+- Social contribution tracking on X.
+- Reputation system based on frequency, consistency and depth of contribution.
+- Contributor dashboard and project workspace analytics.
+- Beta access requests and invite codes.`
   }
 ];
 var getDoc = (slug) => DOCS.find((d) => d.slug === slug);
