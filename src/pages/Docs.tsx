@@ -28,7 +28,7 @@ const SideNav = ({ active, onPick }: { active: string; onPick?: () => void }) =>
       </div>
     ))}
     <div className="border-t border-border pt-4">
-      <Link to="/docs/changelog" onClick={onPick} className="block px-2 py-1.5 text-muted-foreground hover:text-foreground">Changelog</Link>
+      <Link to="/changelog" onClick={onPick} className="block px-2 py-1.5 text-muted-foreground hover:text-foreground">Changelog</Link>
     </div>
   </nav>
 );
