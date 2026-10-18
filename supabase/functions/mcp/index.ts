@@ -259,6 +259,19 @@ Projects can be marked private by RaidFi admins: they don't appear on Explore an
 Create API keys in **Settings \u2192 Developer API** to build your own dashboard or tools, or connect your AI assistant to review submissions for you. See [Developer API](/docs/api-overview) and [MCP](/docs/mcp).`
   },
   {
+    slug: "projects",
+    section: "Getting started",
+    title: "For projects",
+    summary: "Join, manage submissions, analytics and the AI Analyst.",
+    body: `# For projects
+
+1. **Request access** through the project request form.
+2. **Project workspace** (/project): overview, contributors, activity, evaluation, analytics and the AI Analyst.
+3. **Review submissions**: approve or reject, award XP and leave notes.
+4. **Telegram**: add the bot to your group and send \`/connectproject\` to post new submissions there.
+5. **Developer API & AI**: create API keys in Project Settings \u2192 Developer API, or connect your AI assistant through MCP.`
+  },
+  {
     slug: "submissions",
     section: "Getting started",
     title: "Submissions & projects",
