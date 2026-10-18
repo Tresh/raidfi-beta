@@ -3,10 +3,10 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.1.1";
 
 // src/lib/mcp/tools/get-my-profile.ts
-import { defineTool, ToolError } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool, ToolError } from "npm:@lovable.dev/mcp-js@3.1.1";
 
 // src/lib/mcp/supabase.ts
 import { createClient } from "npm:@supabase/supabase-js@^2.96.0";
@@ -81,7 +81,7 @@ var get_my_profile_default = defineTool({
 });
 
 // src/lib/mcp/tools/list-my-contributions.ts
-import { defineTool as defineTool2, ToolError as ToolError2 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool as defineTool2, ToolError as ToolError2 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z } from "npm:zod@^4.6.7";
 var list_my_contributions_default = defineTool2({
   name: "list_my_contributions",
@@ -112,7 +112,7 @@ var list_my_contributions_default = defineTool2({
 });
 
 // src/lib/mcp/tools/get-leaderboard.ts
-import { defineTool as defineTool3, ToolError as ToolError3 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool as defineTool3, ToolError as ToolError3 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z as z2 } from "npm:zod@^4.6.7";
 var get_leaderboard_default = defineTool3({
   name: "get_leaderboard",
@@ -138,7 +138,7 @@ var get_leaderboard_default = defineTool3({
 });
 
 // src/lib/mcp/tools/list-docs.ts
-import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@3.1.1";
 
 // src/lib/docs/content.ts
 var API = "https://beta.raidfi.site/api/v1";
@@ -450,7 +450,7 @@ var list_docs_default = defineTool4({
 });
 
 // src/lib/mcp/tools/read-doc.ts
-import { defineTool as defineTool5, ToolError as ToolError4 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool as defineTool5, ToolError as ToolError4 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z as z3 } from "npm:zod@^4.6.7";
 var read_doc_default = defineTool5({
   name: "read_doc",
@@ -462,7 +462,11 @@ var read_doc_default = defineTool5({
     const doc = getDoc(slug);
     if (!doc) throw new ToolError4(`Unknown doc '${slug}'. Use list_docs.`);
     let body = doc.body;
-    if (slug === "whitepaper") {
+    const { data: override, error } = await supabaseForUser(ctx).from("docs_content").select("body").eq("slug", slug).maybeSingle();
+    if (error) {
+    } else if (override?.body) {
+      body = override.body;
+    } else if (slug === "whitepaper") {
       const { data } = await supabaseForUser(ctx).from("whitepaper_live").select("content").eq("id", "live").maybeSingle();
       body = data?.content ?? "Whitepaper not available.";
     }
@@ -471,11 +475,11 @@ var read_doc_default = defineTool5({
 });
 
 // src/lib/mcp/tools/project-tools.ts
-import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z as z5 } from "npm:zod@^4.6.7";
 
 // src/lib/mcp/api.ts
-import { ToolError as ToolError5 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { ToolError as ToolError5 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z as z4 } from "npm:zod@^4.6.7";
 var env = (n) => globalThis.Deno?.env?.get?.(n) ?? globalThis.process?.env?.[n];
 var apiKeySchema = z4.string().regex(/^rf_live_/).describe("Your project's RaidFi API key (rf_live_...), from Project Settings \u2192 Developer API.");
@@ -546,7 +550,7 @@ var getContributorReputation = defineTool6({
 });
 
 // src/lib/mcp/tools/contributor-tools.ts
-import { defineTool as defineTool7, ToolError as ToolError6 } from "npm:@lovable.dev/mcp-js@3.1.0";
+import { defineTool as defineTool7, ToolError as ToolError6 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z as z6 } from "npm:zod@^4.6.7";
 var submitContribution = defineTool7({
   name: "submit_contribution",
@@ -646,5 +650,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@3.1.0/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@3.1.1/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));

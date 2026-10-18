@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import Docs from "./pages/Docs";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,7 +29,7 @@ const DashFeedback = lazy(() => import("./pages/dashboard/Feedback"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const ContactsManager = lazy(() => import("./pages/admin/ContactsManager"));
-const WhitepaperManager = lazy(() => import("./pages/admin/WhitepaperManager"));
+const DocsManager = lazy(() => import("./pages/admin/DocsManager"));
 const ContributionsManager = lazy(() => import("./pages/admin/ContributionsManager"));
 const ContributeTasksManager = lazy(() => import("./pages/admin/ContributeTasksManager"));
 const PointsManager = lazy(() => import("./pages/admin/PointsManager"));
@@ -49,7 +50,6 @@ const ProjectAnalytics = lazy(() => import("./pages/project/ProjectAnalytics"));
 const ProjectAIAnalyst = lazy(() => import("./pages/project/ProjectAIAnalyst"));
 const ProjectSettings = lazy(() => import("./pages/project/ProjectSettings"));
 
-const Docs = lazy(() => import("./pages/Docs"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -98,7 +98,7 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-verified" element={<EmailVerified />} />
-            <Route path="/whitepaper" element={<Navigate to="/docs/whitepaper" replace />} />
+            <Route path="/whitepaper" element={<Navigate to="/docs" replace />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/docs/:slug" element={<Docs />} />
             <Route path="/changelog" element={<Changelog />} />
@@ -134,7 +134,7 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout requiredPermission="dashboard"><Dashboard /></AdminLayout>} />
             <Route path="/admin/contribute-tasks" element={<AdminLayout requiredPermission="contribute-tasks"><ContributeTasksManager /></AdminLayout>} />
             <Route path="/admin/contacts" element={<AdminLayout requiredPermission="contacts"><ContactsManager /></AdminLayout>} />
-            <Route path="/admin/whitepaper" element={<AdminLayout requiredPermission="whitepaper"><WhitepaperManager /></AdminLayout>} />
+            <Route path="/admin/whitepaper" element={<AdminLayout requiredPermission="whitepaper"><DocsManager /></AdminLayout>} />
             <Route path="/admin/contributions" element={<AdminLayout requiredPermission="contributions"><ContributionsManager /></AdminLayout>} />
             <Route path="/admin/points" element={<AdminLayout requiredPermission="points"><PointsManager /></AdminLayout>} />
             <Route path="/admin/users" element={<AdminLayout requiredPermission="users"><UsersManager /></AdminLayout>} />
