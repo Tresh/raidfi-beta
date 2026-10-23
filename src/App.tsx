@@ -1,3 +1,4 @@
+import ContributorOnly from "@/components/auth/ContributorOnly";
 import { lazy, Suspense } from "react";
 import Docs from "./pages/Docs";
 import { Toaster } from "@/components/ui/toaster";
@@ -112,13 +113,13 @@ const App = () => (
             <Route path="/u/:code" element={<Profile />} />
             <Route path="/p/:slug" element={<ProjectDetail />} />
             {/* Contributor dashboard (MVP) */}
-            <Route path="/dashboard" element={<Overview />} />
-            <Route path="/dashboard/contributions" element={<DashContributions />} />
-            <Route path="/dashboard/reputation" element={<ReputationPage />} />
-            <Route path="/dashboard/analytics" element={<AnalyticsDash />} />
-            <Route path="/dashboard/referrals" element={<DashReferrals />} />
-            <Route path="/dashboard/settings" element={<DashSettings />} />
-            <Route path="/dashboard/feedback" element={<DashFeedback />} />
+            <Route path="/dashboard" element={<ContributorOnly><Overview /></ContributorOnly>} />
+            <Route path="/dashboard/contributions" element={<ContributorOnly><DashContributions /></ContributorOnly>} />
+            <Route path="/dashboard/reputation" element={<ContributorOnly><ReputationPage /></ContributorOnly>} />
+            <Route path="/dashboard/analytics" element={<ContributorOnly><AnalyticsDash /></ContributorOnly>} />
+            <Route path="/dashboard/referrals" element={<ContributorOnly><DashReferrals /></ContributorOnly>} />
+            <Route path="/dashboard/settings" element={<ContributorOnly><DashSettings /></ContributorOnly>} />
+            <Route path="/dashboard/feedback" element={<ContributorOnly><DashFeedback /></ContributorOnly>} />
 
             {/* Project workspace */}
             <Route path="/project" element={<ProjectOverview />} />
