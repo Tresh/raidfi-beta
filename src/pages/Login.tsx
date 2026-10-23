@@ -73,6 +73,7 @@ const Login = () => {
     referredBy.trim() || searchParams.get("ref") || searchParams.get("referred_by") || sessionStorage.getItem("raidfi_ref_code") || null;
 
   const routeAfterLogin = async (userId: string) => {
+    await supabase.rpc("claim_project_memberships" as any);
     const { data: isProjectAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "project_admin" as any });
     const next = oauthReturnPath(sessionStorage.getItem("raidfi_next"));
     if (next !== "/") { sessionStorage.removeItem("raidfi_next"); window.location.href = next; return; }
@@ -98,6 +99,10 @@ const Login = () => {
     const user = session.user;
     const cleanEmail = (user.email || "").toLowerCase();
     const refCode = refCodeValue();
+    // Project accounts never get a contributor profile.
+    await supabase.rpc("claim_project_memberships" as any);
+    const { data: isProjectAcct } = await supabase.rpc("has_role", { _user_id: user.id, _role: "project_admin" as any });
+    if (isProjectAcct) { sessionStorage.removeItem("raidfi_pending_code"); return routeAfterLogin(user.id); }
     const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
     if (profile) {
       const updates: any = {};
