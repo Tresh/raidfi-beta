@@ -619,6 +619,7 @@ var mcp_default = defineMcp({
   instructions: "RaidFi contribution intelligence. Contributors: submit X posts, list your submissions with review notes, analyze your performance, check profile and leaderboard. Projects: pass your project API key (rf_live_...) to read analytics, list submissions, approve or reject them with XP and notes, and check any contributor's reputation. Use list_docs and read_doc to read the RaidFi docs, API reference and whitepaper.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
+    resource: "https://beta.raidfi.site/mcp",
     acceptedAudiences: "authenticated"
   }),
   tools: [
