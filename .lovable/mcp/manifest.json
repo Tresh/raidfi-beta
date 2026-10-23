@@ -5,6 +5,7 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://wuxptfqxiymierorbfzz.supabase.co/auth/v1",
+    "resource": "https://beta.raidfi.site/mcp",
     "accepted_audiences": [
       "authenticated"
     ]
