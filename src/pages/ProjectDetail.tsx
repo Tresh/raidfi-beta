@@ -42,10 +42,9 @@ const ProjectDetail = () => {
     (async () => {
       setLoading(true);
       const { data: p } = await supabase
-        .from("projects" as any)
-        .select("id,name,slug,website,x_handle,telegram,description,verification,status,trust_score,x_verified,created_at,logo_data_url")
+        .from("public_projects" as any)
+        .select("*")
         .eq("slug", slug)
-        .eq("is_private", false)
         .maybeSingle();
       setProject((p as any) ?? null);
       if (p) {
