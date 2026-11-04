@@ -1,5 +1,6 @@
 // Verifies ownership of an X (Twitter) handle via a public verification post.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { fetchXPost } from "../_shared/x-post.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -59,17 +60,13 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (taken) return json({ error: "That X username is already claimed by another contributor." }, 409);
 
-    // Pull the post through oEmbed
-    const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(postUrl)}&omit_script=1&dnt=1`;
-    const res = await fetch(oembedUrl);
-    if (!res.ok) {
+    const post = await fetchXPost(postUrl);
+    if (!post) {
       return json({ error: "Could not read that post. Make sure it is public." }, 400);
     }
-    const data = await res.json();
-    const authorUrl: string = data.author_url ?? "";
-    const authorHandle = clean(authorUrl.split("/").filter(Boolean).pop() ?? "");
-    const html: string = data.html ?? "";
-    const plain = html.replace(/<[^>]*>/g, " ").replace(/&amp;/g, "&").toLowerCase();
+    const data = { author_name: null };
+    const authorHandle = post.author;
+    const plain = post.text;
 
     if (authorHandle !== handle) {
       return json({ error: `That post was made by @${authorHandle || "unknown"}, not @${handle}.` }, 400);
