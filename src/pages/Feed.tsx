@@ -235,7 +235,7 @@ const Feed = () => {
   }, [fetchContributions, projectFilter]);
 
   useEffect(() => {
-    supabase.from("projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score").eq("status", "active").eq("is_private", false).order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
+    supabase.from("public_projects" as any).select("id,name,slug,website,x_handle,description,verification,trust_score,logo_data_url").order("trust_score", { ascending: false }).limit(20).then(({ data }) => setProjects((data as any[]) ?? []));
   }, []);
 
   const formatRelative = (iso: string) => {
@@ -297,11 +297,10 @@ const Feed = () => {
           {tab === "projects" ? (
             <div className="grid sm:grid-cols-2 gap-3">
               {projects.length ? projects.map((project) => (
-                <Card key={project.id} className="hover:border-primary/40 transition-colors"><CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3"><div><Link to={`/p/${project.slug}`} className="text-sm font-semibold hover:underline">{project.name}</Link><p className="text-[11px] text-muted-foreground">{project.verification} · Trust {project.trust_score}</p></div><FolderKanban className="w-4 h-4 text-primary" /></div>
-                  {project.description && <p className="text-xs text-muted-foreground mt-3 line-clamp-3">{project.description}</p>}
-                  <div className="mt-3 flex gap-3 text-xs"><Link to={`/p/${project.slug}`} className="text-primary font-medium">View {project.name}</Link>{project.website && <a href={project.website} target="_blank" rel="noreferrer" className="text-primary">{project.name} website</a>}{project.x_handle && <a href={`https://x.com/${project.x_handle.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-primary">@{project.x_handle.replace(/^@/, "")}</a>}</div>
-                </CardContent></Card>
+                <Link key={project.id} to={`/p/${project.slug}`} className="block"><Card className="hover:border-primary/40 transition-colors h-full"><CardContent className="p-4 flex items-center gap-3">
+                  {project.logo_data_url ? <img src={project.logo_data_url} alt={project.name} className="w-11 h-11 rounded-lg object-cover border border-border shrink-0" /> : <div className="w-11 h-11 rounded-lg bg-muted border border-border flex items-center justify-center font-semibold shrink-0">{project.name?.charAt(0).toUpperCase()}</div>}
+                  <div className="min-w-0 flex-1"><p className="text-sm font-semibold truncate">{project.name}</p>{project.description && <p className="text-xs text-muted-foreground line-clamp-1">{project.description}</p>}</div>
+                </CardContent></Card></Link>
               )) : <p className="text-sm text-muted-foreground py-10 text-center col-span-2">Project listings will appear here after verification.</p>}
             </div>
           ) : loading ? (
