@@ -15,6 +15,13 @@
       "when": 1792109455047,
       "tag": "0001_api_logs_ratelimit_idempotency",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793759474457,
+      "tag": "0002_migration",
+      "breakpoints": true
     }
   ]
 }

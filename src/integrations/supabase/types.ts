@@ -376,6 +376,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       docs_content: {
@@ -714,6 +721,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_ai_config_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "public_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       project_api_idempotency: {
@@ -793,6 +807,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_api_keys_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       project_api_logs: {
@@ -845,6 +866,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_api_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -917,6 +945,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_contributor_lists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       project_members: {
@@ -950,6 +985,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1113,6 +1155,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_saved_views_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       projects: {
@@ -1124,6 +1173,7 @@ export type Database = {
           founder_name: string | null
           id: string
           is_private: boolean
+          logo_data_url: string | null
           name: string
           slug: string
           status: string
@@ -1146,6 +1196,7 @@ export type Database = {
           founder_name?: string | null
           id?: string
           is_private?: boolean
+          logo_data_url?: string | null
           name: string
           slug: string
           status?: string
@@ -1168,6 +1219,7 @@ export type Database = {
           founder_name?: string | null
           id?: string
           is_private?: boolean
+          logo_data_url?: string | null
           name?: string
           slug?: string
           status?: string
@@ -1678,6 +1730,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "public_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       leaderboard_public: {
@@ -1704,6 +1763,54 @@ export type Database = {
           updated_at?: string | null
           validation_xp?: number | null
           waitlist_xp?: number | null
+        }
+        Relationships: []
+      }
+      public_projects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          logo_data_url: string | null
+          name: string | null
+          slug: string | null
+          status: string | null
+          telegram: string | null
+          trust_score: number | null
+          verification: string | null
+          website: string | null
+          x_handle: string | null
+          x_verified: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_data_url?: string | null
+          name?: string | null
+          slug?: string | null
+          status?: string | null
+          telegram?: string | null
+          trust_score?: number | null
+          verification?: string | null
+          website?: string | null
+          x_handle?: string | null
+          x_verified?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_data_url?: string | null
+          name?: string | null
+          slug?: string | null
+          status?: string | null
+          telegram?: string | null
+          trust_score?: number | null
+          verification?: string | null
+          website?: string | null
+          x_handle?: string | null
+          x_verified?: boolean | null
         }
         Relationships: []
       }
