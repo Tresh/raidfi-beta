@@ -25,25 +25,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Require authentication
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "Unauthorized" }, 401);
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    if (!supabaseUrl || !anonKey) {
-      return json({ error: "Server configuration error" }, 500);
-    }
-
-    const authClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userRes, error: authErr } = await authClient.auth.getUser(authHeader.slice(7));
-    if (authErr || !userRes?.user) {
-      return json({ error: "Unauthorized" }, 401);
-    }
+    // Public: only resolves media for public X posts (used on public profile pages).
 
     const body = await req.json().catch(() => ({}));
     const post_url = String(body?.post_url ?? "").trim();
