@@ -31,14 +31,12 @@ const ProjectSettings = () => {
   const [xPostUrl, setXPostUrl] = useState("");
   const [verifyingX, setVerifyingX] = useState(false);
   const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
-  const postText = `🤝 Partnership announcement: ${project?.name ?? "We"} x @raidfi_app
+  const postText = `🤝 Partnership announcement: ${project?.name ?? "We"} x @raidfi_app ${challenge}
 
 We're partnering with RaidFi to recognise the people who actually build our community. Every real contribution to ${project?.name ?? "us"} is now tracked and rewarded with on-chain-ready reputation.
 
 Contributors: start earning for what you already do 👇
-${window.location.origin}/beta
-
-${challenge}`;
+${window.location.origin}/beta`;
 
 
   useEffect(() => {
@@ -215,7 +213,7 @@ ${challenge}`;
               <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 space-y-2">
                 <p className="text-[11px] text-muted-foreground">
                   Post this from that account, then paste the post link below. Edit it however you like - just keep the
-                  last line, that's the part we check.
+                  code <b>{challenge}</b>, that's the part we check.
                 </p>
                 <pre className="text-xs text-foreground whitespace-pre-wrap font-sans leading-relaxed">{postText}</pre>
                 <div className="flex flex-wrap gap-2 pt-1">
