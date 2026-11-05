@@ -1,6 +1,6 @@
 // Verifies ownership of a project's X (Twitter) account via a public verification post.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { fetchXPost } from "../_shared/x-post.ts";
+import { fetchXPost } from "../_shared/core/x-post.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

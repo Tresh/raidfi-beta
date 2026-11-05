@@ -15,7 +15,7 @@ import {
   useProjectContributors,
   useSavedViews,
 } from "@/hooks/useProjectData";
-import { DEFAULT_COLUMNS, Filter, applyFilters } from "@/lib/projectMetrics";
+import { DEFAULT_COLUMNS, Filter, applyFilters } from "@core/projectMetrics";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

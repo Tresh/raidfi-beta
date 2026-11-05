@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FIELDS, FIELD_MAP, Filter, OPERATORS } from "@/lib/projectMetrics";
+import { FIELDS, FIELD_MAP, Filter, OPERATORS } from "@core/projectMetrics";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 

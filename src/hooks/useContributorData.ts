@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { computeReputation, ReputationResult } from "@/lib/reputation";
+import { computeReputation, ReputationResult } from "@core/reputation";
 
 export interface ContributionRow {
   id: string;
