@@ -4,7 +4,7 @@ import { useContributorData } from "@/hooks/useContributorData";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, ScoreMeter, StatCard, StatusPill } from "@/components/dashboard/Primitives";
-import { weeklySeries } from "@/lib/reputation";
+import { weeklySeries } from "@core/reputation";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 

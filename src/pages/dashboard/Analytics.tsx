@@ -4,7 +4,7 @@ import { useContributorData } from "@/hooks/useContributorData";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, ScoreMeter, StatCard } from "@/components/dashboard/Primitives";
-import { weeklySeries } from "@/lib/reputation";
+import { weeklySeries } from "@core/reputation";
 import {
   Bar,
   BarChart,

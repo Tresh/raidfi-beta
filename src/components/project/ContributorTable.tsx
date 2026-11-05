@@ -10,7 +10,7 @@ import {
   FIELD_MAP,
   formatValue,
   toCSV,
-} from "@/lib/projectMetrics";
+} from "@core/projectMetrics";
 
 interface Props {
   rows: ContributorRow[];

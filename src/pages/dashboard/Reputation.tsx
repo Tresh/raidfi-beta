@@ -3,7 +3,7 @@ import { useContributorData } from "@/hooks/useContributorData";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, ScoreMeter, StatCard } from "@/components/dashboard/Primitives";
-import { TIERS } from "@/lib/reputation";
+import { TIERS } from "@core/reputation";
 import { CreditCard, Loader2, ShieldCheck } from "lucide-react";
 import RaidCard from "@/components/dashboard/RaidCard";
 import {

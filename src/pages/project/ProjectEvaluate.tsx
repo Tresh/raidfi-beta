@@ -5,7 +5,7 @@ import CriteriaBar from "@/components/project/CriteriaBar";
 import { PageHeader, Panel } from "@/components/dashboard/Primitives";
 import { useProject } from "@/hooks/useProject";
 import { PERIODS, rangeForDays, useProjectContributors } from "@/hooks/useProjectData";
-import { DEFAULT_COLUMNS, Filter, applyFilters } from "@/lib/projectMetrics";
+import { DEFAULT_COLUMNS, Filter, applyFilters } from "@core/projectMetrics";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 

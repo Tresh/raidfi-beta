@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ExternalLink, ArrowLeft, ShieldCheck, Clock } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 import { BASE_URL } from "@/lib/constants";
-import { computeReputation } from "@/lib/reputation";
+import { computeReputation } from "@core/reputation";
 
 interface Contribution {
   id: string;

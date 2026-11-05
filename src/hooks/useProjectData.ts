@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProjectRecord } from "@/hooks/useProject";
-import { ContributorRow, deriveMetrics } from "@/lib/projectMetrics";
+import { ContributorRow, deriveMetrics } from "@core/projectMetrics";
 
 export const PERIODS = [
   { key: "7", label: "Last 7 days", days: 7 },
