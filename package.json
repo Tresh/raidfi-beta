@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "build:core": "node scripts/build-core.mjs",
-    "check:core": "node scripts/build-core.mjs --check"
+    "check:core": "node scripts/build-core.mjs --check",
+    "test": "vitest run"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",

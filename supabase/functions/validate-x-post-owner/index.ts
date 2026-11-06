@@ -1,3 +1,4 @@
+import { isXPostUrl, handleFromAuthorUrl, checkPostOwnership } from "../_shared/core/submission.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
@@ -22,7 +23,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const postUrl = String(body.post_url ?? "").trim();
-    if (!/^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i.test(postUrl)) {
+    if (!isXPostUrl(postUrl)) {
       return json({ error: "Paste a direct link to an X post." }, 400);
     }
 
@@ -40,11 +41,9 @@ Deno.serve(async (req) => {
     const response = await fetch(`https://publish.twitter.com/oembed?url=${encodeURIComponent(postUrl)}&omit_script=1&dnt=1`);
     if (!response.ok) return json({ error: "We could not read this post. Make sure it is public and try again." }, 400);
     const post = await response.json();
-    const authorHandle = clean(String(post.author_url ?? "").split("/").filter(Boolean).pop() ?? "");
+    const owner = checkPostOwnership(handleFromAuthorUrl(String(post.author_url ?? "")), profile.x_username);
+    if (!owner.ok) return json({ error: owner.error }, 403);
     const verifiedHandle = clean(profile.x_username);
-    if (!authorHandle || authorHandle !== verifiedHandle) {
-      return json({ error: `This post is from @${authorHandle || "unknown"}. Only posts from your verified @${verifiedHandle} account are accepted.` }, 403);
-    }
 
     return json({ valid: true, handle: verifiedHandle });
   } catch (error) {
