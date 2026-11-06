@@ -544,7 +544,7 @@ var submitContribution = defineTool7({
   title: "Submit an X post",
   description: "Submit one of your X posts to RaidFi for review, optionally for a specific project (by slug).",
   inputSchema: {
-    post_url: z6.string().regex(/^https:\/\/(x|twitter)\.com\/[^/]+\/status\/\d+/, "Must be an X post link"),
+    post_url: z6.string().max(500),
     project_slug: z6.string().max(100).optional()
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
@@ -560,8 +560,16 @@ var submitContribution = defineTool7({
     }
     const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
     if (dup) throw new ToolError6("This post was already submitted.");
-    const { data, error } = await db.from("contributions").insert({ post_url, user_email: email.toLowerCase(), user_id: ctx.getUserId() ?? null, project_id, status: "pending" }).select("id,status").single();
-    if (error) throw new ToolError6(error.message);
+    const base = globalThis.Deno?.env.get("SUPABASE_URL");
+    if (!base) throw new ToolError6("Server configuration error.");
+    const res = await fetch(`${base}/functions/v1/submit-contribution`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${ctx.getToken()}` },
+      body: JSON.stringify({ post_url, project_id })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.contribution_id) throw new ToolError6(body.error ?? "Submission failed.");
+    const data = { id: body.contribution_id, status: "pending" };
     return out({ ...data, message: "Submitted. It will be reviewed shortly." });
   }
 });

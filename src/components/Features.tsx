@@ -42,8 +42,8 @@ const features = [
   },
   {
     icon: ArrowUpRight,
-    title: "Portable history",
-    description: "Your contribution record belongs to you and carries across the communities you join.",
+    title: "Your own history",
+    description: "Your contribution record belongs to your RaidFi account, across every project you contribute to.",
   },
 ];
 

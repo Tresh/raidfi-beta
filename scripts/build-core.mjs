@@ -8,7 +8,7 @@ const OUT = "supabase/functions/_shared/core";
 const BANNER = "// GENERATED from /core by scripts/build-core.mjs. Do not edit by hand.\n";
 const check = process.argv.includes("--check");
 
-const files = readdirSync(SRC).filter((f) => f.endsWith(".ts"));
+const files = readdirSync(SRC).filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"));
 let drift = [];
 if (!check) { rmSync(OUT, { recursive: true, force: true }); mkdirSync(OUT, { recursive: true }); }
 for (const f of files) {

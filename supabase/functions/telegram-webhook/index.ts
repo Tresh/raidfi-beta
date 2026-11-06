@@ -1,3 +1,4 @@
+import { isXPostUrl, findXPostUrl } from "../_shared/core/submission.ts";
 // Telegram bot webhook: account linking + slash commands.
 // Public endpoint (verify_jwt = false). Verifies X-Telegram-Bot-Api-Secret-Token.
 
@@ -6,7 +7,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 import { SITE_ORIGIN, ROOT_DOMAIN } from "../_shared/config.ts";
 
-const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/i;
 
 function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -406,9 +406,8 @@ async function handle(update: any, supabase: any) {
     // never reacts to normal chatter.
     if (!isPrivate(chatType)) return;
 
-    const found = text.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i);
-    if (!found) return;
-    const droppedUrl = found[0];
+    const droppedUrl = findXPostUrl(text);
+    if (!droppedUrl) return;
 
     const { data: dropLink } = await supabase
       .from("telegram_links").select("*").eq("telegram_user_id", fromId).maybeSingle();
@@ -701,8 +700,8 @@ async function handle(update: any, supabase: any) {
 
     case "submit": {
       if (!(await requireLink())) return;
-      const url = (arg.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i) || [])[0] || arg;
-      if (!TWEET_URL_REGEX.test(url)) {
+      const url = findXPostUrl(arg) || arg;
+      if (!isXPostUrl(url)) {
         await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
       }

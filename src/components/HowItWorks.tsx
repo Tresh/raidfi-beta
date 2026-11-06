@@ -4,7 +4,7 @@ const steps = [
   {
     number: "01",
     title: "Capture",
-    description: "RaidFi monitors social participation across supported platforms and on-chain interactions connected to Web3 communities.",
+    description: "RaidFi tracks the X posts contributors submit about Web3 communities.",
     items: ["Engagement behavior", "Mention velocity", "Influence spread", "Community growth patterns"],
   },
   {
@@ -16,8 +16,8 @@ const steps = [
   {
     number: "03",
     title: "Build Reputation",
-    description: "Performance history feeds into a persistent reputation graph that compounds over time and travels with contributors.",
-    items: ["Portable across ecosystems", "Reflects long-term credibility", "Differentiates signal from noise", "Builds compounding social capital"],
+    description: "Reviewed contributions build a reputation score that grows over time and belongs to the contributor's RaidFi account.",
+    items: ["Tied to your RaidFi account", "Reflects long-term credibility", "Differentiates signal from noise", "Builds compounding social capital"],
   },
   {
     number: "04",

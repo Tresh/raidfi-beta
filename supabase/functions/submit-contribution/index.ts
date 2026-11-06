@@ -1,3 +1,4 @@
+import { isXPostUrl, handleFromAuthorUrl, checkPostOwnership } from "../_shared/core/submission.ts";
 // Single entry point for contribution submissions from every surface
 // (dashboard, contribute page, Telegram bot). Guarantees the exact same
 // workflow: ownership check -> insert -> fetch post text/media -> notify admin
@@ -17,7 +18,6 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const TWEET_URL_REGEX = /^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i;
 const clean = (v: string) => v.trim().replace(/^@/, "").toLowerCase();
 
 Deno.serve(async (req) => {
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const projectId = UUID_RE.test(projectIdRaw) ? projectIdRaw : null;
 
-    if (!TWEET_URL_REGEX.test(postUrl)) {
+    if (!isXPostUrl(postUrl)) {
       return json({ error: "Paste a direct link to an X post." }, 400);
     }
 
@@ -106,13 +106,8 @@ Deno.serve(async (req) => {
       return json({ error: "We couldn't read that post. Make sure it is public and try again." }, 400);
     }
     const post = await oembed.json();
-    const authorHandle = clean(String(post.author_url ?? "").split("/").filter(Boolean).pop() ?? "");
-    const verifiedHandle = clean(profile.x_username);
-    if (!authorHandle || authorHandle !== verifiedHandle) {
-      return json({
-        error: `This post is from @${authorHandle || "unknown"}. Only posts from your verified @${verifiedHandle} account are accepted.`,
-      }, 403);
-    }
+    const owner = checkPostOwnership(handleFromAuthorUrl(String(post.author_url ?? "")), profile.x_username);
+    if (!owner.ok) return json({ error: owner.error }, 403);
 
     const id = crypto.randomUUID();
     const { error: insertError } = await admin.from("contributions").insert({
