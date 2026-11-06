@@ -558,6 +558,8 @@ var submitContribution = defineTool7({
       if (!data2) throw new ToolError6(`No project with slug "${project_slug}".`);
       project_id = data2.id;
     }
+    const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
+    if (dup) throw new ToolError6("This post was already submitted.");
     const base = globalThis.Deno?.env.get("SUPABASE_URL");
     if (!base) throw new ToolError6("Server configuration error.");
     const res = await fetch(`${base}/functions/v1/submit-contribution`, {

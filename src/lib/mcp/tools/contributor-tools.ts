@@ -22,8 +22,10 @@ export const submitContribution = defineTool({
       if (!data) throw new ToolError(`No project with slug "${project_slug}".`);
       project_id = data.id;
     }
+    const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
+    if (dup) throw new ToolError("This post was already submitted.");
     // Route through the shared submission pipeline (link rule, verified X
-    // ownership, duplicate guard, notifications) instead of writing directly.
+    // ownership, notifications) instead of writing to the database directly.
     const base = (globalThis as { Deno?: { env: { get(k: string): string | undefined } } }).Deno?.env.get("SUPABASE_URL");
     if (!base) throw new ToolError("Server configuration error.");
     const res = await fetch(`${base}/functions/v1/submit-contribution`, {
