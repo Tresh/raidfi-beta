@@ -108,7 +108,6 @@ Deno.serve(async (req) => {
     const post = await oembed.json();
     const owner = checkPostOwnership(handleFromAuthorUrl(String(post.author_url ?? "")), profile.x_username);
     if (!owner.ok) return json({ error: owner.error }, 403);
-    const verifiedHandle = clean(profile.x_username);
 
     const id = crypto.randomUUID();
     const { error: insertError } = await admin.from("contributions").insert({

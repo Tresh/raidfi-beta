@@ -700,7 +700,7 @@ async function handle(update: any, supabase: any) {
 
     case "submit": {
       if (!(await requireLink())) return;
-      const url = (arg.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i) || [])[0] || arg;
+      const url = findXPostUrl(arg) || arg;
       if (!isXPostUrl(url)) {
         await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
