@@ -438,7 +438,7 @@ const Settings = () => {
         </Panel>
 
 
-        <Panel title="Public profile" description="Your portable reputation page.">
+        <Panel title="Public profile" description="Your public reputation page.">
           {data.profile?.referral_code ? (
             <a
               href={`/u/${data.profile.referral_code}`}

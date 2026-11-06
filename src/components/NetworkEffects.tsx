@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 const effects = [
-  { metric: "More Contributors", detail: "Higher data density, more accurate reputation scores" },
+  { metric: "More Contributors", detail: "More reviewed posts behind each reputation score" },
   { metric: "More Projects", detail: "Cross-project analytics reveal patterns invisible in isolation" },
   { metric: "Better Data", detail: "Improved scoring drives higher-quality participation" },
   { metric: "Stronger Network", detail: "Each participant adds exponential value to the intelligence layer" },

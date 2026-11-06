@@ -33,7 +33,7 @@ const ProjectSettings = () => {
   const challenge = `raidfi-${(project?.slug ?? "").toLowerCase()}`;
   const postText = `🤝 Partnership announcement: ${project?.name ?? "We"} x @raidfi_app ${challenge}
 
-We're partnering with RaidFi to recognise the people who actually build our community. Every real contribution to ${project?.name ?? "us"} is now tracked and rewarded with on-chain-ready reputation.
+We're partnering with RaidFi to recognise the people who actually build our community. Every real contribution to ${project?.name ?? "us"} is now tracked and reviewed, and builds the contributor's reputation on RaidFi.
 
 Contributors: start earning for what you already do 👇
 ${window.location.origin}/beta`;
