@@ -8,7 +8,7 @@ export const submitContribution = defineTool({
   title: "Submit an X post",
   description: "Submit one of your X posts to RaidFi for review, optionally for a specific project (by slug).",
   inputSchema: {
-    post_url: z.string().regex(/^https:\/\/(x|twitter)\.com\/[^/]+\/status\/\d+/, "Must be an X post link"),
+    post_url: z.string().max(500),
     project_slug: z.string().max(100).optional(),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
@@ -22,12 +22,18 @@ export const submitContribution = defineTool({
       if (!data) throw new ToolError(`No project with slug "${project_slug}".`);
       project_id = data.id;
     }
-    const { data: dup } = await db.from("contributions").select("id").eq("post_url", post_url).maybeSingle();
-    if (dup) throw new ToolError("This post was already submitted.");
-    const { data, error } = await db.from("contributions")
-      .insert({ post_url, user_email: email.toLowerCase(), user_id: ctx.getUserId() ?? null, project_id, status: "pending" })
-      .select("id,status").single();
-    if (error) throw new ToolError(error.message);
+    // Route through the shared submission pipeline (link rule, verified X
+    // ownership, duplicate guard, notifications) instead of writing directly.
+    const base = (globalThis as { Deno?: { env: { get(k: string): string | undefined } } }).Deno?.env.get("SUPABASE_URL");
+    if (!base) throw new ToolError("Server configuration error.");
+    const res = await fetch(`${base}/functions/v1/submit-contribution`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${ctx.getToken()}` },
+      body: JSON.stringify({ post_url, project_id }),
+    });
+    const body = await res.json().catch(() => ({})) as { error?: string; contribution_id?: string };
+    if (!res.ok || !body.contribution_id) throw new ToolError(body.error ?? "Submission failed.");
+    const data = { id: body.contribution_id, status: "pending" };
     return out({ ...data, message: "Submitted. It will be reviewed shortly." });
   },
 });
