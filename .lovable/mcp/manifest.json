@@ -120,7 +120,7 @@
           "properties": {
             "post_url": {
               "type": "string",
-              "pattern": "^https:\\/\\/(x|twitter)\\.com\\/[^/]+\\/status\\/\\d+"
+              "maxLength": 500
             },
             "project_slug": {
               "type": "string",
