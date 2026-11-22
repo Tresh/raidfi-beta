@@ -15,7 +15,7 @@ describe("MCP submit_contribution", () => {
     (globalThis as any).Deno = { env: { get: () => "https://backend.test" } };
     globalThis.fetch = vi.fn(async () => {
       const r = checkPostOwnership(POST_AUTHOR, CALLER_VERIFIED);
-      return new Response(JSON.stringify(r.ok ? { contribution_id: "x" } : { error: r.error }), { status: r.ok ? 200 : 403 });
+      return new Response(JSON.stringify(r.ok ? { contribution_id: "x" } : { error: (r as { error: string }).error }), { status: r.ok ? 200 : 403 });
     }) as any;
   });
 
