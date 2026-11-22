@@ -3,6 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+// Display labels for stored option values. Stored values stay unchanged so old answers still read correctly.
+const OPTION_LABELS: Record<string, string> = {
+  "Combines on-chain + off-chain data": "Blockchain projects",
+  "On-chain action + social": "Blockchain projects",
+};
+const labelFor = (opt: string) => OPTION_LABELS[opt] ?? opt;
+
 interface SingleSelectProps {
   label: string;
   options: string[];
@@ -29,7 +36,7 @@ export const SingleSelect = ({ label, options, value, onChange, required }: Sing
               : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/[0.15]"
           )}
         >
-          {opt}
+          {labelFor(opt)}
         </button>
       ))}
     </div>
@@ -66,7 +73,7 @@ export const MultiSelect = ({ label, options, value, onChange, required }: Multi
                 : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/[0.15]"
             )}
           >
-            {opt}
+            {labelFor(opt)}
           </button>
         );
       })}

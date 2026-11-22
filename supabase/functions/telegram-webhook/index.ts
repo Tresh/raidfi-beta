@@ -1,4 +1,7 @@
-import { isXPostUrl, findXPostUrl } from "../_shared/core/submission.ts";
+// HELD (F1): bot keeps its original X link rule until the founder approves the
+// website-vs-bot disagreement list. Do not switch to /core/submission.ts yet.
+const TWEET_URL_REGEX = /^https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/(\d+)/i;
+const BOT_FIND_URL = /https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/\s]+\/status\/\d+/i;
 // Telegram bot webhook: account linking + slash commands.
 // Public endpoint (verify_jwt = false). Verifies X-Telegram-Bot-Api-Secret-Token.
 
@@ -406,8 +409,9 @@ async function handle(update: any, supabase: any) {
     // never reacts to normal chatter.
     if (!isPrivate(chatType)) return;
 
-    const droppedUrl = findXPostUrl(text);
-    if (!droppedUrl) return;
+    const found = text.match(BOT_FIND_URL);
+    if (!found) return;
+    const droppedUrl = found[0];
 
     const { data: dropLink } = await supabase
       .from("telegram_links").select("*").eq("telegram_user_id", fromId).maybeSingle();
@@ -700,8 +704,8 @@ async function handle(update: any, supabase: any) {
 
     case "submit": {
       if (!(await requireLink())) return;
-      const url = findXPostUrl(arg) || arg;
-      if (!isXPostUrl(url)) {
+      const url = (arg.match(BOT_FIND_URL) || [])[0] || arg;
+      if (!TWEET_URL_REGEX.test(url)) {
         await reply(chatId, `That doesn't look like a valid X post link.\nTry: <code>/submit https://x.com/user/status/123</code>`, [], msgId);
         return;
       }

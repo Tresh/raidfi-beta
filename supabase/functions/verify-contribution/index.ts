@@ -72,7 +72,7 @@ Scoring rules (score_modifier range: -5 to +5):
 - Low-effort, generic, or barely relevant: -2 to -3  
 - Spam, completely irrelevant, or suspicious: -4 to -5
 
-Be fair and encouraging. The feedback should help users improve their contributions.
+Apply the project's criteria consistently and be encouraging. The feedback should help users improve their contributions.
 Keep feedback to 1-2 sentences max.`;
 
     const aiResponse = await fetch(
