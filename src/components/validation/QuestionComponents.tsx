@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 // Display labels for stored option values. Stored values stay unchanged so old answers still read correctly.
 const OPTION_LABELS: Record<string, string> = {
-  "Combines on-chain + off-chain data": "Blockchain projects",
+  "Shows contributor history across projects": "Blockchain projects",
   "On-chain action + social": "Blockchain projects",
 };
 const labelFor = (opt: string) => OPTION_LABELS[opt] ?? opt;

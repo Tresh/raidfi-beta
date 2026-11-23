@@ -1,4 +1,4 @@
-import { isXPostUrl, handleFromAuthorUrl, checkPostOwnership } from "../_shared/core/submission.ts";
+import { normalizeXPostUrl, isXPostUrl, handleFromAuthorUrl, checkPostOwnership } from "../_shared/core/submission.ts";
 // Single entry point for contribution submissions from every surface
 // (dashboard, contribute page, Telegram bot). Guarantees the exact same
 // workflow: ownership check -> insert -> fetch post text/media -> notify admin
@@ -35,7 +35,8 @@ Deno.serve(async (req) => {
     const token = authHeader.slice(7);
 
     const body = await req.json().catch(() => ({}));
-    const postUrl = String(body.post_url ?? "").trim();
+    const rawUrl = String(body.post_url ?? "").trim();
+    const postUrl = normalizeXPostUrl(rawUrl) ?? rawUrl;
     const contentType = String(body.content_type ?? "post").slice(0, 40);
     const aiGenerated = body.ai_generated === true;
     const mediaType = body.media_type === "image" ? "image" : "text";

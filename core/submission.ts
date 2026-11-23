@@ -14,6 +14,13 @@ export function findXPostUrl(text: string): string | null {
   return m ? m[0] : null;
 }
 
+/** Canonical form of an X post link: https://x.com/{handle}/status/{id}, no query, no trailing slash.
+ * Returns null when the value is not an X post link. Handle is lowercased (X handles are case-insensitive). */
+export function normalizeXPostUrl(value: string): string | null {
+  const m = String(value ?? "").trim().match(/^https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/([^/\s?#]+)\/status\/(\d+)/i);
+  return m ? `https://x.com/${m[1].toLowerCase()}/status/${m[2]}` : null;
+}
+
 export const cleanHandle = (v: string) => String(v ?? "").trim().replace(/^@/, "").toLowerCase();
 
 /** Handle from an oEmbed author_url such as https://twitter.com/someone */

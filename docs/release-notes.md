@@ -9,3 +9,5 @@
 
 ## Beta: beta-access survey
 - "On-chain" survey options now display as "Blockchain projects". Stored answers are unchanged.
+
+- X post links are saved in one canonical form (https://x.com/handle/status/id): tracking parts like ?s=20 are removed and twitter.com/mobile links map to x.com, so the same post can't be submitted twice with a different link. Existing rows were not changed.

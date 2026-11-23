@@ -98,7 +98,7 @@ export const ProjectStep4 = ({ data, update }: StepProps) => (
     <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Contribution Intelligence</h3>
     <MultiSelect
       label="Would you use a platform that:"
-      options={["Automatically tracks cross-platform contributions", "Scores contributors based on real impact", "Filters noise from quality", "Combines on-chain + off-chain data"]}
+      options={["Automatically tracks cross-platform contributions", "Scores contributors based on real impact", "Filters noise from quality", "Shows contributor history across projects"]}
       value={data.platform_features || []}
       onChange={(v) => update("platform_features", v)}
       required
