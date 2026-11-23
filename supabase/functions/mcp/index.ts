@@ -297,7 +297,17 @@ Send your project key in \`x-api-key: rf_live_...\` or \`Authorization: Bearer r
 Read and write requests are rate limited per key. A limited request returns \`429\`.
 
 ## Idempotency
-Send \`Idempotency-Key: <unique>\` on POST requests. Retrying with the same key returns the original result instead of creating a duplicate.
+Send \`Idempotency-Key: <unique>\` on write requests. Retrying with the same key returns the original result instead of creating a duplicate. Read requests ignore the header.
+
+| Endpoint | Method | Idempotency-Key |
+|---|---|---|
+| \`/contributions\` | POST | Supported |
+| \`/contributions/:id/verify\` | PATCH | Supported. Use a new key for a corrected re-review. |
+| \`/reputation/batch\` | POST | Not used (read) |
+| \`/reputation/:handle\` | GET | Not used |
+| \`/leaderboard\` | GET | Not used |
+| \`/contributions\` | GET | Not used |
+| \`/metrics\` | GET | Not used |
 
 ## Errors
 JSON \`{ "error": "message" }\` with status 400, 401, 403, 404 or 429.`
@@ -309,12 +319,12 @@ JSON \`{ "error": "message" }\` with status 400, 401, 403, 404 or 429.`
     summary: "Read a contributor's reputation and the leaderboard.",
     body: `# Reputation
 
-RaidFi owns the scoring model; every project reads the same score.
+API reputation is a separate metric until the new score ships.
 
 \`\`\`bash
 curl ${API}/reputation/<x_handle> -H "x-api-key: rf_live_..."
 curl -X POST ${API}/reputation/batch -H "x-api-key: rf_live_..." \\
-  -H "Content-Type: application/json" -d '{"handles":["alice","bob"]}'
+  -H "Content-Type: application/json" -d '{"identifiers":["alice","bob"]}'
 curl "${API}/leaderboard?period=week" -H "x-api-key: rf_live_..."
 \`\`\``
   },
@@ -330,12 +340,12 @@ curl "${API}/leaderboard?period=week" -H "x-api-key: rf_live_..."
 curl "${API}/contributions?status=pending" -H "x-api-key: rf_live_..."
 
 # Approve with XP, score and notes
-curl -X POST ${API}/contributions/<id>/verify -H "x-api-key: rf_live_..." \\
+curl -X PATCH ${API}/contributions/<id>/verify -H "x-api-key: rf_live_..." \\
   -H "Content-Type: application/json" -H "Idempotency-Key: review-123" \\
   -d '{"status":"approved","points":50,"score":80,"notes":"Clear breakdown"}'
 
 # Reject with feedback
-curl -X POST ${API}/contributions/<id>/verify -H "x-api-key: rf_live_..." \\
+curl -X PATCH ${API}/contributions/<id>/verify -H "x-api-key: rf_live_..." \\
   -H "Content-Type: application/json" -d '{"status":"rejected","notes":"Off-topic"}'
 \`\`\`
 
@@ -352,7 +362,7 @@ Points are clamped to 0\u20131000 and score to 0\u2013100. Submissions are alway
 curl ${API}/metrics -H "x-api-key: rf_live_..."
 \`\`\`
 
-Returns submission counts by status, active contributors and XP awarded over the last 30 days. Usage of your keys (volume, errors, limits) is shown in Project Settings.`
+Returns submission counts by status, unique emails (the \`contributors\` field counts distinct submitter emails) and XP awarded over the last 30 days. Usage of your keys (volume, errors, limits) is shown in Project Settings.`
   },
   {
     slug: "mcp",
@@ -461,6 +471,20 @@ var read_doc_default = defineTool5({
   }
 });
 
+// core/review.ts
+function fnv1a(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+function reviewIdempotencyKey(r) {
+  const payload = JSON.stringify([r.decision, r.points ?? null, r.score ?? null, r.notes ?? ""]);
+  return `mcp-${r.contribution_id}-${r.decision}-${fnv1a(payload)}`;
+}
+
 // src/lib/mcp/tools/project-tools.ts
 import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@3.1.0";
 import { z as z5 } from "npm:zod@^4.6.7";
@@ -524,7 +548,7 @@ var reviewContribution = defineTool6({
   handler: async ({ api_key, contribution_id, decision, points, score, notes }) => out(await callApi(api_key, `/contributions/${contribution_id}/verify`, {
     method: "PATCH",
     body: { status: decision, points, score, notes },
-    idem: `mcp-${contribution_id}-${decision}`
+    idem: reviewIdempotencyKey({ contribution_id, decision, points, score, notes })
   }))
 });
 var getContributorReputation = defineTool6({

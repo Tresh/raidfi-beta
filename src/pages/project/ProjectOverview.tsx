@@ -28,7 +28,7 @@ const ProjectOverview = () => {
             <StatCard label="Mentions" value={totals.mentions} hint="Tracked posts about you (90d)" />
             <StatCard label="Active contributors" value={totals.contributors} accent hint="People creating for you" />
             <StatCard label="Avg. quality" value={totals.avgQuality || "-"} hint="Reviewed score out of 10" />
-            <StatCard label="Share of voice" value={`${totals.shareOfVoice}%`} hint="Of all RaidFi contributions" />
+            <StatCard label="Share of tracked activity" value={`${totals.shareOfVoice}%`} hint="Of all RaidFi contributions" />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-4">
@@ -38,11 +38,11 @@ const ProjectOverview = () => {
                   <span className="text-3xl font-semibold tabular-nums text-foreground">{totals.last30}</span>
                   <span
                     className={`inline-flex items-center gap-1 text-xs font-medium mb-1 ${
-                      totals.momentum >= 0 ? "text-primary" : "text-destructive"
+                      totals.momentum == null ? "text-muted-foreground" : totals.momentum >= 0 ? "text-primary" : "text-destructive"
                     }`}
                   >
-                    {totals.momentum >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                    {totals.momentum > 0 ? "+" : ""}{totals.momentum}%
+                    {totals.momentum == null ? "n/a" : (<>{totals.momentum >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                    {totals.momentum > 0 ? "+" : ""}{totals.momentum}%</>)}
                   </span>
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-2">

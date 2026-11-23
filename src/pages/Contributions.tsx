@@ -426,7 +426,7 @@ const Contributions = () => {
       check_email: email.trim().toLowerCase(),
     });
     if (!emailExists) {
-      toast({ title: "Not on the waitlist", description: "Complete the waitlist first.", variant: "destructive" });
+      toast({ title: "No beta access yet", description: "Request Beta Access first.", variant: "destructive" });
       setSubmittingAuth(false);
       return;
     }
@@ -637,7 +637,7 @@ const Contributions = () => {
                     <p className="text-xs text-muted-foreground mt-1">
                       {otpSent
                         ? <>Code sent to <span className="text-foreground font-medium">{email}</span></>
-                        : "Use your waitlist email to sign in."
+                        : "Use the email you requested beta access with to sign in."
                       }
                     </p>
                   </div>
@@ -651,7 +651,7 @@ const Contributions = () => {
                         Send Code
                       </Button>
                       <p className="text-xs text-muted-foreground text-center">
-                        Don't have access? <a href="/waitlist" className="text-primary hover:underline">Join the waitlist</a>
+                        Don't have access? <a href="/beta" className="text-primary hover:underline">Request Beta Access</a>
                       </p>
                     </form>
                   ) : (
@@ -767,7 +767,7 @@ const Contributions = () => {
                           </Button>
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-2">
-                          Share this link - you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist through it.
+                          Share this link - you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who requests beta access through it.
                         </p>
                       </CardContent>
                     </Card>
@@ -1064,7 +1064,7 @@ const Contributions = () => {
               <div className="w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">3</div>
               <div>
                 <p className="font-medium text-foreground">Refer friends</p>
-                <p className="text-xs text-muted-foreground">Share your referral link - you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who joins the waitlist.</p>
+                <p className="text-xs text-muted-foreground">Share your referral link - you earn <span className="text-primary font-semibold">+50 XP</span> for every friend who requests beta access.</p>
               </div>
             </div>
             <div className="flex gap-3">

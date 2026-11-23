@@ -166,7 +166,7 @@ export function useProjectSignal(project: ProjectRecord | null) {
       shareOfVoice: eco ? Math.round((total / eco) * 100) : 0,
       last30,
       prev30,
-      momentum: prev30 === 0 ? (last30 > 0 ? 100 : 0) : Math.round(((last30 - prev30) / prev30) * 100),
+      momentum: prev30 === 0 ? null : Math.round(((last30 - prev30) / prev30) * 100),
     };
   }, [stats, prevStats, mentions]);
 

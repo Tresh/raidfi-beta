@@ -80,7 +80,7 @@ export const IndividualStep3 = ({ data, update }: StepProps) => (
       required
     />
     <SingleSelect
-      label="Would you want a contribution track record you can show to other projects?"
+      label="Would you want a contribution record that follows you across projects?"
       options={["Yes", "Not sure", "No"]}
       value={data.onchain_reputation || ""}
       onChange={(v) => update("onchain_reputation", v)}

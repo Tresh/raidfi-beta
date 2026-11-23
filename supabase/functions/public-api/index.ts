@@ -112,7 +112,8 @@ async function handle(req: Request, url: URL, path: string, key: any): Promise<R
     }
     if (req.method === "POST" && parts[0] === "reputation" && parts[1] === "batch") {
       const body = await req.json().catch(() => ({}));
-      const ids: unknown = body?.identifiers;
+      // `handles` is accepted for one release as an alias of `identifiers`.
+      const ids: unknown = body?.identifiers ?? body?.handles;
       if (!Array.isArray(ids) || ids.length === 0 || ids.length > 100) return json({ error: "identifiers must be an array of 1-100 strings" }, 400);
       const out: Record<string, unknown> = {};
       for (const i of ids) if (typeof i === "string") out[i] = await reputationFor(i);

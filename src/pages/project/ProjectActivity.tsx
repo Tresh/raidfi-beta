@@ -13,6 +13,9 @@ const Stat = ({ label, value, delta }: { label: string; value: string | number; 
   <div className="border border-border rounded-lg bg-card p-3">
     <p className="text-[11px] text-muted-foreground">{label}</p>
     <p className="text-lg font-semibold text-foreground tabular-nums mt-0.5">{value}</p>
+    {delta === null && (
+      <p className="text-[11px] mt-0.5 text-muted-foreground">n/a vs previous period</p>
+    )}
     {delta != null && Number.isFinite(delta) && (
       <p className={`text-[11px] mt-0.5 ${delta >= 0 ? "text-primary" : "text-destructive"}`}>
         {delta >= 0 ? "+" : ""}{delta}% vs previous period

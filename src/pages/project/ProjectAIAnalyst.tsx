@@ -34,28 +34,20 @@ const PROVIDERS = [
   { key: "custom", label: "Custom (OpenAI-compatible)", url: "", model: "" },
 ];
 
-const STORE = "raidfi.project.ai";
-const CHATS = "raidfi.project.ai.chats";
 
 interface Config { provider: string; apiKey: string; model: string; baseUrl: string }
 interface Msg { role: "user" | "assistant"; content: string }
 interface Chat { id: string; title: string; messages: Msg[]; updated: number }
 
+// Provider key and chats live in this tab's memory only — never in browser storage.
+let memConfig: Config | null = null;
+let memChats: Chat[] = [];
 const loadConfig = (): Config => {
-  try {
-    const raw = localStorage.getItem(STORE);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
+  if (memConfig) return memConfig;
   return { provider: "openai", apiKey: "", model: PROVIDERS[0].model, baseUrl: PROVIDERS[0].url };
 };
 
-const loadChats = (): Chat[] => {
-  try {
-    const raw = localStorage.getItem(CHATS);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
-  return [];
-};
+const loadChats = (): Chat[] => memChats;
 
 const newChat = (): Chat => ({ id: crypto.randomUUID(), title: "New chat", messages: [], updated: Date.now() });
 
@@ -93,7 +85,7 @@ const ProjectAIAnalyst = () => {
   }, [activeId, chats]);
 
   useEffect(() => {
-    localStorage.setItem(CHATS, JSON.stringify(chats.slice(0, 30)));
+    memChats = chats.slice(0, 30);
   }, [chats]);
 
   useEffect(() => {
@@ -104,7 +96,7 @@ const ProjectAIAnalyst = () => {
 
   const saveConfig = (next: Config) => {
     setConfig(next);
-    localStorage.setItem(STORE, JSON.stringify(next));
+    memConfig = next;
   };
 
   const patchActive = (messages: Msg[]) =>
@@ -300,8 +292,13 @@ const ProjectAIAnalyst = () => {
                     placeholder="API key"
                     className="h-8 text-xs"
                   />
+                  {config.apiKey && (
+                    <Button type="button" variant="outline" size="sm" className="h-7 w-full text-xs" onClick={() => saveConfig({ ...config, apiKey: "" })}>
+                      Clear key
+                    </Button>
+                  )}
                   <p className="text-[10px] text-muted-foreground leading-tight">
-                    Stored only in this browser and sent straight to your provider. Nothing is kept on RaidFi servers.
+                    Your key and chats are kept in this tab's memory only and are erased when you close or reload it. Your questions and your project's contributor data are sent from your browser straight to {config.baseUrl ? new URL(config.baseUrl, "https://x").host : "your provider"}. RaidFi does not store them.
                   </p>
                 </div>
               </div>

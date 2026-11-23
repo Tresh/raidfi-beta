@@ -1,3 +1,4 @@
+import { reviewIdempotencyKey } from "@core/review";
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { apiKeySchema, callApi, out } from "../api";
@@ -44,7 +45,7 @@ export const reviewContribution = defineTool({
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   handler: async ({ api_key, contribution_id, decision, points, score, notes }) =>
     out(await callApi(api_key, `/contributions/${contribution_id}/verify`, {
-      method: "PATCH", body: { status: decision, points, score, notes }, idem: `mcp-${contribution_id}-${decision}`,
+      method: "PATCH", body: { status: decision, points, score, notes }, idem: reviewIdempotencyKey({ contribution_id, decision, points, score, notes }),
     })),
 });
 

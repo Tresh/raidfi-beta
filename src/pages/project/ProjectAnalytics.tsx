@@ -130,10 +130,10 @@ const ProjectAnalytics = () => {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-            <StatCard label="Mentions (90d)" value={totals.mentions} hint={`${totals.momentum >= 0 ? "+" : ""}${totals.momentum}% vs previous 30d`} />
+            <StatCard label="Mentions (90d)" value={totals.mentions} hint={totals.momentum == null ? "n/a vs previous 30d" : `${totals.momentum >= 0 ? "+" : ""}${totals.momentum}% vs previous 30d`} />
             <StatCard label="XP released" value={totals.xp.toLocaleString()} accent hint={`≈ ${costPerPost} XP per approved post`} />
             <StatCard label="Repeat contributors" value={`${repeatRate}%`} hint="Posted about you more than once" />
-            <StatCard label="Share of voice" value={`${totals.shareOfVoice}%`} hint="Across all RaidFi activity" />
+            <StatCard label="Share of tracked activity" value={`${totals.shareOfVoice}%`} hint="Across all RaidFi activity" />
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
