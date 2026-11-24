@@ -1,6 +1,7 @@
 // RaidFi Developer API. Auth: Authorization: Bearer rf_live_...
 // Scopes: "reputation" (scoring only) | "full" (contributions, metrics, verify).
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { readBatchIdentifiers } from "./batch-input.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -113,7 +114,7 @@ async function handle(req: Request, url: URL, path: string, key: any): Promise<R
     if (req.method === "POST" && parts[0] === "reputation" && parts[1] === "batch") {
       const body = await req.json().catch(() => ({}));
       // `handles` is accepted for one release as an alias of `identifiers`.
-      const ids: unknown = body?.identifiers ?? body?.handles;
+      const ids: unknown = readBatchIdentifiers(body);
       if (!Array.isArray(ids) || ids.length === 0 || ids.length > 100) return json({ error: "identifiers must be an array of 1-100 strings" }, 400);
       const out: Record<string, unknown> = {};
       for (const i of ids) if (typeof i === "string") out[i] = await reputationFor(i);
